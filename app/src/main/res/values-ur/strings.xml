@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">کیش میمر</string>
+    <string name="app_tagline">پروفیشنل رسید آرگنائزر</string>
+
+    <string name="nav_receipts">رسیدیں</string>
+    <string name="nav_inventory">انوینٹری</string>
+    <string name="nav_price_list">قیمت کی فہرست</string>
+    <string name="nav_rates">شرحیں</string>
+    <string name="nav_members">ممبران</string>
+    <string name="nav_more">مزید</string>
+
+    <string name="tab_receipts">رسیدیں</string>
+    <string name="tab_history">تاریخ</string>
+    <string name="tab_dashboard">ڈیش بورڈ</string>
+</resources>

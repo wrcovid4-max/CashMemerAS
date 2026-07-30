@@ -1,0 +1,256 @@
+package com.cashmemer.core.data
+
+import android.content.Context
+import com.cashmemer.core.model.CurrencyRate
+import com.cashmemer.core.model.Member
+import com.cashmemer.core.model.Product
+import com.cashmemer.core.model.Receipt
+import com.cashmemer.core.network.ExchangeRateApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
+
+/**
+ * Single entry point for app data. Both the phone and the watch talk to this
+ * rather than to Room directly, so the sync payload stays in one place.
+ */
+class CashMemerRepository private constructor(context: Context) {
+
+    private val db = CashMemerDatabase.get(context)
+    private val receipts = db.receiptDao()
+    private val products = db.productDao()
+    private val members = db.memberDao()
+    private val rates = db.currencyRateDao()
+
+    // ---- Receipts -----------------------------------------------------------
+
+    fun observeReceipts(): Flow<List<Receipt>> = receipts.observeAll()
+
+    fun searchReceipts(query: String, from: Long, to: Long): Flow<List<Receipt>> =
+        receipts.search(query, from, to)
+
+    suspend fun recentReceipts(limit: Int = 10): List<Receipt> = receipts.recent(limit)
+
+    suspend fun receipt(id: Long): Receipt? = receipts.byId(id)
+
+    suspend fun saveReceipt(receipt: Receipt): Long =
+        if (receipt.id == 0L) receipts.insert(receipt)
+        else receipt.id.also { receipts.update(receipt) }
+
+    suspend fun deleteReceipts(ids: List<Long>) = receipts.deleteByIds(ids)
+
+    suspend fun setPinned(id: Long, pinned: Boolean) = receipts.setPinned(id, pinned)
+
+    // ---- Products -----------------------------------------------------------
+
+    fun observeProducts(): Flow<List<Product>> = products.observeAll()
+
+    fun observePriceList(): Flow<List<Product>> = products.observePriceList()
+
+    suspend fun productByBarcode(barcode: String): Product? = products.byBarcode(barcode)
+
+    suspend fun saveProduct(product: Product): Long =
+        products.upsert(product.copy(updatedAt = System.currentTimeMillis()))
+
+    suspend fun deleteProduct(product: Product) = products.delete(product)
+
+    suspend fun setProductArchived(id: Long, archived: Boolean) =
+        products.setArchived(id, archived)
+
+    // ---- Members ------------------------------------------------------------
+
+    fun observeMembers(): Flow<List<Member>> = members.observeAll()
+
+    suspend fun saveMember(member: Member): Long = members.upsert(member)
+
+    suspend fun deleteMember(member: Member) = members.delete(member)
+
+    // ---- Exchange rates -----------------------------------------------------
+
+    fun observeRates(): Flow<List<CurrencyRate>> = rates.observeAll()
+
+    suspend fun ratesLastUpdated(): Long = rates.lastUpdated() ?: 0L
+
+    suspend fun addCustomRate(code: String, name: String, rate: Double) =
+        rates.upsert(CurrencyRate(code.uppercase(), name, rate, custom = true))
+
+    suspend fun deleteRate(rate: CurrencyRate) = rates.delete(rate)
+
+    /** Pulls USD-base rates and writes them through, keeping custom rows intact. */
+    suspend fun refreshRates(): Result<Int> = withContext(Dispatchers.IO) {
+        ExchangeRateApi.latestUsdRates().map { fetched ->
+            // Hand-registered currencies win over the feed — never overwrite them.
+            val customCodes = rates.customCodes().toSet()
+            val rows = fetched
+                .filterNot { it.key in customCodes }
+                .map { (code, value) ->
+                    CurrencyRate(
+                        code = code,
+                        displayName = CurrencyNames.of(code),
+                        rate = value,
+                        flagEmoji = CurrencyNames.flagOf(code),
+                    )
+                }
+            rates.upsertAll(rows)
+            rows.size
+        }
+    }
+
+    // ---- Backup / restore ---------------------------------------------------
+
+    /** Full offline backup payload — matches the JSON the web app exports. */
+    suspend fun exportJson(): String = withContext(Dispatchers.IO) {
+        val root = JSONObject()
+        root.put("version", 1)
+        root.put("exportedAt", System.currentTimeMillis())
+
+        val receiptArray = JSONArray()
+        receipts.allOnce().forEach { r ->
+            receiptArray.put(
+                JSONObject()
+                    .put("id", r.id)
+                    .put("placeName", r.placeName)
+                    .put("locationAddress", r.locationAddress)
+                    .put("customerName", r.customerName)
+                    .put("customerPhone", r.customerPhone)
+                    .put("customerEmail", r.customerEmail)
+                    .put("currencyCode", r.currencyCode)
+                    .put("category", r.category)
+                    .put("paymentType", r.paymentType)
+                    .put("subtotal", r.subtotal)
+                    .put("discount", r.discount)
+                    .put("taxPercent", r.taxPercent)
+                    .put("total", r.total)
+                    .put("notesPage1", r.notesPage1)
+                    .put("notesPage2", r.notesPage2)
+                    .put("items", JSONArray(r.itemsJson))
+                    .put("pinned", r.pinned)
+                    .put("createdAt", r.createdAt)
+            )
+        }
+        root.put("receipts", receiptArray)
+
+        val productArray = JSONArray()
+        products.allOnce().forEach { p ->
+            productArray.put(
+                JSONObject()
+                    .put("id", p.id)
+                    .put("name", p.name)
+                    .put("barcode", p.barcode)
+                    .put("brand", p.brand)
+                    .put("category", p.category)
+                    .put("purchasePrice", p.purchasePrice)
+                    .put("price", p.price)
+                    .put("stock", p.stock)
+                    .put("unit", p.unit)
+                    .put("archived", p.archived)
+                    .put("inPriceList", p.inPriceList)
+            )
+        }
+        root.put("products", productArray)
+
+        val memberArray = JSONArray()
+        members.allOnce().forEach { m ->
+            memberArray.put(
+                JSONObject()
+                    .put("id", m.id)
+                    .put("name", m.name)
+                    .put("phone", m.phone)
+                    .put("email", m.email)
+                    .put("address", m.address)
+            )
+        }
+        root.put("members", memberArray)
+
+        root.toString(2)
+    }
+
+    /** Replaces local data with a previously exported payload. */
+    suspend fun importJson(json: String, replace: Boolean = true): Result<Int> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val root = JSONObject(json)
+                if (replace) {
+                    receipts.clear()
+                    products.clear()
+                    members.clear()
+                }
+
+                var count = 0
+                root.optJSONArray("receipts")?.let { arr ->
+                    for (i in 0 until arr.length()) {
+                        val o = arr.getJSONObject(i)
+                        receipts.insert(
+                            Receipt(
+                                placeName = o.optString("placeName"),
+                                locationAddress = o.optString("locationAddress"),
+                                customerName = o.optString("customerName"),
+                                customerPhone = o.optString("customerPhone"),
+                                customerEmail = o.optString("customerEmail"),
+                                currencyCode = o.optString("currencyCode", "PKR"),
+                                category = o.optString("category", "SHOPPING"),
+                                paymentType = o.optString("paymentType", "CASH"),
+                                subtotal = o.optDouble("subtotal", 0.0),
+                                discount = o.optDouble("discount", 0.0),
+                                taxPercent = o.optDouble("taxPercent", 0.0),
+                                total = o.optDouble("total", 0.0),
+                                notesPage1 = o.optString("notesPage1"),
+                                notesPage2 = o.optString("notesPage2"),
+                                itemsJson = o.optJSONArray("items")?.toString() ?: "[]",
+                                pinned = o.optBoolean("pinned", false),
+                                createdAt = o.optLong("createdAt", System.currentTimeMillis()),
+                            )
+                        )
+                        count++
+                    }
+                }
+                root.optJSONArray("products")?.let { arr ->
+                    for (i in 0 until arr.length()) {
+                        val o = arr.getJSONObject(i)
+                        products.upsert(
+                            Product(
+                                name = o.optString("name"),
+                                barcode = o.optString("barcode"),
+                                brand = o.optString("brand"),
+                                category = o.optString("category"),
+                                purchasePrice = o.optDouble("purchasePrice", 0.0),
+                                price = o.optDouble("price", 0.0),
+                                stock = o.optDouble("stock", 0.0),
+                                unit = o.optString("unit", "piece"),
+                                archived = o.optBoolean("archived", false),
+                                inPriceList = o.optBoolean("inPriceList", false),
+                            )
+                        )
+                        count++
+                    }
+                }
+                root.optJSONArray("members")?.let { arr ->
+                    for (i in 0 until arr.length()) {
+                        val o = arr.getJSONObject(i)
+                        members.upsert(
+                            Member(
+                                name = o.optString("name"),
+                                phone = o.optString("phone"),
+                                email = o.optString("email"),
+                                address = o.optString("address"),
+                            )
+                        )
+                        count++
+                    }
+                }
+                count
+            }
+        }
+
+    companion object {
+        @Volatile
+        private var instance: CashMemerRepository? = null
+
+        fun get(context: Context): CashMemerRepository =
+            instance ?: synchronized(this) {
+                instance ?: CashMemerRepository(context).also { instance = it }
+            }
+    }
+}

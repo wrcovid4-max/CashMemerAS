@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Generated receipt PDFs and exported backups are shared from here. -->
+    <cache-path name="receipts" path="receipts/" />
+    <files-path name="backups" path="backups/" />
+    <external-files-path name="exports" path="exports/" />
+</paths>

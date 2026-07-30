@@ -1,0 +1,15 @@
+# Copy this file to `local.properties` and fill in real values.
+# `local.properties` is gitignored — never commit real keys.
+
+# Path to your Android SDK (Android Studio fills this in automatically)
+sdk.dir=/Users/you/Library/Android/sdk
+
+# https://www.exchangerate-api.com/  (v6 REST key)
+EXCHANGE_RATE_API_KEY=your_exchangerate_api_key
+
+# Google AI Studio key used for the Gemini OCR receipt parser
+GEMINI_API_KEY=your_gemini_api_key
+
+# Google Maps Platform key (Geocoding API) used for the GPS address field.
+# Restrict it to your package name + release SHA-1 in Google Cloud Console.
+MAPS_API_KEY=your_maps_api_key

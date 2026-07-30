@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cash Memer</string>
+    <string name="app_tagline">Professional Receipt Organizer</string>
+
+    <string name="nav_receipts">Receipts</string>
+    <string name="nav_inventory">Inventory</string>
+    <string name="nav_price_list">Price List</string>
+    <string name="nav_rates">Rates</string>
+    <string name="nav_members">Members</string>
+    <string name="nav_more">More</string>
+
+    <string name="tab_receipts">Receipts</string>
+    <string name="tab_history">History</string>
+    <string name="tab_dashboard">Dashboard</string>
+</resources>
