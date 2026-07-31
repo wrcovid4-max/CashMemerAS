@@ -92,13 +92,58 @@ sdk.dir=/path/that/android/studio/already/filled/in
 EXCHANGE_RATE_API_KEY=your_exchangerate_key
 GEMINI_API_KEY=your_gemini_key
 MAPS_API_KEY=your_maps_key
+GOOGLE_WEB_CLIENT_ID=your_web_client_id.apps.googleusercontent.com
 ```
 
 Android Studio writes `sdk.dir` itself the first time it opens the project —
-just add the three key lines under it.
+just add the key lines under it.
 
-The app builds and runs fine without keys; the rates screen and AI scan will
-report the missing key instead of crashing.
+**The app builds and runs with all of these blank.** Each feature reports its
+missing key rather than crashing, so you can add them one at a time.
+
+#### Which key does what
+
+| Key | Powers | Where to get it |
+| --- | --- | --- |
+| `EXCHANGE_RATE_API_KEY` | Rates screen | <https://www.exchangerate-api.com> |
+| `GEMINI_API_KEY` | AI receipt scanning | <https://aistudio.google.com/apikey> |
+| `MAPS_API_KEY` | GPS address fallback | Google Cloud Console |
+| `GOOGLE_WEB_CLIENT_ID` | Sign in with Google | Google Cloud Console |
+
+#### Setting up the Maps key
+
+The GPS pin button tries Android's built-in geocoder first, which is free and
+needs no key. The Maps key is only the fallback for when that returns nothing —
+common on emulators and some devices.
+
+1. Google Cloud Console → **APIs & Services → Library** → enable **Geocoding API**
+2. **Credentials → Create credentials → API key**
+3. Paste it as `MAPS_API_KEY`
+
+Geocoding API requests are billed per call and *cannot* be restricted by
+Android package name — only by IP or left unrestricted. Keep this key separate
+from any Android-restricted key, and set a quota cap on it.
+
+#### Setting up Google sign-in
+
+Sign-in uses Credential Manager, so there is **no Firebase and no
+`google-services.json`**. You need two OAuth client IDs in the same Cloud
+project:
+
+1. Google Cloud Console → **APIs & Services → OAuth consent screen** → configure
+   it (External, add your own email as a test user)
+2. **Credentials → Create credentials → OAuth client ID → Android**
+   - Package name: `com.cashmemer`
+   - SHA-1: run `./gradlew signingReport` and copy the **debug** SHA-1
+3. **Create credentials → OAuth client ID → Web application**
+4. Paste the **Web** client ID into `GOOGLE_WEB_CLIENT_ID`
+
+The Android client makes the account chooser appear; the Web client ID is what
+the app sends. Only the Web one goes in `local.properties`.
+
+**What sign-in does and does not do:** it identifies who is at the counter. It
+does **not** back anything up — that is what the folder snapshots below are for.
+Real cloud sync would need Firebase/Firestore, which is not wired up.
 
 ### 5. Sync Gradle
 
@@ -197,11 +242,9 @@ work with no extra setup.
 
 ## What still needs building
 
-- **GPS auto-fill** — the location field accepts typing; the pin button doesn't
-  call the fused location provider yet.
-- **Firebase auth + cloud sync** — the original had Google sign-in and Firestore
-  backup. Left out on purpose so the project builds without a
-  `google-services.json`. The offline backups above cover the same need.
+- **Cloud sync** — Google sign-in works, but it only establishes identity.
+  Syncing receipts to Firestore would mean adding Firebase and a
+  `google-services.json`; the folder snapshots cover the same need without it.
 - **Store weather on the watch** — the payload carries a weather slot; nothing
   fills it yet.
 - **App lock** — the toggle and passcode persist; the biometric prompt on launch

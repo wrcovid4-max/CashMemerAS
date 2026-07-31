@@ -1,6 +1,7 @@
 package com.cashmemer.ui.settings
 
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -15,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FolderOpen
@@ -41,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -53,6 +57,7 @@ import com.cashmemer.core.data.MassPrintOption
 import com.cashmemer.core.data.SettingsStore
 import com.cashmemer.core.data.ThemeMode
 import com.cashmemer.core.util.Format
+import com.cashmemer.auth.GoogleAuth
 import com.cashmemer.backup.BackupScheduler
 import com.cashmemer.backup.BackupWriter
 import com.cashmemer.ui.components.SectionCard
@@ -111,6 +116,25 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _message.value = "Backup folder set"
     }
 
+    /** [activityContext] must be an Activity — the chooser needs a window. */
+    fun signIn(activityContext: Context) = launch {
+        GoogleAuth.signInAndStore(activityContext, store)
+            .onSuccess { _message.value = "Signed in as ${it.email}" }
+            .onFailure { error ->
+                _message.value = when (error) {
+                    is GoogleAuth.CancelledException -> null
+                    is GoogleAuth.NotConfiguredException ->
+                        "Add GOOGLE_WEB_CLIENT_ID to local.properties first"
+                    else -> error.message ?: "Sign-in failed"
+                }
+            }
+    }
+
+    fun signOut(activityContext: Context) = launch {
+        GoogleAuth.signOut(activityContext, store)
+        _message.value = "Signed out"
+    }
+
     fun setAutoBackup(enabled: Boolean) = launch {
         store.setAutoBackup(enabled)
         val app = getApplication<Application>()
@@ -144,12 +168,21 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
 ) {
     val message by viewModel.message.collectAsState()
+    val context = LocalContext.current
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        item {
+            AccountCard(
+                settings = settings,
+                onSignIn = { viewModel.signIn(context) },
+                onSignOut = { viewModel.signOut(context) },
+            )
+        }
+
         item {
             SectionCard {
                 RowTitle(Icons.Filled.Palette, "Appearance settings")
@@ -306,6 +339,61 @@ private fun PasscodeCard(onUpdate: (String, String) -> Unit) {
                 onClick = { onUpdate(passcode, confirm) },
                 modifier = Modifier.weight(1f),
             ) { Text("Update") }
+        }
+    }
+}
+
+/**
+ * Google account card. Sign-in establishes identity only — it is not a cloud
+ * backup, so the copy here says so rather than implying the data is safe.
+ */
+@Composable
+private fun AccountCard(
+    settings: AppSettings,
+    onSignIn: () -> Unit,
+    onSignOut: () -> Unit,
+) {
+    SectionCard {
+        RowTitle(Icons.Filled.AccountCircle, "Google Account")
+
+        if (settings.signedIn) {
+            Text(
+                text = settings.accountName ?: "Signed in",
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = settings.accountEmail.orEmpty(),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Signed in for identity only. Your receipts are backed up " +
+                    "by the folder snapshots below, not by this account.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            OutlinedButton(onClick = onSignOut, modifier = Modifier.fillMaxWidth()) {
+                Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
+                Text("  Sign out")
+            }
+        } else {
+            Text(
+                text = "Sign in with Google to tag receipts with who created them.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Button(onClick = onSignIn, modifier = Modifier.fillMaxWidth()) {
+                Icon(Icons.Filled.AccountCircle, contentDescription = null)
+                Text("  Sign in with Google")
+            }
+            if (!GoogleAuth.isConfigured) {
+                Text(
+                    text = "Needs GOOGLE_WEB_CLIENT_ID in local.properties — " +
+                        "see the README.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
         }
     }
 }

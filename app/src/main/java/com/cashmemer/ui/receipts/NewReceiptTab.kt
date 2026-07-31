@@ -1,5 +1,6 @@
 package com.cashmemer.ui.receipts
 
+import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
@@ -46,6 +48,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -54,6 +57,7 @@ import com.cashmemer.core.model.PaymentType
 import com.cashmemer.core.model.ReceiptCategory
 import com.cashmemer.core.model.ReceiptItem
 import com.cashmemer.core.util.Format
+import com.cashmemer.location.LocationResolver
 import com.cashmemer.scan.CaptureReceiptContract
 import com.cashmemer.scan.ScanBarcodeContract
 import com.cashmemer.ui.components.SectionCard
@@ -85,6 +89,13 @@ fun NewReceiptTab(
     ) { uris -> viewModel.scanReceipts(uris) }
 
     val imagesOnly = ActivityResultContracts.PickVisualMedia.ImageOnly
+
+    val context = LocalContext.current
+    val locationPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { granted ->
+        if (granted.values.any { it }) viewModel.useCurrentLocation()
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -135,7 +146,35 @@ fun NewReceiptTab(
                     onValueChange = viewModel::setLocationAddress,
                     label = { Text("Location Address (GPS)") },
                     trailingIcon = {
-                        Icon(Icons.Filled.Place, contentDescription = "Use current location")
+                        if (state.locatingAddress) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .padding(12.dp)
+                                    .size(20.dp),
+                                strokeWidth = 2.dp,
+                            )
+                        } else {
+                            IconButton(
+                                onClick = {
+                                    if (LocationResolver.hasPermission(context)) {
+                                        viewModel.useCurrentLocation()
+                                    } else {
+                                        locationPermission.launch(
+                                            arrayOf(
+                                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                                Manifest.permission.ACCESS_COARSE_LOCATION,
+                                            )
+                                        )
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Filled.Place,
+                                    contentDescription = "Use current location",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
                     },
                     modifier = Modifier.fillMaxWidth(),
                 )

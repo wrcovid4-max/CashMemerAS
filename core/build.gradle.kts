@@ -25,6 +25,11 @@ android {
         buildConfigField("String", "EXCHANGE_RATE_API_KEY", "\"${secret("EXCHANGE_RATE_API_KEY")}\"")
         buildConfigField("String", "GEMINI_API_KEY", "\"${secret("GEMINI_API_KEY")}\"")
         buildConfigField("String", "MAPS_API_KEY", "\"${secret("MAPS_API_KEY")}\"")
+        buildConfigField(
+            "String",
+            "GOOGLE_WEB_CLIENT_ID",
+            "\"${secret("GOOGLE_WEB_CLIENT_ID")}\"",
+        )
     }
 
     buildFeatures {

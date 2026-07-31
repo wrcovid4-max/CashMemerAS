@@ -16,6 +16,7 @@ import com.cashmemer.core.model.Receipt
 import com.cashmemer.core.model.ReceiptCategory
 import com.cashmemer.core.model.ReceiptItem
 import com.cashmemer.core.network.GeminiOcrClient
+import com.cashmemer.location.LocationResolver
 import com.cashmemer.wear.PhoneWearSyncManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -47,6 +48,7 @@ data class ReceiptFormState(
     val sourceImageUri: String? = null,
     val saveSignatureAsDefault: Boolean = true,
     val scanning: Boolean = false,
+    val locatingAddress: Boolean = false,
     val message: String? = null,
     val draftSavedAt: Long? = null,
 ) {
@@ -106,6 +108,27 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         _state.update { it.copy(saveSignatureAsDefault = value) }
 
     fun consumeMessage() = _state.update { it.copy(message = null) }
+
+    /** Fills the location field from the device's current position. */
+    fun useCurrentLocation() {
+        _state.update { it.copy(locatingAddress = true) }
+        viewModelScope.launch {
+            LocationResolver.currentAddress(getApplication<Application>())
+                .onSuccess { address ->
+                    _state.update {
+                        it.copy(locationAddress = address, locatingAddress = false)
+                    }
+                }
+                .onFailure { error ->
+                    _state.update {
+                        it.copy(
+                            locatingAddress = false,
+                            message = error.message ?: "Could not find your location",
+                        )
+                    }
+                }
+        }
+    }
 
     /** Picking a member fills the three customer fields in one go. */
     fun selectMember(member: Member?) = _state.update {

@@ -35,7 +35,12 @@ data class AppSettings(
     val autoBackup: Boolean = false,
     val lastBackupAt: Long = 0L,
     val lastBackupError: String? = null,
-)
+    val accountName: String? = null,
+    val accountEmail: String? = null,
+    val accountPhotoUrl: String? = null,
+) {
+    val signedIn: Boolean get() = accountEmail != null
+}
 
 class SettingsStore(private val context: Context) {
 
@@ -56,6 +61,9 @@ class SettingsStore(private val context: Context) {
         val AUTO_BACKUP = booleanPreferencesKey("auto_backup")
         val LAST_BACKUP_AT = longPreferencesKey("last_backup_at")
         val LAST_BACKUP_ERROR = stringPreferencesKey("last_backup_error")
+        val ACCOUNT_NAME = stringPreferencesKey("account_name")
+        val ACCOUNT_EMAIL = stringPreferencesKey("account_email")
+        val ACCOUNT_PHOTO = stringPreferencesKey("account_photo")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { it.toSettings() }
@@ -77,6 +85,9 @@ class SettingsStore(private val context: Context) {
         autoBackup = this[Keys.AUTO_BACKUP] ?: false,
         lastBackupAt = this[Keys.LAST_BACKUP_AT] ?: 0L,
         lastBackupError = this[Keys.LAST_BACKUP_ERROR],
+        accountName = this[Keys.ACCOUNT_NAME],
+        accountEmail = this[Keys.ACCOUNT_EMAIL],
+        accountPhotoUrl = this[Keys.ACCOUNT_PHOTO],
     )
 
     suspend fun setThemeMode(mode: ThemeMode) = put(Keys.THEME, mode.name)
@@ -95,6 +106,21 @@ class SettingsStore(private val context: Context) {
         context.dataStore.edit { prefs ->
             if (uri == null) prefs.remove(Keys.BACKUP_FOLDER)
             else prefs[Keys.BACKUP_FOLDER] = uri
+        }
+    }
+
+    /** Stores the signed-in Google identity, or clears it on sign-out. */
+    suspend fun setAccount(name: String?, email: String?, photoUrl: String?) {
+        context.dataStore.edit { prefs ->
+            if (email == null) {
+                prefs.remove(Keys.ACCOUNT_NAME)
+                prefs.remove(Keys.ACCOUNT_EMAIL)
+                prefs.remove(Keys.ACCOUNT_PHOTO)
+            } else {
+                prefs[Keys.ACCOUNT_EMAIL] = email
+                name?.let { prefs[Keys.ACCOUNT_NAME] = it }
+                photoUrl?.let { prefs[Keys.ACCOUNT_PHOTO] = it }
+            }
         }
     }
 

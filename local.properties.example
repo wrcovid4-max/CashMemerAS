@@ -11,5 +11,14 @@ EXCHANGE_RATE_API_KEY=your_exchangerate_api_key
 GEMINI_API_KEY=your_gemini_api_key
 
 # Google Maps Platform key (Geocoding API) used for the GPS address field.
-# Restrict it to your package name + release SHA-1 in Google Cloud Console.
+# Enable "Geocoding API" in Google Cloud Console for the project that owns it.
+# Note: Geocoding API calls are billed per request and cannot be restricted by
+# package name, so keep this key separate from any Android-restricted key.
 MAPS_API_KEY=your_maps_api_key
+
+# OAuth 2.0 *Web application* client ID used for Google sign-in.
+# Google Cloud Console -> Credentials -> Create credentials -> OAuth client ID
+# -> Web application. You also need an Android client ID registered with your
+# package name (com.cashmemer) and signing SHA-1, but only the Web one goes here.
+# Leave blank to run the app without sign-in.
+GOOGLE_WEB_CLIENT_ID=your_web_client_id.apps.googleusercontent.com

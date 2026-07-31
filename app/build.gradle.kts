@@ -60,6 +60,11 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.documentfile)
 
+    // Google sign-in through Credential Manager (no Firebase dependency)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services)
+    implementation(libs.googleid)
+
     // Camera + barcode for Scan Receipt / Barcode Scan
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
