@@ -17,6 +17,9 @@ Studio project with a Wear OS companion.
 | `:app`  | The phone app. Compose + Material 3, min SDK 26. |
 | `:wear` | The Wear OS companion. Wear Compose, min SDK 30. Not standalone — it needs the phone app. |
 
+**[FEATURES.md](FEATURES.md) has the complete feature list**, screen by screen,
+including the known gaps.
+
 ### Screens (phone)
 
 - **Receipts** — new receipt form: store, GPS address, member picker, customer
@@ -141,9 +144,31 @@ project:
 The Android client makes the account chooser appear; the Web client ID is what
 the app sends. Only the Web one goes in `local.properties`.
 
-**What sign-in does and does not do:** it identifies who is at the counter. It
-does **not** back anything up — that is what the folder snapshots below are for.
-Real cloud sync would need Firebase/Firestore, which is not wired up.
+#### Setting up cloud sync (optional)
+
+Cloud sync is the only part that needs Firebase. **The project builds and runs
+without it** — the Gradle plugin is applied only when `google-services.json` is
+actually present, so a fresh clone is never broken by its absence.
+
+1. <https://console.firebase.google.com> → **Add project** (reuse the Cloud
+   project that owns your OAuth clients, so sign-in and Firestore line up)
+2. Add an **Android app**: package `com.cashmemer`, plus the debug SHA-1 from
+   `./gradlew signingReport`
+3. Download **`google-services.json`** and drop it in the `app/` folder
+4. **Build → Authentication → Sign-in method** → enable **Google**
+5. **Build → Firestore Database → Create database** → production mode
+6. **Rules** tab → paste the contents of `firestore.rules` from this repo →
+   **Publish**
+
+Step 6 matters. Firestore's default test-mode rules let *any* signed-in Google
+user read *your* shop's data, and expire after 30 days. The rules in this repo
+scope every document to its owner.
+
+Once that's done, sign in and the Settings card shows **Sync** and **Restore**.
+New receipts also upload on their own the moment you hit Generate.
+
+`google-services.json` is gitignored, so it will not come down with a clone —
+re-download it from the Firebase console (takes 30 seconds) on a new machine.
 
 ### 5. Sync Gradle
 
@@ -218,7 +243,12 @@ clone — recreate them by hand:
 ## Keeping your data safe
 
 Everything lives in one SQLite database on the phone. Lose the phone, lose the
-records — so the app has three ways out:
+records — so the app has four ways out:
+
+0. **Cloud sync** (needs Firebase, see above). Every receipt uploads to
+   Firestore as you generate it, and **Sync** / **Restore** in More move the
+   whole shop up or down on demand. This is the only option that survives
+   losing the phone with no action on your part.
 
 1. **Automatic daily backup** (More → Automatic Backup). Choose a folder once;
    a dated JSON snapshot is written there every day and the last 30 are kept.
@@ -242,11 +272,11 @@ work with no extra setup.
 
 ## What still needs building
 
-- **Cloud sync** — Google sign-in works, but it only establishes identity.
-  Syncing receipts to Firestore would mean adding Firebase and a
-  `google-services.json`; the folder snapshots cover the same need without it.
 - **Store weather on the watch** — the payload carries a weather slot; nothing
   fills it yet.
+- **Conflict handling in sync** — push overwrites the cloud, pull overwrites the
+  phone. Fine for one person on one device; two devices editing at once would
+  need per-record timestamps to merge properly.
 - **App lock** — the toggle and passcode persist; the biometric prompt on launch
   isn't wired.
 - **Auto-send / auto-print on generate** — both settings persist but nothing

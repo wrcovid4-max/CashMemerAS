@@ -33,6 +33,27 @@ class CashMemerRepository private constructor(context: Context) {
 
     suspend fun recentReceipts(limit: Int = 10): List<Receipt> = receipts.recent(limit)
 
+    /** Snapshot reads used by the cloud sync layer. */
+    suspend fun allReceiptsOnce(): List<Receipt> = receipts.allOnce()
+
+    suspend fun allProductsOnce(): List<Product> = products.allOnce()
+
+    suspend fun allMembersOnce(): List<Member> = members.allOnce()
+
+    /** Replaces local data wholesale — used when restoring from the cloud. */
+    suspend fun replaceAll(
+        newReceipts: List<Receipt>,
+        newProducts: List<Product>,
+        newMembers: List<Member>,
+    ) {
+        receipts.clear()
+        products.clear()
+        members.clear()
+        newReceipts.forEach { receipts.insert(it) }
+        newProducts.forEach { products.upsert(it) }
+        newMembers.forEach { members.upsert(it) }
+    }
+
     suspend fun receipt(id: Long): Receipt? = receipts.byId(id)
 
     suspend fun saveReceipt(receipt: Receipt): Long =

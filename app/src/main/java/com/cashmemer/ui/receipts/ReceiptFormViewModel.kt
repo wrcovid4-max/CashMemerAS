@@ -17,6 +17,7 @@ import com.cashmemer.core.model.ReceiptCategory
 import com.cashmemer.core.model.ReceiptItem
 import com.cashmemer.core.network.GeminiOcrClient
 import com.cashmemer.location.LocationResolver
+import com.cashmemer.sync.FirebaseSync
 import com.cashmemer.wear.PhoneWearSyncManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -294,6 +295,12 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
 
             // Keep the watch's "today" figure honest right after a sale.
             PhoneWearSyncManager.push(getApplication<Application>())
+
+            // Push the sale to the cloud immediately when signed in, so a lost
+            // phone costs at most the receipt currently being typed.
+            repository.receipt(id)?.let { saved ->
+                FirebaseSync.pushReceipt(getApplication<Application>(), saved)
+            }
 
             _state.value = ReceiptFormState(
                 currencyCode = current.currencyCode,

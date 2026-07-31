@@ -18,6 +18,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FolderOpen
@@ -31,6 +32,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -60,6 +62,7 @@ import com.cashmemer.core.util.Format
 import com.cashmemer.auth.GoogleAuth
 import com.cashmemer.backup.BackupScheduler
 import com.cashmemer.backup.BackupWriter
+import com.cashmemer.sync.FirebaseSync
 import com.cashmemer.ui.components.SectionCard
 import com.cashmemer.ui.components.SectionTitle
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -116,10 +119,27 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _message.value = "Backup folder set"
     }
 
+    private val _syncing = MutableStateFlow(false)
+    val syncing: StateFlow<Boolean> = _syncing.asStateFlow()
+
     /** [activityContext] must be an Activity — the chooser needs a window. */
     fun signIn(activityContext: Context) = launch {
         GoogleAuth.signInAndStore(activityContext, store)
-            .onSuccess { _message.value = "Signed in as ${it.email}" }
+            .onSuccess { account ->
+                // Trade the Google token for a Firebase session so Firestore
+                // rules can scope data to this user. Harmless when Firebase
+                // is not configured — sync just stays unavailable.
+                val app = getApplication<Application>()
+                if (FirebaseSync.isConfigured(app)) {
+                    FirebaseSync.authenticate(app, account.idToken)
+                        .onFailure { error ->
+                            _message.value =
+                                "Signed in, but cloud sync failed: ${error.message}"
+                            return@onSuccess
+                        }
+                }
+                _message.value = "Signed in as ${account.email}"
+            }
             .onFailure { error ->
                 _message.value = when (error) {
                     is GoogleAuth.CancelledException -> null
@@ -131,8 +151,31 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun signOut(activityContext: Context) = launch {
+        FirebaseSync.signOut(getApplication<Application>())
         GoogleAuth.signOut(activityContext, store)
         _message.value = "Signed out"
+    }
+
+    /** Uploads everything local to Firestore. */
+    fun syncUp() = runSync { FirebaseSync.push(getApplication<Application>()) }
+
+    /** Pulls the cloud copy down, replacing what is on this device. */
+    fun syncDown() = runSync { FirebaseSync.pull(getApplication<Application>()) }
+
+    private fun runSync(block: suspend () -> Result<Int>) = launch {
+        if (_syncing.value) return@launch
+        _syncing.value = true
+        block()
+            .onSuccess { _message.value = "Synced $it record(s)" }
+            .onFailure { error ->
+                _message.value = when (error) {
+                    is FirebaseSync.NotConfiguredException ->
+                        "Add google-services.json to the app module first"
+                    is FirebaseSync.NotSignedInException -> "Sign in with Google first"
+                    else -> error.message ?: "Sync failed"
+                }
+            }
+        _syncing.value = false
     }
 
     fun setAutoBackup(enabled: Boolean) = launch {
@@ -168,7 +211,9 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
 ) {
     val message by viewModel.message.collectAsState()
+    val syncing by viewModel.syncing.collectAsState()
     val context = LocalContext.current
+    val cloudReady = remember(context) { FirebaseSync.isConfigured(context) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -178,8 +223,12 @@ fun SettingsScreen(
         item {
             AccountCard(
                 settings = settings,
+                cloudReady = cloudReady,
+                syncing = syncing,
                 onSignIn = { viewModel.signIn(context) },
                 onSignOut = { viewModel.signOut(context) },
+                onSyncUp = viewModel::syncUp,
+                onSyncDown = viewModel::syncDown,
             )
         }
 
@@ -350,11 +399,15 @@ private fun PasscodeCard(onUpdate: (String, String) -> Unit) {
 @Composable
 private fun AccountCard(
     settings: AppSettings,
+    cloudReady: Boolean,
+    syncing: Boolean,
     onSignIn: () -> Unit,
     onSignOut: () -> Unit,
+    onSyncUp: () -> Unit,
+    onSyncDown: () -> Unit,
 ) {
     SectionCard {
-        RowTitle(Icons.Filled.AccountCircle, "Google Account")
+        RowTitle(Icons.Filled.AccountCircle, "Cloud Sync & Backup")
 
         if (settings.signedIn) {
             Text(
@@ -366,12 +419,51 @@ private fun AccountCard(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Text(
-                text = "Signed in for identity only. Your receipts are backed up " +
-                    "by the folder snapshots below, not by this account.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+
+            if (cloudReady) {
+                Text(
+                    text = "Cloud sync connected",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Button(
+                        onClick = onSyncUp,
+                        enabled = !syncing,
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Icon(Icons.Filled.CloudUpload, contentDescription = null)
+                        Text("  Sync")
+                    }
+                    OutlinedButton(
+                        onClick = onSyncDown,
+                        enabled = !syncing,
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Icon(Icons.Filled.CloudDownload, contentDescription = null)
+                        Text("  Restore")
+                    }
+                }
+                Text(
+                    text = "Restore replaces everything on this phone with the " +
+                        "cloud copy. Use it on a new device, not to merge.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                Text(
+                    text = "Cloud sync is off — add google-services.json to the app " +
+                        "module to switch it on. Your daily folder backups below " +
+                        "still run.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            if (syncing) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+
             OutlinedButton(onClick = onSignOut, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
                 Text("  Sign out")

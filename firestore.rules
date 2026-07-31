@@ -1,0 +1,20 @@
+rules_version = '2';
+
+// Paste these into Firebase Console -> Firestore Database -> Rules.
+//
+// Firestore's default rules either lock everything out or, in "test mode",
+// let ANY signed-in user read ANY user's data and expire after 30 days. These
+// scope every document to the account that owns it, with no expiry.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // A user may only touch their own subtree.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /{document=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}
