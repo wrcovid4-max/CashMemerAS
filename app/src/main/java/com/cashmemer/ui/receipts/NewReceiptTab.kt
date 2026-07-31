@@ -1,5 +1,8 @@
 package com.cashmemer.ui.receipts
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,8 +54,13 @@ import com.cashmemer.core.model.PaymentType
 import com.cashmemer.core.model.ReceiptCategory
 import com.cashmemer.core.model.ReceiptItem
 import com.cashmemer.core.util.Format
+import com.cashmemer.scan.CaptureReceiptContract
+import com.cashmemer.scan.ScanBarcodeContract
 import com.cashmemer.ui.components.SectionCard
 import com.cashmemer.ui.components.SectionTitle
+
+/** Cap on how many photos one bulk scan will send to the parser. */
+private const val MAX_BULK_SCAN = 10
 
 @Composable
 fun NewReceiptTab(
@@ -63,12 +71,39 @@ fun NewReceiptTab(
     val members by viewModel.members.collectAsState()
     val products by viewModel.products.collectAsState()
 
+    val captureReceipt = rememberLauncherForActivityResult(CaptureReceiptContract()) { uri ->
+        uri?.let(viewModel::scanReceiptFrom)
+    }
+    val scanBarcode = rememberLauncherForActivityResult(ScanBarcodeContract()) { code ->
+        code?.let(viewModel::addByBarcode)
+    }
+    val pickImage = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia(),
+    ) { uri -> uri?.let(viewModel::scanReceiptFrom) }
+    val pickImages = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickMultipleVisualMedia(MAX_BULK_SCAN),
+    ) { uris -> viewModel.scanReceipts(uris) }
+
+    val imagesOnly = ActivityResultContracts.PickVisualMedia.ImageOnly
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item { ScannerCard(scanning = state.scanning) }
+        item {
+            ScannerCard(
+                scanning = state.scanning,
+                onScanReceipt = { captureReceipt.launch(Unit) },
+                onImportImage = {
+                    pickImage.launch(PickVisualMediaRequest(imagesOnly))
+                },
+                onBulkScan = {
+                    pickImages.launch(PickVisualMediaRequest(imagesOnly))
+                },
+                onBarcodeScan = { scanBarcode.launch(Unit) },
+            )
+        }
 
         item {
             SectionCard {
@@ -251,7 +286,13 @@ fun NewReceiptTab(
 }
 
 @Composable
-private fun ScannerCard(scanning: Boolean) {
+private fun ScannerCard(
+    scanning: Boolean,
+    onScanReceipt: () -> Unit,
+    onImportImage: () -> Unit,
+    onBulkScan: () -> Unit,
+    onBarcodeScan: () -> Unit,
+) {
     SectionCard(accent = true) {
         Text(
             text = "OCR Receipt Scanner (AI Gemini)",
@@ -264,21 +305,37 @@ private fun ScannerCard(scanning: Boolean) {
         )
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedButton(onClick = { }, modifier = Modifier.weight(1f)) {
+            OutlinedButton(
+                onClick = onScanReceipt,
+                enabled = !scanning,
+                modifier = Modifier.weight(1f),
+            ) {
                 Icon(Icons.Filled.PhotoCamera, contentDescription = null)
                 Text("  Scan Receipt")
             }
-            OutlinedButton(onClick = { }, modifier = Modifier.weight(1f)) {
+            OutlinedButton(
+                onClick = onImportImage,
+                enabled = !scanning,
+                modifier = Modifier.weight(1f),
+            ) {
                 Icon(Icons.Filled.Image, contentDescription = null)
                 Text("  Import Image")
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = { }, modifier = Modifier.weight(1f)) {
+            Button(
+                onClick = onBulkScan,
+                enabled = !scanning,
+                modifier = Modifier.weight(1f),
+            ) {
                 Icon(Icons.Filled.Image, contentDescription = null)
                 Text("  Bulk Scan")
             }
-            Button(onClick = { }, modifier = Modifier.weight(1f)) {
+            Button(
+                onClick = onBarcodeScan,
+                enabled = !scanning,
+                modifier = Modifier.weight(1f),
+            ) {
                 Icon(Icons.Filled.QrCodeScanner, contentDescription = null)
                 Text("  Barcode Scan")
             }

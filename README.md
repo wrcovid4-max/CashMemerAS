@@ -170,26 +170,44 @@ clone — recreate them by hand:
 
 ---
 
+## Keeping your data safe
+
+Everything lives in one SQLite database on the phone. Lose the phone, lose the
+records — so the app has three ways out:
+
+1. **Automatic daily backup** (More → Automatic Backup). Choose a folder once;
+   a dated JSON snapshot is written there every day and the last 30 are kept.
+   Point it at a Drive- or Dropbox-synced folder and the data leaves the phone
+   on its own. There's a **Back up now** button for a snapshot on demand.
+2. **Backup JSON / Restore JSON** on the History tab — writes or reads a single
+   file wherever you choose.
+3. **Export / Restore JSON** in More — the same payload as raw text.
+
+All three produce the same format, so a snapshot from any of them restores
+through any of the others.
+
+## Printing a memo
+
+Receipts render to A4 PDF with the platform PDF engine — no external library.
+From History: the **printer icon** on any row prints that receipt; select
+several and use the printer or share icon in the bar to do them in one job.
+Which pages get printed follows the **Mass Print Option** in More
+(Page 1 / Page 2 / Both). Share opens the normal sheet, so WhatsApp and email
+work with no extra setup.
+
 ## What still needs building
 
-The scaffolding is complete and the app runs, but these are wired up as UI
-without their backing implementation yet:
-
-- **Camera capture / gallery import** — the Scan Receipt, Import Image, Bulk
-  Scan and Barcode Scan buttons are in place; CameraX and ML Kit are already on
-  the classpath, but the capture flow isn't hooked to `scanReceipt()` /
-  `addByBarcode()` yet.
 - **GPS auto-fill** — the location field accepts typing; the pin button doesn't
   call the fused location provider yet.
-- **PDF generation, printing and share** — the print settings persist, but
-  nothing renders a memo to PDF yet.
 - **Firebase auth + cloud sync** — the original had Google sign-in and Firestore
   backup. Left out on purpose so the project builds without a
-  `google-services.json`. Offline JSON backup/restore works today.
+  `google-services.json`. The offline backups above cover the same need.
 - **Store weather on the watch** — the payload carries a weather slot; nothing
   fills it yet.
-- **App lock** — the toggle and passcode persist; biometric prompt on launch
+- **App lock** — the toggle and passcode persist; the biometric prompt on launch
   isn't wired.
+- **Auto-send / auto-print on generate** — both settings persist but nothing
+  acts on them at generation time yet.
 
 ---
 

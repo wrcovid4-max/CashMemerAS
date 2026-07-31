@@ -1,6 +1,10 @@
 package com.cashmemer.ui.settings
 
 import android.app.Application
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,10 +17,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
@@ -45,6 +52,9 @@ import com.cashmemer.core.data.CashMemerRepository
 import com.cashmemer.core.data.MassPrintOption
 import com.cashmemer.core.data.SettingsStore
 import com.cashmemer.core.data.ThemeMode
+import com.cashmemer.core.util.Format
+import com.cashmemer.backup.BackupScheduler
+import com.cashmemer.backup.BackupWriter
 import com.cashmemer.ui.components.SectionCard
 import com.cashmemer.ui.components.SectionTitle
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,6 +93,34 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     /** Copies the whole database out as JSON — the offline backup path. */
     fun exportJson(onReady: (String) -> Unit) = launch {
         onReady(repository.exportJson())
+    }
+
+    /**
+     * Stores the folder the user picked and takes a persistable grant so the
+     * scheduled worker can still write to it after a reboot.
+     */
+    fun setBackupFolder(uri: Uri) = launch {
+        val app = getApplication<Application>()
+        runCatching {
+            app.contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+            )
+        }
+        store.setBackupFolder(uri.toString())
+        _message.value = "Backup folder set"
+    }
+
+    fun setAutoBackup(enabled: Boolean) = launch {
+        store.setAutoBackup(enabled)
+        val app = getApplication<Application>()
+        if (enabled) BackupScheduler.enable(app) else BackupScheduler.disable(app)
+    }
+
+    fun backupNow() = launch {
+        BackupWriter.run(getApplication<Application>())
+            .onSuccess { _message.value = "Saved $it" }
+            .onFailure { _message.value = it.message ?: "Backup failed" }
     }
 
     fun importJson(json: String) = launch {
@@ -190,6 +228,8 @@ fun SettingsScreen(
 
         item { PasscodeCard(onUpdate = viewModel::setPasscode) }
 
+        item { AutoBackupCard(settings = settings, viewModel = viewModel) }
+
         item { BackupCard(viewModel = viewModel) }
 
         message?.let { text ->
@@ -267,6 +307,76 @@ private fun PasscodeCard(onUpdate: (String, String) -> Unit) {
                 modifier = Modifier.weight(1f),
             ) { Text("Update") }
         }
+    }
+}
+
+/**
+ * Scheduled backups. Point this at a Drive/Dropbox-synced folder and the
+ * snapshots leave the phone on their own.
+ */
+@Composable
+private fun AutoBackupCard(
+    settings: AppSettings,
+    viewModel: SettingsViewModel,
+) {
+    val folderPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocumentTree(),
+    ) { uri -> uri?.let(viewModel::setBackupFolder) }
+
+    SectionCard {
+        RowTitle(Icons.Filled.Schedule, "Automatic Backup")
+        Text(
+            "Writes a dated JSON snapshot every day into a folder you choose. " +
+                "Pick a folder that syncs to the cloud and your records survive " +
+                "losing this phone.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        OutlinedButton(
+            onClick = { folderPicker.launch(null) },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Icon(Icons.Filled.FolderOpen, contentDescription = null)
+            Text(
+                text = if (settings.backupFolderUri == null) "  Choose backup folder"
+                else "  Change backup folder",
+            )
+        }
+
+        settings.backupFolderUri?.let { uri ->
+            Text(
+                text = Uri.decode(uri.substringAfterLast(':')).ifBlank { uri },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        ToggleRow(
+            label = "Daily automatic backup",
+            checked = settings.autoBackup,
+            onCheckedChange = viewModel::setAutoBackup,
+        )
+
+        Button(
+            onClick = viewModel::backupNow,
+            enabled = settings.backupFolderUri != null,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Icon(Icons.Filled.Save, contentDescription = null)
+            Text("  Back up now")
+        }
+
+        Text(
+            text = when {
+                settings.lastBackupError != null -> "Last backup failed: ${settings.lastBackupError}"
+                settings.lastBackupAt > 0L -> "Last backup: ${Format.timestamp(settings.lastBackupAt)}"
+                else -> "No backup taken yet"
+            },
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (settings.lastBackupError != null) MaterialTheme.colorScheme.error
+            else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

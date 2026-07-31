@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -29,6 +30,11 @@ data class AppSettings(
     val appLock: Boolean = false,
     val passcode: String? = null,
     val defaultCurrency: String = "PKR",
+    /** SAF tree uri of the folder auto-backups are written into. */
+    val backupFolderUri: String? = null,
+    val autoBackup: Boolean = false,
+    val lastBackupAt: Long = 0L,
+    val lastBackupError: String? = null,
 )
 
 class SettingsStore(private val context: Context) {
@@ -46,6 +52,10 @@ class SettingsStore(private val context: Context) {
         val APP_LOCK = booleanPreferencesKey("app_lock")
         val PASSCODE = stringPreferencesKey("passcode")
         val DEFAULT_CURRENCY = stringPreferencesKey("default_currency")
+        val BACKUP_FOLDER = stringPreferencesKey("backup_folder_uri")
+        val AUTO_BACKUP = booleanPreferencesKey("auto_backup")
+        val LAST_BACKUP_AT = longPreferencesKey("last_backup_at")
+        val LAST_BACKUP_ERROR = stringPreferencesKey("last_backup_error")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { it.toSettings() }
@@ -63,6 +73,10 @@ class SettingsStore(private val context: Context) {
         appLock = this[Keys.APP_LOCK] ?: false,
         passcode = this[Keys.PASSCODE],
         defaultCurrency = this[Keys.DEFAULT_CURRENCY] ?: "PKR",
+        backupFolderUri = this[Keys.BACKUP_FOLDER],
+        autoBackup = this[Keys.AUTO_BACKUP] ?: false,
+        lastBackupAt = this[Keys.LAST_BACKUP_AT] ?: 0L,
+        lastBackupError = this[Keys.LAST_BACKUP_ERROR],
     )
 
     suspend fun setThemeMode(mode: ThemeMode) = put(Keys.THEME, mode.name)
@@ -75,6 +89,23 @@ class SettingsStore(private val context: Context) {
     suspend fun setMassPrint(option: MassPrintOption) = put(Keys.MASS_PRINT, option.name)
     suspend fun setAppLock(value: Boolean) = put(Keys.APP_LOCK, value)
     suspend fun setDefaultCurrency(code: String) = put(Keys.DEFAULT_CURRENCY, code)
+    suspend fun setAutoBackup(value: Boolean) = put(Keys.AUTO_BACKUP, value)
+
+    suspend fun setBackupFolder(uri: String?) {
+        context.dataStore.edit { prefs ->
+            if (uri == null) prefs.remove(Keys.BACKUP_FOLDER)
+            else prefs[Keys.BACKUP_FOLDER] = uri
+        }
+    }
+
+    /** Records the outcome of a backup run so Settings can show it. */
+    suspend fun recordBackupResult(succeededAt: Long?, error: String?) {
+        context.dataStore.edit { prefs ->
+            succeededAt?.let { prefs[Keys.LAST_BACKUP_AT] = it }
+            if (error == null) prefs.remove(Keys.LAST_BACKUP_ERROR)
+            else prefs[Keys.LAST_BACKUP_ERROR] = error
+        }
+    }
 
     suspend fun setDefaultSignature(base64: String?) {
         context.dataStore.edit { prefs ->

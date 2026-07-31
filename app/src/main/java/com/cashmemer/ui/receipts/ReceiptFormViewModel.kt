@@ -2,6 +2,8 @@ package com.cashmemer.ui.receipts
 
 import android.app.Application
 import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.cashmemer.core.data.CashMemerRepository
@@ -20,8 +22,10 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Everything the new-receipt form holds while it is being filled in. */
 data class ReceiptFormState(
@@ -40,6 +44,7 @@ data class ReceiptFormState(
     val notesPage1: String = "",
     val notesPage2: String = "",
     val signatureBase64: String? = null,
+    val sourceImageUri: String? = null,
     val saveSignatureAsDefault: Boolean = true,
     val scanning: Boolean = false,
     val message: String? = null,
@@ -145,10 +150,59 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-    /** Send a photographed receipt through Gemini and merge the parsed fields in. */
-    fun scanReceipt(bitmap: Bitmap) {
-        _state.update { it.copy(scanning = true, message = null) }
+    /**
+     * Reads an image the user captured or picked, downscales it, and runs it
+     * through the OCR parser.
+     */
+    fun scanReceiptFrom(uri: Uri) {
         viewModelScope.launch {
+            val bitmap = decodeScaled(uri)
+            if (bitmap == null) {
+                _state.update { it.copy(message = "Could not read that image") }
+                return@launch
+            }
+            _state.update { it.copy(sourceImageUri = uri.toString()) }
+            scanReceipt(bitmap)
+        }
+    }
+
+    /** Bulk scan: parse each picked image in turn, merging every result. */
+    fun scanReceipts(uris: List<Uri>) {
+        if (uris.isEmpty()) return
+        viewModelScope.launch {
+            uris.forEach { uri ->
+                decodeScaled(uri)?.let { bitmap -> scanReceipt(bitmap).join() }
+            }
+        }
+    }
+
+    /**
+     * Gemini charges by pixels and phone photos are far larger than the parser
+     * needs, so cap the long edge before uploading.
+     */
+    private suspend fun decodeScaled(uri: Uri): Bitmap? = withContext(Dispatchers.IO) {
+        runCatching {
+            val resolver = getApplication<Application>().contentResolver
+            val source = ImageDecoder.createSource(resolver, uri)
+            ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
+                val longEdge = maxOf(info.size.width, info.size.height)
+                if (longEdge > MAX_SCAN_EDGE) {
+                    val scale = MAX_SCAN_EDGE.toFloat() / longEdge
+                    decoder.setTargetSize(
+                        (info.size.width * scale).toInt(),
+                        (info.size.height * scale).toInt(),
+                    )
+                }
+                decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+                decoder.isMutableRequired = false
+            }
+        }.getOrNull()
+    }
+
+    /** Send a photographed receipt through Gemini and merge the parsed fields in. */
+    fun scanReceipt(bitmap: Bitmap) =
+        viewModelScope.launch {
+            _state.update { it.copy(scanning = true, message = null) }
             GeminiOcrClient.parse(bitmap)
                 .onSuccess { parsed ->
                     _state.update { current ->
@@ -177,7 +231,6 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                     }
                 }
         }
-    }
 
     /** Writes the receipt and clears the form, like the original Generate button. */
     fun generate(onGenerated: (Long) -> Unit = {}) {
@@ -205,6 +258,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                 notesPage1 = current.notesPage1,
                 notesPage2 = current.notesPage2,
                 signatureBase64 = current.signatureBase64,
+                sourceImageUri = current.sourceImageUri,
                 itemsJson = ReceiptItemCodec.encode(current.items),
             )
 
@@ -234,5 +288,10 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
 
     fun clear() {
         _state.value = ReceiptFormState(currencyCode = _state.value.currencyCode)
+    }
+
+    private companion object {
+        /** Long-edge cap for images sent to the OCR parser. */
+        const val MAX_SCAN_EDGE = 1600
     }
 }

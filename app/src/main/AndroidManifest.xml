@@ -34,6 +34,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".scan.ScanActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.CashMemer" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

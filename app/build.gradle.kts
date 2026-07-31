@@ -56,6 +56,10 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.coil.compose)
 
+    // Scheduled offline backups written into a folder the user picks
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.documentfile)
+
     // Camera + barcode for Scan Receipt / Barcode Scan
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
