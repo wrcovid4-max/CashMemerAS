@@ -144,6 +144,9 @@ class CashMemerRepository private constructor(context: Context) {
                     .put("discount", r.discount)
                     .put("taxPercent", r.taxPercent)
                     .put("total", r.total)
+                    .put("cashGiven", r.cashGiven)
+                    .put("latitude", r.latitude ?: JSONObject.NULL)
+                    .put("longitude", r.longitude ?: JSONObject.NULL)
                     .put("notesPage1", r.notesPage1)
                     .put("notesPage2", r.notesPage2)
                     .put("items", JSONArray(r.itemsJson))
@@ -217,6 +220,11 @@ class CashMemerRepository private constructor(context: Context) {
                                 discount = o.optDouble("discount", 0.0),
                                 taxPercent = o.optDouble("taxPercent", 0.0),
                                 total = o.optDouble("total", 0.0),
+                                cashGiven = o.optDouble("cashGiven", 0.0),
+                                latitude = if (o.isNull("latitude")) null
+                                else o.optDouble("latitude"),
+                                longitude = if (o.isNull("longitude")) null
+                                else o.optDouble("longitude"),
                                 notesPage1 = o.optString("notesPage1"),
                                 notesPage2 = o.optString("notesPage2"),
                                 itemsJson = o.optJSONArray("items")?.toString() ?: "[]",

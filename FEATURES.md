@@ -19,8 +19,14 @@ listed so the gaps are visible rather than discovered later.
 
 **Receipt details**
 - Place / store name
-- Location address, with a GPS pin that fixes your position and reverse-geocodes
-  it (on-device geocoder first, Maps Geocoding API as fallback)
+- Location address, two ways:
+  - GPS pin — fixes your position and reverse-geocodes it (on-device geocoder
+    first, Maps Geocoding API as fallback)
+  - Map picker — full Google map, search by address or place name, drag to
+    position, Confirm Location. Coordinates are stored with the receipt and
+    printed on the memo.
+- Live barcode feed from a connected Bluetooth scanner drops straight into the
+  open sale
 - Member picker — selecting a saved customer fills name, phone and email at once
 - Customer name, phone, email (phone and email optional)
 
@@ -34,7 +40,8 @@ listed so the gaps are visible rather than discovered later.
   auto-filling the price; quantity and price per line
 - Line items list with per-line totals and remove
 - Discount (flat) and tax (percentage)
-- Live totals: subtotal → discount → tax → total
+- Live totals: subtotal → discount → tax → grand total
+- Cash Given, with change calculated automatically (never negative)
 
 **Finishing**
 - Notes, page 1 and page 2
@@ -147,12 +154,48 @@ listed so the gaps are visible rather than discovered later.
 
 ---
 
+## Connected Devices & Integrations
+
+Real Bluetooth, not placeholder switches. Works with barcode scanners, payment
+terminals and thermal receipt printers that speak the Serial Port Profile —
+which is nearly all counter hardware.
+
+- Live connection banner: connected / connecting / failed, with the reason
+- **Payment Terminal Integration** and **Android OCR Companion** toggles
+- **Connection Preferences**, all seven persisted: auto-reconnect to paired
+  devices, auto-connect to default, ask before connecting new, show status in
+  status bar, connection notifications, scan/payment confirmation sounds,
+  vibration feedback
+- **Manage Paired Devices** — reads the real Bluetooth bonded-device list,
+  guesses each device's type from its name, connect / disconnect, set a default
+- Scanned barcodes stream from the connected device straight into the open sale
+- Raw byte send, for ESC/POS printers and terminal protocol frames
+- **Run Connection Diagnostics** — five real checks: radio present, Bluetooth
+  on, permission granted, something paired, something connected
+- **View Integration Logs** — rolling 200-entry event log, clearable
+- **Forget All Paired Devices** — disconnects and clears the default, and says
+  plainly that Android keeps the pairings themselves
+
+Runtime permissions handled for both the pre-Android-12 and Android-12+ models.
+
+## Android Auto
+
+Read-only and driving-safe — no text entry, short lists.
+
+- Today's takings and receipt count
+- Recent receipts list, capped at 6 rows (Android Auto blocks longer lists in
+  motion)
+- Built on the Car App Library template host
+
 ## Printing
 
 - Receipts render to A4 PDF using the platform PDF engine — no external library
 - Page 1: store, address, receipt number, timestamp, customer block, itemised
-  table, subtotal / discount / tax / total, payment method
+  table, subtotal / discount / tax / grand total, cash given and change,
+  payment method, GPS coordinates
 - Page 2: both note fields plus the signature image
+- QR block on both pages encoding receipt number, store, total, timestamp and
+  coordinates — short payload on purpose, so it still scans off thermal paper
 - Print through the Android print dialog — any printer the phone can see
 - Share as PDF through the standard share sheet
 - Single or bulk, honouring the Mass Print Option setting

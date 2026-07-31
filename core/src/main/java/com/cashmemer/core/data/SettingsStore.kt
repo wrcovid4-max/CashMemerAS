@@ -38,6 +38,17 @@ data class AppSettings(
     val accountName: String? = null,
     val accountEmail: String? = null,
     val accountPhotoUrl: String? = null,
+    // Connected Devices & Integrations
+    val paymentTerminalEnabled: Boolean = true,
+    val ocrCompanionEnabled: Boolean = true,
+    val autoReconnect: Boolean = true,
+    val autoConnectDefault: Boolean = true,
+    val askBeforeNewDevice: Boolean = true,
+    val showStatusInBar: Boolean = true,
+    val connectionNotifications: Boolean = true,
+    val confirmationSounds: Boolean = true,
+    val vibrationFeedback: Boolean = true,
+    val defaultDeviceAddress: String? = null,
 ) {
     val signedIn: Boolean get() = accountEmail != null
 }
@@ -64,6 +75,51 @@ class SettingsStore(private val context: Context) {
         val ACCOUNT_NAME = stringPreferencesKey("account_name")
         val ACCOUNT_EMAIL = stringPreferencesKey("account_email")
         val ACCOUNT_PHOTO = stringPreferencesKey("account_photo")
+        val PAYMENT_TERMINAL = booleanPreferencesKey("payment_terminal_enabled")
+        val OCR_COMPANION = booleanPreferencesKey("ocr_companion_enabled")
+        val AUTO_RECONNECT = booleanPreferencesKey("auto_reconnect")
+        val AUTO_CONNECT_DEFAULT = booleanPreferencesKey("auto_connect_default")
+        val ASK_BEFORE_NEW = booleanPreferencesKey("ask_before_new_device")
+        val SHOW_STATUS_BAR = booleanPreferencesKey("show_status_in_bar")
+        val CONNECTION_NOTIFICATIONS = booleanPreferencesKey("connection_notifications")
+        val CONFIRMATION_SOUNDS = booleanPreferencesKey("confirmation_sounds")
+        val VIBRATION_FEEDBACK = booleanPreferencesKey("vibration_feedback")
+        val DEFAULT_DEVICE = stringPreferencesKey("default_device_address")
+    }
+
+    /** Every device toggle, keyed by the enum the Devices screen renders from. */
+    enum class DeviceToggle(internal val key: Preferences.Key<Boolean>, val label: String) {
+        PAYMENT_TERMINAL(Keys.PAYMENT_TERMINAL, "Payment Terminal Integration"),
+        OCR_COMPANION(Keys.OCR_COMPANION, "Android OCR Companion"),
+        AUTO_RECONNECT(Keys.AUTO_RECONNECT, "Auto-reconnect to paired devices"),
+        AUTO_CONNECT_DEFAULT(Keys.AUTO_CONNECT_DEFAULT, "Auto-connect to default device"),
+        ASK_BEFORE_NEW(Keys.ASK_BEFORE_NEW, "Ask before connecting new device"),
+        SHOW_STATUS_BAR(Keys.SHOW_STATUS_BAR, "Show status in status bar"),
+        CONNECTION_NOTIFICATIONS(Keys.CONNECTION_NOTIFICATIONS, "Enable connection notifications"),
+        CONFIRMATION_SOUNDS(Keys.CONFIRMATION_SOUNDS, "Scan/payment confirmation sounds"),
+        VIBRATION_FEEDBACK(Keys.VIBRATION_FEEDBACK, "Vibration feedback"),
+    }
+
+    fun AppSettings.isEnabled(toggle: DeviceToggle): Boolean = when (toggle) {
+        DeviceToggle.PAYMENT_TERMINAL -> paymentTerminalEnabled
+        DeviceToggle.OCR_COMPANION -> ocrCompanionEnabled
+        DeviceToggle.AUTO_RECONNECT -> autoReconnect
+        DeviceToggle.AUTO_CONNECT_DEFAULT -> autoConnectDefault
+        DeviceToggle.ASK_BEFORE_NEW -> askBeforeNewDevice
+        DeviceToggle.SHOW_STATUS_BAR -> showStatusInBar
+        DeviceToggle.CONNECTION_NOTIFICATIONS -> connectionNotifications
+        DeviceToggle.CONFIRMATION_SOUNDS -> confirmationSounds
+        DeviceToggle.VIBRATION_FEEDBACK -> vibrationFeedback
+    }
+
+    suspend fun setDeviceToggle(toggle: DeviceToggle, value: Boolean) =
+        put(toggle.key, value)
+
+    suspend fun setDefaultDevice(address: String?) {
+        context.dataStore.edit { prefs ->
+            if (address == null) prefs.remove(Keys.DEFAULT_DEVICE)
+            else prefs[Keys.DEFAULT_DEVICE] = address
+        }
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { it.toSettings() }
@@ -88,6 +144,16 @@ class SettingsStore(private val context: Context) {
         accountName = this[Keys.ACCOUNT_NAME],
         accountEmail = this[Keys.ACCOUNT_EMAIL],
         accountPhotoUrl = this[Keys.ACCOUNT_PHOTO],
+        paymentTerminalEnabled = this[Keys.PAYMENT_TERMINAL] ?: true,
+        ocrCompanionEnabled = this[Keys.OCR_COMPANION] ?: true,
+        autoReconnect = this[Keys.AUTO_RECONNECT] ?: true,
+        autoConnectDefault = this[Keys.AUTO_CONNECT_DEFAULT] ?: true,
+        askBeforeNewDevice = this[Keys.ASK_BEFORE_NEW] ?: true,
+        showStatusInBar = this[Keys.SHOW_STATUS_BAR] ?: true,
+        connectionNotifications = this[Keys.CONNECTION_NOTIFICATIONS] ?: true,
+        confirmationSounds = this[Keys.CONFIRMATION_SOUNDS] ?: true,
+        vibrationFeedback = this[Keys.VIBRATION_FEEDBACK] ?: true,
+        defaultDeviceAddress = this[Keys.DEFAULT_DEVICE],
     )
 
     suspend fun setThemeMode(mode: ThemeMode) = put(Keys.THEME, mode.name)

@@ -22,12 +22,16 @@ import androidx.navigation.compose.rememberNavController
 import com.cashmemer.core.data.AppSettings
 import com.cashmemer.ui.components.BrandHeader
 import com.cashmemer.ui.components.CashMemerBottomBar
+import com.cashmemer.ui.devices.DevicesScreen
 import com.cashmemer.ui.inventory.InventoryScreen
 import com.cashmemer.ui.members.MembersScreen
 import com.cashmemer.ui.pricelist.PriceListScreen
 import com.cashmemer.ui.rates.RatesScreen
 import com.cashmemer.ui.receipts.ReceiptsHomeScreen
 import com.cashmemer.ui.settings.SettingsScreen
+
+/** Sub-screen of More, so it stays off the bottom bar. */
+private const val ROUTE_DEVICES = "devices"
 
 @Composable
 fun CashMemerApp(settings: AppSettings) {
@@ -92,7 +96,13 @@ private fun AppNavHost(
             composable(Destination.PriceList.route) { PriceListScreen() }
             composable(Destination.Rates.route) { RatesScreen() }
             composable(Destination.Members.route) { MembersScreen() }
-            composable(Destination.Settings.route) { SettingsScreen(settings) }
+            composable(Destination.Settings.route) {
+                SettingsScreen(
+                    settings = settings,
+                    onOpenDevices = { navController.navigate(ROUTE_DEVICES) },
+                )
+            }
+            composable(ROUTE_DEVICES) { DevicesScreen(settings) }
         }
     }
 }

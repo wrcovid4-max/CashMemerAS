@@ -58,8 +58,13 @@ data class Receipt(
     val discount: Double = 0.0,
     val taxPercent: Double = 0.0,
     val total: Double = 0.0,
+    /** What the customer handed over, so the memo can show their change. */
+    val cashGiven: Double = 0.0,
     val notesPage1: String = "",
     val notesPage2: String = "",
+    /** Coordinates behind [locationAddress], printed on the memo. */
+    val latitude: Double? = null,
+    val longitude: Double? = null,
     /** PNG bytes of the captured signature, base64 encoded. */
     val signatureBase64: String? = null,
     val itemsJson: String = "[]",
@@ -67,7 +72,12 @@ data class Receipt(
     val sourceImageUri: String? = null,
     val pinned: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
-)
+) {
+    /** Never negative — an underpayment is not change owed. */
+    val changeAmount: Double get() = (cashGiven - total).coerceAtLeast(0.0)
+
+    val hasCoordinates: Boolean get() = latitude != null && longitude != null
+}
 
 /** One purchased line on a receipt. Serialised into [Receipt.itemsJson]. */
 data class ReceiptItem(

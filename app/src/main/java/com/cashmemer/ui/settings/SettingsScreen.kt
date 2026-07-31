@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Lock
@@ -208,6 +209,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 @Composable
 fun SettingsScreen(
     settings: AppSettings,
+    onOpenDevices: () -> Unit = {},
     viewModel: SettingsViewModel = viewModel(),
 ) {
     val message by viewModel.message.collectAsState()
@@ -230,6 +232,20 @@ fun SettingsScreen(
                 onSyncUp = viewModel::syncUp,
                 onSyncDown = viewModel::syncDown,
             )
+        }
+
+        item {
+            SectionCard {
+                RowTitle(Icons.Filled.Devices, "Connected Devices & Integrations")
+                Text(
+                    "Manage payment terminals and scanners",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                OutlinedButton(onClick = onOpenDevices, modifier = Modifier.fillMaxWidth()) {
+                    Text("Open")
+                }
+            }
         }
 
         item {

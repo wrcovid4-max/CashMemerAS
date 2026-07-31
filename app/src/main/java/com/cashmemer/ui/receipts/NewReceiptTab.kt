@@ -20,9 +20,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
@@ -58,6 +59,7 @@ import com.cashmemer.core.model.ReceiptCategory
 import com.cashmemer.core.model.ReceiptItem
 import com.cashmemer.core.util.Format
 import com.cashmemer.location.LocationResolver
+import com.cashmemer.location.PickLocationContract
 import com.cashmemer.scan.CaptureReceiptContract
 import com.cashmemer.scan.ScanBarcodeContract
 import com.cashmemer.ui.components.SectionCard
@@ -95,6 +97,11 @@ fun NewReceiptTab(
         ActivityResultContracts.RequestMultiplePermissions(),
     ) { granted ->
         if (granted.values.any { it }) viewModel.useCurrentLocation()
+    }
+    val pickOnMap = rememberLauncherForActivityResult(PickLocationContract()) { picked ->
+        picked?.let {
+            viewModel.setPickedLocation(it.address, it.latitude, it.longitude)
+        }
     }
 
     LazyColumn(
@@ -154,25 +161,42 @@ fun NewReceiptTab(
                                 strokeWidth = 2.dp,
                             )
                         } else {
-                            IconButton(
-                                onClick = {
-                                    if (LocationResolver.hasPermission(context)) {
-                                        viewModel.useCurrentLocation()
-                                    } else {
-                                        locationPermission.launch(
-                                            arrayOf(
-                                                Manifest.permission.ACCESS_FINE_LOCATION,
-                                                Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Row {
+                                IconButton(
+                                    onClick = {
+                                        if (LocationResolver.hasPermission(context)) {
+                                            viewModel.useCurrentLocation()
+                                        } else {
+                                            locationPermission.launch(
+                                                arrayOf(
+                                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                                                )
                                             )
+                                        }
+                                    }
+                                ) {
+                                    Icon(
+                                        Icons.Filled.MyLocation,
+                                        contentDescription = "Use current location",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        pickOnMap.launch(
+                                            state.latitude?.let { lat ->
+                                                state.longitude?.let { lng -> lat to lng }
+                                            }
                                         )
                                     }
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Map,
+                                        contentDescription = "Pick on map",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                    )
                                 }
-                            ) {
-                                Icon(
-                                    Icons.Filled.Place,
-                                    contentDescription = "Use current location",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                )
                             }
                         }
                     },
@@ -258,6 +282,7 @@ fun NewReceiptTab(
                 state = state,
                 onDiscountChange = viewModel::setDiscount,
                 onTaxChange = viewModel::setTaxPercent,
+                onCashGivenChange = viewModel::setCashGiven,
             )
         }
 
@@ -638,6 +663,7 @@ private fun TotalsCard(
     state: ReceiptFormState,
     onDiscountChange: (Double) -> Unit,
     onTaxChange: (Double) -> Unit,
+    onCashGivenChange: (Double) -> Unit,
 ) {
     SectionCard {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -662,7 +688,19 @@ private fun TotalsCard(
         TotalRow("Subtotal", state.subtotal, state.currencyCode)
         TotalRow("Discount", -state.discount, state.currencyCode)
         TotalRow("Tax", state.taxAmount, state.currencyCode)
-        TotalRow("Total", state.total, state.currencyCode, emphasised = true)
+        TotalRow("Grand Total", state.total, state.currencyCode, emphasised = true)
+
+        OutlinedTextField(
+            value = if (state.cashGiven == 0.0) "" else state.cashGiven.toString(),
+            onValueChange = { onCashGivenChange(it.toDoubleOrNull() ?: 0.0) },
+            label = { Text("Cash Given") },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        if (state.cashGiven > 0) {
+            TotalRow("Change Amount", state.changeAmount, state.currencyCode, emphasised = true)
+        }
     }
 }
 

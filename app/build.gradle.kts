@@ -1,7 +1,16 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+}
+
+// The Maps SDK reads its key from the manifest, not BuildConfig, so it has to
+// be injected as a placeholder at build time.
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
 }
 
 /**
@@ -30,6 +39,9 @@ android {
 
         // Lets the app tell "Firebase not set up" apart from "sync failed".
         buildConfigField("boolean", "FIREBASE_CONFIGURED", firebaseConfig.exists().toString())
+
+        manifestPlaceholders["mapsApiKey"] =
+            (localProps.getProperty("MAPS_API_KEY") ?: "").trim()
     }
 
     buildTypes {
@@ -91,6 +103,15 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.mlkit.barcode.scanning)
 
-    // GPS for the receipt's location field
+    // GPS + map picker for the receipt's location field
     implementation(libs.play.services.location)
+    implementation(libs.play.services.maps)
+    implementation(libs.maps.compose)
+
+    // QR block printed on every memo
+    implementation(libs.zxing.core)
+
+    // Android Auto — glanceable takings while driving between stalls
+    implementation(libs.androidx.car.app)
+    implementation(libs.androidx.car.app.projected)
 }

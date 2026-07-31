@@ -56,8 +56,65 @@ object LocationResolver {
         val location = currentLocation(context) ?: error("Could not get a location fix")
 
         deviceGeocode(context, location)
-            ?: remoteGeocode(location)
+            ?: remoteGeocode(location.latitude, location.longitude)
             ?: "${location.latitude}, ${location.longitude}"
+    }
+
+    /** Just the coordinates, for centring the map picker. */
+    suspend fun currentLatLng(context: Context): Result<Pair<Double, Double>> = runCatching {
+        check(hasPermission(context)) { "Location permission not granted" }
+        val location = currentLocation(context) ?: error("Could not get a location fix")
+        location.latitude to location.longitude
+    }
+
+    /** Reverse-geocodes an arbitrary point — used as the map camera settles. */
+    suspend fun addressFor(
+        context: Context,
+        latitude: Double,
+        longitude: Double,
+    ): Result<String> = runCatching {
+        val point = Location("map").apply {
+            this.latitude = latitude
+            this.longitude = longitude
+        }
+        deviceGeocode(context, point)
+            ?: remoteGeocode(latitude, longitude)
+            ?: "$latitude, $longitude"
+    }
+
+    /** Forward geocode for the picker's search box. */
+    suspend fun searchPlace(
+        context: Context,
+        query: String,
+    ): Result<Pair<Double, Double>> = withContext(Dispatchers.IO) {
+        runCatching {
+            if (Geocoder.isPresent()) {
+                @Suppress("DEPRECATION")
+                Geocoder(context, Locale.getDefault())
+                    .getFromLocationName(query, 1)
+                    ?.firstOrNull()
+                    ?.let { return@runCatching it.latitude to it.longitude }
+            }
+
+            val key = BuildConfig.MAPS_API_KEY
+            require(key.isNotBlank()) { "No result, and MAPS_API_KEY is not set" }
+
+            val url = "https://maps.googleapis.com/maps/api/geocode/json" +
+                "?address=${java.net.URLEncoder.encode(query, "UTF-8")}&key=$key"
+
+            client.newCall(Request.Builder().url(url).get().build()).execute().use { response ->
+                if (!response.isSuccessful) throw IOException("HTTP ${response.code}")
+                val json = JSONObject(response.body?.string().orEmpty())
+                check(json.optString("status") == "OK") { "No match for \"$query\"" }
+
+                val location = json.getJSONArray("results")
+                    .getJSONObject(0)
+                    .getJSONObject("geometry")
+                    .getJSONObject("location")
+
+                location.getDouble("lat") to location.getDouble("lng")
+            }
+        }
     }
 
     @SuppressLint("MissingPermission") // guarded by the hasPermission check above
@@ -105,14 +162,14 @@ object LocationResolver {
     }
 
     /** Maps Geocoding API fallback for when the device geocoder has no backend. */
-    private suspend fun remoteGeocode(location: Location): String? =
+    private suspend fun remoteGeocode(latitude: Double, longitude: Double): String? =
         withContext(Dispatchers.IO) {
             val key = BuildConfig.MAPS_API_KEY
             if (key.isBlank()) return@withContext null
 
             runCatching {
                 val url = "https://maps.googleapis.com/maps/api/geocode/json" +
-                    "?latlng=${location.latitude},${location.longitude}&key=$key"
+                    "?latlng=$latitude,$longitude&key=$key"
 
                 val request = Request.Builder().url(url).get().build()
 

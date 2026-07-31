@@ -16,6 +16,7 @@ import com.cashmemer.core.model.Receipt
 import com.cashmemer.core.model.ReceiptCategory
 import com.cashmemer.core.model.ReceiptItem
 import com.cashmemer.core.network.GeminiOcrClient
+import com.cashmemer.devices.TerminalManager
 import com.cashmemer.location.LocationResolver
 import com.cashmemer.sync.FirebaseSync
 import com.cashmemer.wear.PhoneWearSyncManager
@@ -43,6 +44,9 @@ data class ReceiptFormState(
     val items: List<ReceiptItem> = emptyList(),
     val discount: Double = 0.0,
     val taxPercent: Double = 0.0,
+    val cashGiven: Double = 0.0,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
     val notesPage1: String = "",
     val notesPage2: String = "",
     val signatureBase64: String? = null,
@@ -56,6 +60,7 @@ data class ReceiptFormState(
     val subtotal: Double get() = items.sumOf { it.lineTotal }
     val taxAmount: Double get() = (subtotal - discount).coerceAtLeast(0.0) * taxPercent / 100.0
     val total: Double get() = (subtotal - discount).coerceAtLeast(0.0) + taxAmount
+    val changeAmount: Double get() = (cashGiven - total).coerceAtLeast(0.0)
     val canGenerate: Boolean get() = placeName.isNotBlank() && items.isNotEmpty()
 }
 
@@ -74,6 +79,11 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     init {
+        // A hardware scanner on the counter feeds straight into the open sale.
+        viewModelScope.launch {
+            TerminalManager.scans.collect { barcode -> addByBarcode(barcode) }
+        }
+
         // Restore the saved default signature and currency, as the original app did.
         viewModelScope.launch {
             settingsStore.settings.collect { settings ->
@@ -102,6 +112,17 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
     fun setCategory(category: ReceiptCategory) = _state.update { it.copy(category = category) }
     fun setPaymentType(type: PaymentType) = _state.update { it.copy(paymentType = type) }
     fun setDiscount(value: Double) = _state.update { it.copy(discount = value) }
+    fun setCashGiven(value: Double) = _state.update { it.copy(cashGiven = value) }
+
+    /** Applies a point chosen on the map, address and coordinates together. */
+    fun setPickedLocation(address: String, latitude: Double, longitude: Double) =
+        _state.update {
+            it.copy(
+                locationAddress = address,
+                latitude = latitude,
+                longitude = longitude,
+            )
+        }
     fun setTaxPercent(value: Double) = _state.update { it.copy(taxPercent = value) }
     fun setNotesPage1(value: String) = _state.update { it.copy(notesPage1 = value) }
     fun setNotesPage2(value: String) = _state.update { it.copy(notesPage2 = value) }
@@ -279,6 +300,9 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                 discount = current.discount,
                 taxPercent = current.taxPercent,
                 total = current.total,
+                cashGiven = current.cashGiven,
+                latitude = current.latitude,
+                longitude = current.longitude,
                 notesPage1 = current.notesPage1,
                 notesPage2 = current.notesPage2,
                 signatureBase64 = current.signatureBase64,
