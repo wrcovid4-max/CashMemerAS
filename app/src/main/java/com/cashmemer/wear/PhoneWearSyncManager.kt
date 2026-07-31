@@ -2,9 +2,12 @@ package com.cashmemer.wear
 
 import android.content.Context
 import com.cashmemer.core.data.CashMemerRepository
+import com.cashmemer.core.model.Receipt
+import com.cashmemer.core.network.WeatherClient
 import com.cashmemer.core.wear.WearRate
 import com.cashmemer.core.wear.WearSummary
 import com.cashmemer.core.wear.WearSync
+import com.cashmemer.core.wear.WearWeather
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import kotlinx.coroutines.Dispatchers
@@ -59,7 +62,25 @@ object PhoneWearSyncManager {
             lastSyncedAt = System.currentTimeMillis(),
             pendingCount = 0,
             rates = rates,
-            weather = null,
+            weather = weatherForLatestStore(receipts),
         )
+    }
+
+    /**
+     * Weather for wherever trading last happened. Falls back through the
+     * receipt history so a sale without GPS does not blank the watch tile.
+     */
+    private suspend fun weatherForLatestStore(receipts: List<Receipt>): WearWeather? {
+        val located = receipts.firstOrNull { it.hasCoordinates } ?: return null
+        val latitude = located.latitude ?: return null
+        val longitude = located.longitude ?: return null
+
+        return WeatherClient
+            .currentWeather(
+                latitude = latitude,
+                longitude = longitude,
+                place = located.placeName.ifBlank { "Store" },
+            )
+            .getOrNull()
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.cashmemer.core.data.AppSettings
 import com.cashmemer.core.ui.theme.CashMemerTheme
+import com.cashmemer.lock.AppLockGate
 import com.cashmemer.ui.CashMemerApp
 
 class MainActivity : AppCompatActivity() {
@@ -21,7 +22,9 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val settings by settingsFlow.collectAsState(initial = AppSettings())
             CashMemerTheme(themeMode = settings.themeMode) {
-                CashMemerApp(settings = settings)
+                AppLockGate(settings = settings) {
+                    CashMemerApp(settings = settings)
+                }
             }
         }
     }

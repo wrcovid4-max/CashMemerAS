@@ -26,6 +26,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -80,7 +86,19 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
     val products: StateFlow<List<Product>> = repository.observeProducts()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** Emitted after Generate so the UI can auto-print / auto-send. */
+    private val _generated = MutableSharedFlow<Receipt>(extraBufferCapacity = 4)
+    val generated: SharedFlow<Receipt> = _generated.asSharedFlow()
+
     init {
+        // Bring back whatever was being typed when the app last went away.
+        viewModelScope.launch {
+            DraftStore.load(application)?.let { draft ->
+                _state.value = draft.copy(draftSavedAt = System.currentTimeMillis())
+            }
+            startDraftAutoSave()
+        }
+
         // A hardware scanner on the counter feeds straight into the open sale.
         viewModelScope.launch {
             TerminalManager.scans.collect { barcode -> addByBarcode(barcode) }
@@ -115,6 +133,34 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    /**
+     * Writes the draft a beat after typing stops. Debounced because saving on
+     * every keystroke would hammer DataStore while someone types a note.
+     */
+    @OptIn(FlowPreview::class)
+    private fun startDraftAutoSave() {
+        viewModelScope.launch {
+            _state
+                .debounce(DRAFT_DEBOUNCE_MILLIS)
+                .distinctUntilChangedBy { it.draftFingerprint() }
+                .collect { current ->
+                    if (current.placeName.isBlank() && current.items.isEmpty()) {
+                        DraftStore.clear(getApplication<Application>())
+                        return@collect
+                    }
+                    DraftStore.save(getApplication<Application>(), current)
+                    _state.update { it.copy(draftSavedAt = System.currentTimeMillis()) }
+                }
+        }
+    }
+
+    /** Everything worth persisting — excludes transient UI flags. */
+    private fun ReceiptFormState.draftFingerprint(): String = listOf(
+        editingId, placeName, locationAddress, customerName, customerPhone,
+        customerEmail, currencyCode, category, paymentType, items, discount,
+        taxPercent, cashGiven, notesPage1, notesPage2, latitude, longitude,
+    ).joinToString("|")
+
     fun setPlaceName(value: String) = _state.update { it.copy(placeName = value) }
     fun setLocationAddress(value: String) = _state.update { it.copy(locationAddress = value) }
     fun setCustomerName(value: String) = _state.update { it.copy(customerName = value) }
@@ -142,6 +188,10 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         _state.update { it.copy(saveSignatureAsDefault = value) }
 
     fun consumeMessage() = _state.update { it.copy(message = null) }
+
+    /** Surfaces what auto-print / auto-send actually did. */
+    fun reportDelivery(description: String) =
+        _state.update { it.copy(message = "Receipt saved — $description") }
 
     /** Fills the location field from the device's current position. */
     fun useCurrentLocation() {
@@ -335,9 +385,14 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
 
             // Push the sale to the cloud immediately when signed in, so a lost
             // phone costs at most the receipt currently being typed.
-            repository.receipt(id)?.let { saved ->
-                FirebaseSync.pushReceipt(getApplication<Application>(), saved)
-            }
+            val saved = repository.receipt(id)
+            saved?.let { FirebaseSync.pushReceipt(getApplication<Application>(), it) }
+
+            // The sale is committed — the draft has served its purpose.
+            DraftStore.clear(getApplication<Application>())
+
+            // Lets the UI run auto-print / auto-send, which need an Activity.
+            saved?.let { _generated.emit(it) }
 
             _state.value = ReceiptFormState(
                 currencyCode = current.currencyCode,
@@ -396,5 +451,8 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
     private companion object {
         /** Long-edge cap for images sent to the OCR parser. */
         const val MAX_SCAN_EDGE = 1600
+
+        /** Quiet period after typing before a draft is written. */
+        const val DRAFT_DEBOUNCE_MILLIS = 1_200L
     }
 }

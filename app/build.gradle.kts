@@ -114,4 +114,7 @@ dependencies {
     // Android Auto — glanceable takings while driving between stalls
     implementation(libs.androidx.car.app)
     implementation(libs.androidx.car.app.projected)
+
+    // App Lock: fingerprint / face, with the device credential as fallback
+    implementation(libs.androidx.biometric)
 }

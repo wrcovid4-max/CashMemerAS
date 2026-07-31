@@ -42,6 +42,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +61,7 @@ import com.cashmemer.core.model.ReceiptItem
 import com.cashmemer.core.util.Format
 import com.cashmemer.location.LocationResolver
 import com.cashmemer.location.PickLocationContract
+import com.cashmemer.print.ReceiptDelivery
 import com.cashmemer.scan.CaptureReceiptContract
 import com.cashmemer.scan.ScanBarcodeContract
 import com.cashmemer.ui.components.SectionCard
@@ -93,6 +95,16 @@ fun NewReceiptTab(
     val imagesOnly = ActivityResultContracts.PickVisualMedia.ImageOnly
 
     val context = LocalContext.current
+
+    // Auto-print / auto-send need an Activity window, so they run here rather
+    // than in the ViewModel.
+    LaunchedEffect(Unit) {
+        viewModel.generated.collect { receipt ->
+            ReceiptDelivery.deliver(context, receipt, settings)?.let { done ->
+                viewModel.reportDelivery(done)
+            }
+        }
+    }
     val locationPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
     ) { granted ->

@@ -156,16 +156,23 @@ listed so the gaps are visible rather than discovered later.
 - Theme: System / Light / Dark
 
 **General**
-- Auto-Send toggle ⛔ *persists but nothing acts on it yet*
+- Auto-Send — on Generate, opens the mail client pre-filled with the receipt
+  PDF when the customer has an email, or an SMS when they only have a phone.
+  Deliberately not silent: sending on the shopkeeper's behalf without them
+  seeing it would be worse than one tap.
 - Save Signature toggle
 
 **Print**
-- Auto-Print toggle ⛔ *persists but nothing acts on it yet*
+- Auto-Print — renders and sends the memo to the print dialog on Generate
 - Show Page 1 / Show Page 2 in the viewer
 - Mass Print Option: Page 1 / Page 2 / Both — governs what actually prints
 
 **Security**
-- App Lock toggle ⛔ *persists; the biometric prompt on launch isn't wired*
+- App Lock — fingerprint / face via BiometricPrompt, with the device PIN or
+  pattern as fallback, and the 4-digit passcode underneath that
+- Re-locks whenever the app goes to the background, not only at cold start
+- If no passcode is set and the device has no biometrics, it says so and lets
+  you through rather than stranding you out of your own till
 - Custom 4-digit passcode with confirmation
 
 **Backup & Recovery**
@@ -226,7 +233,8 @@ Read-only and driving-safe — no text entry, short lists.
 - Today's takings and receipt count
 - Sync status — backed up, or how many are pending
 - Live rates for USD, PKR, AED, SAR, GBP, EUR
-- Store weather card ⛔ *the payload carries a weather slot; nothing fills it*
+- Store weather — temperature and conditions for wherever trading last
+  happened, from Open-Meteo (no API key, no account)
 - Caches the last payload, so the numbers still show when the phone is out of
   range
 - Asks the phone for a refresh whenever the watch app is opened
@@ -249,9 +257,9 @@ Read-only and driving-safe — no text entry, short lists.
 
 | Gap | Detail |
 | --- | --- |
-| Auto-Send | Setting persists, nothing sends on generate |
-| Auto-Print | Setting persists, nothing prints on generate |
-| App Lock | Toggle and passcode persist, no prompt on launch |
-| Watch weather | Payload slot exists, no weather source wired |
+| Dashboard tiles | Only 4 stats + 2 charts. The original had ~15 tiles: total products, avg receipt, highest/lowest, avg product cost, NFC scans, most-visited store, unique stores, top product, storage used, pending sync |
+| Receipt viewer | No in-app viewer. Receipts exist only as a PDF you print or share — the Pan / Text / ✓ / ✗ annotation screen is not built |
+| Scan feedback | No "Added — item ×1" confirmation toast after a barcode scan |
 | Sync conflicts | Push overwrites cloud, pull overwrites phone — no merge |
 | Tests | No unit or instrumentation tests yet |
+| **Never compiled** | **No Android SDK in the environment it was written in. Expect errors on first Gradle sync.** |
