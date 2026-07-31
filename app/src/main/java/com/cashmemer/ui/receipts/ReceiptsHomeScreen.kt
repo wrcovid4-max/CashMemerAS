@@ -7,9 +7,10 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -29,6 +30,12 @@ fun ReceiptsHomeScreen(settings: AppSettings) {
         stringResource(R.string.tab_history),
         stringResource(R.string.tab_dashboard),
     )
+
+    // Tapping Edit in History jumps back to the form with that receipt loaded.
+    val editRequest by ReceiptEditBus.requestedId.collectAsState()
+    LaunchedEffect(editRequest) {
+        if (editRequest != null) selectedTab = 0
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         TabRow(

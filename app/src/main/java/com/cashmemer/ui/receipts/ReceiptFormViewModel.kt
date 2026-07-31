@@ -32,6 +32,8 @@ import kotlinx.coroutines.withContext
 
 /** Everything the new-receipt form holds while it is being filled in. */
 data class ReceiptFormState(
+    /** Non-zero when editing an existing receipt rather than creating one. */
+    val editingId: Long = 0,
     val placeName: String = "",
     val locationAddress: String = "",
     val selectedMember: Member? = null,
@@ -82,6 +84,16 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         // A hardware scanner on the counter feeds straight into the open sale.
         viewModelScope.launch {
             TerminalManager.scans.collect { barcode -> addByBarcode(barcode) }
+        }
+
+        // History asking us to open a receipt for editing.
+        viewModelScope.launch {
+            ReceiptEditBus.requestedId.collect { id ->
+                if (id != null) {
+                    loadForEdit(id)
+                    ReceiptEditBus.consume()
+                }
+            }
         }
 
         // Restore the saved default signature and currency, as the original app did.
@@ -287,6 +299,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
 
         viewModelScope.launch {
             val receipt = Receipt(
+                id = current.editingId,
                 placeName = current.placeName,
                 locationAddress = current.locationAddress,
                 memberId = current.selectedMember?.id,
@@ -337,6 +350,42 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                 message = "Receipt #$id generated",
             )
             onGenerated(id)
+        }
+    }
+
+    /**
+     * Loads an existing receipt back into the form. [editingId] is carried so
+     * Generate updates the original rather than creating a second copy.
+     */
+    fun loadForEdit(id: Long) {
+        viewModelScope.launch {
+            val receipt = repository.receipt(id) ?: run {
+                _state.update { it.copy(message = "Receipt #$id no longer exists") }
+                return@launch
+            }
+
+            _state.value = ReceiptFormState(
+                editingId = receipt.id,
+                placeName = receipt.placeName,
+                locationAddress = receipt.locationAddress,
+                customerName = receipt.customerName,
+                customerPhone = receipt.customerPhone,
+                customerEmail = receipt.customerEmail,
+                currencyCode = receipt.currencyCode,
+                category = ReceiptCategory.from(receipt.category),
+                paymentType = PaymentType.from(receipt.paymentType),
+                items = ReceiptItemCodec.decode(receipt.itemsJson),
+                discount = receipt.discount,
+                taxPercent = receipt.taxPercent,
+                cashGiven = receipt.cashGiven,
+                latitude = receipt.latitude,
+                longitude = receipt.longitude,
+                notesPage1 = receipt.notesPage1,
+                notesPage2 = receipt.notesPage2,
+                signatureBase64 = receipt.signatureBase64,
+                sourceImageUri = receipt.sourceImageUri,
+                message = "Editing receipt #${receipt.id}",
+            )
         }
     }
 

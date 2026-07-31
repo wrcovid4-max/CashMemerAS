@@ -55,14 +55,33 @@ listed so the gaps are visible rather than discovered later.
 
 ## History tab
 
-- Full list, newest first, pinned receipts held at the top
+**Weekly AI Summary card** — always the last 7 days, regardless of filters:
+- Total Spend, Txns, Avg Value, Top Customer, Total Tax, Total Discount
+- The six figures are computed locally and always shown — they never depend on
+  the network or an API key
+- **Generate insight** adds one sentence of interpretation from Gemini on top;
+  if the key is missing or the call fails, the numbers still stand
+- Collapsible
+
+**Filtering**
 - Search across title, location and customer
+- Start Date / End Date range pickers, with a Clear button. The end date covers
+  the whole day, not just its midnight instant
+
+**Bulk actions**
 - Select individual receipts, or Select All
-- Bulk delete
-- Bulk print — one job for every selected receipt
-- Bulk share — PDF through the normal share sheet (WhatsApp, email, anything)
-- Per-row print button
-- Per-row pin / unpin
+- Bulk print (one job), bulk share as PDF, bulk delete
+
+**Per-row**
+- Tap to expand: every line item, Notes (Page 1), Saved Location,
+  Payment method and Change given
+- Six actions: **Share · PDF · Print · Dupe · Edit · Delete**
+- Dupe copies the sale as a fresh receipt — the "same order again" case
+- Edit loads it back into the Receipts form and updates the original rather
+  than creating a second copy
+- Pin / unpin, pinned rows held at the top
+
+**Backup**
 - Backup JSON — write the whole database to a file you name
 - Restore JSON — read one back
 
