@@ -10,6 +10,7 @@ import com.cashmemer.core.model.Receipt
 import com.cashmemer.core.network.GeminiInsights
 import com.cashmemer.core.util.Format
 import com.cashmemer.print.ReceiptOutput
+import com.cashmemer.print.ReceiptPages
 import com.cashmemer.print.ReceiptPdfRenderer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -181,8 +182,18 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch { repository.setPinned(receipt.id, !receipt.pinned) }
     }
 
-    /** Renders to PDF and hands the file back for printing or sharing. */
-    fun renderPdf(ids: Collection<Long>, onReady: (File) -> Unit) {
+    /**
+     * Renders to PDF and hands the file back.
+     *
+     * A shared or exported memo is always both pages — page 2 is the shop's
+     * record and should travel with it. Mass Print Option only narrows what
+     * goes to paper, which is what that setting is actually for.
+     */
+    fun renderPdf(
+        ids: Collection<Long>,
+        forPrinting: Boolean = false,
+        onReady: (File) -> Unit,
+    ) {
         if (ids.isEmpty()) {
             _error.value = "Select at least one receipt"
             return
@@ -191,7 +202,11 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val app = getApplication<Application>()
             val chosen = receipts.value.filter { it.id in ids }
-            val pages = ReceiptOutput.pagesFor(settingsStore.settings.first().massPrint)
+            val pages = if (forPrinting) {
+                ReceiptOutput.pagesFor(settingsStore.settings.first().massPrint)
+            } else {
+                ReceiptPages.BOTH
+            }
 
             ReceiptPdfRenderer
                 .render(app, chosen, pages, ReceiptOutput.outputFile(app, chosen))

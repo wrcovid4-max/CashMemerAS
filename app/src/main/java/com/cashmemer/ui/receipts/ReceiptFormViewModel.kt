@@ -32,9 +32,13 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+/** Printed on page 1 of every receipt unless the shopkeeper edits it. */
+const val DEFAULT_NOTE_1 = "Thank You for shopping !!!"
 
 /** Everything the new-receipt form holds while it is being filled in. */
 data class ReceiptFormState(
@@ -55,7 +59,9 @@ data class ReceiptFormState(
     val cashGiven: Double = 0.0,
     val latitude: Double? = null,
     val longitude: Double? = null,
-    val notesPage1: String = "",
+    /** Pre-filled with the standard thank-you; editable per receipt. */
+    val notesPage1: String = DEFAULT_NOTE_1,
+    /** Stays empty on purpose — page 2 is the shopkeeper's own note. */
     val notesPage2: String = "",
     val signatureBase64: String? = null,
     val sourceImageUri: String? = null,
@@ -382,8 +388,14 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         }
 
         viewModelScope.launch {
+            // Stamp the issuing account onto the receipt rather than reading it
+            // at print time, so a receipt keeps whoever actually rang it up.
+            val account = settingsStore.settings.first()
+
             val receipt = Receipt(
                 id = current.editingId,
+                issuerName = account.accountName.orEmpty(),
+                issuerEmail = account.accountEmail.orEmpty(),
                 placeName = current.placeName,
                 locationAddress = current.locationAddress,
                 memberId = current.selectedMember?.id,

@@ -13,7 +13,7 @@ import com.cashmemer.core.model.Receipt
 
 @Database(
     entities = [Receipt::class, Product::class, Member::class, CurrencyRate::class],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class CashMemerDatabase : RoomDatabase() {
@@ -35,6 +35,18 @@ abstract class CashMemerDatabase : RoomDatabase() {
             }
         }
 
+        /** v2 -> v3: the issuing account, printed on page 2. */
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE receipts ADD COLUMN issuerName TEXT NOT NULL DEFAULT ''"
+                )
+                db.execSQL(
+                    "ALTER TABLE receipts ADD COLUMN issuerEmail TEXT NOT NULL DEFAULT ''"
+                )
+            }
+        }
+
         @Volatile
         private var instance: CashMemerDatabase? = null
 
@@ -47,7 +59,7 @@ abstract class CashMemerDatabase : RoomDatabase() {
                 )
                     // Real migrations, not destructive fallback — a shop's
                     // history must survive an app update.
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .fallbackToDestructiveMigrationOnDowngrade()
                     .build()
                     .also { instance = it }

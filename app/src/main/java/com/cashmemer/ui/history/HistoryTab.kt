@@ -183,7 +183,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                     Text("Select All", modifier = Modifier.weight(1f))
                     IconButton(
                         onClick = {
-                            viewModel.renderPdf(selected) { file ->
+                            viewModel.renderPdf(selected, forPrinting = true) { file ->
                                 ReceiptOutput.print(context, file, "Cash Memer receipts")
                             }
                         }
@@ -242,7 +242,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                     }
                 },
                 onPrint = {
-                    viewModel.renderPdf(listOf(receipt.id)) { file ->
+                    viewModel.renderPdf(listOf(receipt.id), forPrinting = true) { file ->
                         ReceiptOutput.print(context, file, "Receipt ${receipt.id}")
                     }
                 },

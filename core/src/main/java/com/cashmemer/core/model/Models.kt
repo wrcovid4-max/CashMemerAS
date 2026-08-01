@@ -65,6 +65,9 @@ data class Receipt(
     /** Coordinates behind [locationAddress], printed on the memo. */
     val latitude: Double? = null,
     val longitude: Double? = null,
+    /** Who issued the sale — taken from the Google account at generation time. */
+    val issuerName: String = "",
+    val issuerEmail: String = "",
     /** PNG bytes of the captured signature, base64 encoded. */
     val signatureBase64: String? = null,
     val itemsJson: String = "[]",

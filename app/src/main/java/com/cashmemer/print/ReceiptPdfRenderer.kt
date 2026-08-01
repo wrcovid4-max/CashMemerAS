@@ -11,6 +11,7 @@ import android.util.Base64
 import com.cashmemer.core.data.ReceiptItemCodec
 import com.cashmemer.core.model.PaymentType
 import com.cashmemer.core.model.Receipt
+import com.cashmemer.core.model.ReceiptCategory
 import com.cashmemer.core.util.Format
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -20,8 +21,16 @@ import java.io.File
 enum class ReceiptPages { PAGE_1, PAGE_2, BOTH }
 
 /**
- * Renders receipts to an A4 PDF using the platform PdfDocument — no external
- * PDF library, so nothing extra to keep up to date.
+ * Renders receipts to A4 PDF using the platform PdfDocument — no external
+ * library, so nothing extra to keep up to date.
+ *
+ * Every receipt is two pages by design:
+ *
+ *  - **Page 1 is the customer's copy.** Their name, what they bought, what
+ *    they paid. It deliberately omits their phone, address and the issuing
+ *    account, none of which belong on a slip handed across a counter.
+ *  - **Page 2 is the shop's record.** Everything, including full customer
+ *    contact details, both note fields and the issuing account.
  */
 object ReceiptPdfRenderer {
 
@@ -35,13 +44,13 @@ object ReceiptPdfRenderer {
 
     private val titlePaint = Paint().apply {
         color = brandGreen
-        textSize = 24f
+        textSize = 22f
         isAntiAlias = true
         isFakeBoldText = true
     }
     private val headingPaint = Paint().apply {
         color = Color.BLACK
-        textSize = 14f
+        textSize = 13f
         isAntiAlias = true
         isFakeBoldText = true
     }
@@ -52,7 +61,7 @@ object ReceiptPdfRenderer {
     }
     private val totalPaint = Paint().apply {
         color = brandGreen
-        textSize = 16f
+        textSize = 15f
         isAntiAlias = true
         isFakeBoldText = true
     }
@@ -60,11 +69,14 @@ object ReceiptPdfRenderer {
         color = Color.LTGRAY
         strokeWidth = 0.8f
     }
+    private val heavyRulePaint = Paint().apply {
+        color = Color.DKGRAY
+        strokeWidth = 1.4f
+    }
 
-    /**
-     * Renders [receipts] into one PDF at [outputFile]. Each receipt contributes
-     * one or two pages depending on [pages].
-     */
+    private const val QTY_COL = 330f
+    private const val PRICE_COL = 430f
+
     suspend fun render(
         context: Context,
         receipts: List<Receipt>,
@@ -76,16 +88,17 @@ object ReceiptPdfRenderer {
             var pageNumber = 1
 
             receipts.forEach { receipt ->
+                // Page 2 always renders — it is the shop's record, so it must
+                // exist even when both note fields happen to be empty.
                 if (pages != ReceiptPages.PAGE_2) {
-                    document.newPage(pageNumber++) { canvas -> drawPageOne(canvas, receipt) }
+                    document.newPage(pageNumber++) { drawPageOne(it, receipt) }
                 }
-                if (pages != ReceiptPages.PAGE_1 && receipt.hasPageTwoContent()) {
-                    document.newPage(pageNumber++) { canvas -> drawPageTwo(canvas, receipt) }
+                if (pages != ReceiptPages.PAGE_1) {
+                    document.newPage(pageNumber++) { drawPageTwo(it, receipt) }
                 }
             }
 
-            // A caller asking for page 2 only on a receipt with no notes.
-            check(pageNumber > 1) { "Nothing to print for the selected pages" }
+            check(pageNumber > 1) { "Nothing to print" }
 
             outputFile.parentFile?.mkdirs()
             outputFile.outputStream().use { document.writeTo(it) }
@@ -94,9 +107,6 @@ object ReceiptPdfRenderer {
         }
     }
 
-    private fun Receipt.hasPageTwoContent(): Boolean =
-        notesPage1.isNotBlank() || notesPage2.isNotBlank() || signatureBase64 != null
-
     private inline fun PdfDocument.newPage(number: Int, draw: (Canvas) -> Unit) {
         val info = PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, number).create()
         val page = startPage(info)
@@ -104,197 +114,249 @@ object ReceiptPdfRenderer {
         finishPage(page)
     }
 
+    // ---- Page 1: the customer's copy ---------------------------------------
+
     private fun drawPageOne(canvas: Canvas, receipt: Receipt) {
-        var y = MARGIN + 18f
-
-        canvas.drawText("CASH MEMO", MARGIN, y, titlePaint)
-        y += 22f
-        canvas.drawText(
-            receipt.placeName.ifBlank { "Cash Memer" },
-            MARGIN,
-            y,
-            headingPaint,
-        )
-
-        if (receipt.locationAddress.isNotBlank()) {
-            y += 15f
-            canvas.drawText(receipt.locationAddress, MARGIN, y, bodyPaint)
-        }
-
-        // Right-aligned meta block: receipt number and timestamp.
         val right = PAGE_WIDTH - MARGIN
-        canvas.drawTextRight("Receipt #${receipt.id}", right, MARGIN + 18f, bodyPaint)
-        canvas.drawTextRight(
-            Format.timestamp(receipt.createdAt),
-            right,
-            MARGIN + 33f,
-            bodyPaint,
-        )
+        var y = canvas.drawHeader(receipt, "CASH MEMO")
 
-        y += 22f
-        canvas.drawLine(MARGIN, y, right, y, rulePaint)
-        y += 20f
-
+        // Customer name only. Phone, address and the issuing account are the
+        // shop's record, not the customer's slip.
         if (receipt.customerName.isNotBlank()) {
-            canvas.drawText("Billed to", MARGIN, y, headingPaint)
-            y += 15f
-            canvas.drawText(receipt.customerName, MARGIN, y, bodyPaint)
-            listOf(receipt.customerPhone, receipt.customerEmail)
-                .filter { it.isNotBlank() }
-                .forEach { line ->
-                    y += 13f
-                    canvas.drawText(line, MARGIN, y, bodyPaint)
-                }
+            canvas.drawText("Customer: ${receipt.customerName}", MARGIN, y, headingPaint)
             y += 20f
         }
 
-        // Items table
-        canvas.drawText("Item", MARGIN, y, headingPaint)
-        canvas.drawTextRight("Qty", MARGIN + 330f, y, headingPaint)
-        canvas.drawTextRight("Price", MARGIN + 420f, y, headingPaint)
-        canvas.drawTextRight("Amount", right, y, headingPaint)
-        y += 8f
-        canvas.drawLine(MARGIN, y, right, y, rulePaint)
-        y += 16f
+        y = canvas.drawItems(receipt, y)
+        y = canvas.drawTotals(receipt, y, right)
 
-        ReceiptItemCodec.decode(receipt.itemsJson).forEach { item ->
-            canvas.drawText(item.productName.take(48), MARGIN, y, bodyPaint)
-            canvas.drawTextRight(Format.amount(item.qty), MARGIN + 330f, y, bodyPaint)
-            canvas.drawTextRight(Format.amount(item.unitPrice), MARGIN + 420f, y, bodyPaint)
-            canvas.drawTextRight(Format.amount(item.lineTotal), right, y, bodyPaint)
+        if (receipt.notesPage1.isNotBlank()) {
             y += 16f
+            canvas.drawText("Notes:", MARGIN, y, headingPaint)
+            y += 15f
+            y = canvas.drawWrapped(receipt.notesPage1, MARGIN, y, right - MARGIN, bodyPaint)
+        }
 
-            // Spill onto nothing rather than off the page — long receipts get truncated.
-            if (y > PAGE_HEIGHT - 200f) {
-                canvas.drawText("… more items", MARGIN, y, bodyPaint)
-                y += 16f
-                return@forEach
+        canvas.drawSignature(receipt, PAGE_HEIGHT - MARGIN - 120f)
+        canvas.drawQrBlock(receipt)
+        canvas.drawText("Generated by Cash Memer", MARGIN, PAGE_HEIGHT - MARGIN, bodyPaint)
+    }
+
+    // ---- Page 2: the shop's record -----------------------------------------
+
+    private fun drawPageTwo(canvas: Canvas, receipt: Receipt) {
+        val right = PAGE_WIDTH - MARGIN
+        var y = canvas.drawHeader(receipt, "CASH MEMO (Page 2)")
+
+        canvas.drawText("Customer Details:", MARGIN, y, headingPaint)
+        y += 15f
+        listOf(
+            "Name" to receipt.customerName,
+            "Phone" to receipt.customerPhone,
+            "Email" to receipt.customerEmail,
+        ).forEach { (label, value) ->
+            if (value.isNotBlank()) {
+                canvas.drawText("  $label: $value", MARGIN, y, bodyPaint)
+                y += 14f
             }
         }
-
-        y += 6f
-        canvas.drawLine(MARGIN + 300f, y, right, y, rulePaint)
-        y += 18f
-
-        canvas.drawTotal("Subtotal", receipt.subtotal, receipt.currencyCode, right, y)
-        y += 16f
-        if (receipt.discount > 0) {
-            canvas.drawTotal("Discount", -receipt.discount, receipt.currencyCode, right, y)
-            y += 16f
+        if (receipt.locationAddress.isNotBlank()) {
+            canvas.drawText("  Address: ${receipt.locationAddress}", MARGIN, y, bodyPaint)
+            y += 14f
         }
-        if (receipt.taxPercent > 0) {
-            val tax = (receipt.subtotal - receipt.discount) * receipt.taxPercent / 100.0
-            canvas.drawTotal(
-                "Tax (${Format.amount(receipt.taxPercent)}%)",
-                tax,
-                receipt.currencyCode,
-                right,
-                y,
-            )
-            y += 16f
-        }
-
-        y += 6f
-        canvas.drawTextRight("GRAND TOTAL", MARGIN + 420f, y, totalPaint)
-        canvas.drawTextRight(
-            Format.amountWithCurrency(receipt.total, receipt.currencyCode),
-            right,
-            y,
-            totalPaint,
-        )
-
-        // Cash tendered and change, so the customer can check the float.
-        if (receipt.cashGiven > 0) {
-            y += 20f
-            canvas.drawTotal("Cash Given", receipt.cashGiven, receipt.currencyCode, right, y)
-            y += 16f
-            canvas.drawTotal(
-                "Change Amount",
-                receipt.changeAmount,
-                receipt.currencyCode,
-                right,
-                y,
-            )
-        }
-
-        y += 26f
-        canvas.drawText(
-            "Paid by ${PaymentType.from(receipt.paymentType).label}",
-            MARGIN,
-            y,
-            bodyPaint,
-        )
-
         if (receipt.hasCoordinates) {
-            y += 15f
             canvas.drawText(
-                "GPS: ${receipt.latitude}, ${receipt.longitude}",
+                "  GPS: ${receipt.latitude}, ${receipt.longitude}",
                 MARGIN,
                 y,
                 bodyPaint,
             )
+            y += 14f
         }
+        y += 8f
 
-        canvas.drawQrBlock(receipt)
+        y = canvas.drawItems(receipt, y)
+        y = canvas.drawTotals(receipt, y, right)
 
-        canvas.drawText(
-            "Generated by Cash Memer",
-            MARGIN,
-            PAGE_HEIGHT - MARGIN,
-            bodyPaint,
-        )
-    }
+        // Both note fields, page 2 only — note 2 is the shopkeeper's own.
+        listOf("Notes (Page 1)" to receipt.notesPage1, "Notes (Page 2)" to receipt.notesPage2)
+            .filter { it.second.isNotBlank() }
+            .forEach { (label, text) ->
+                y += 16f
+                canvas.drawText("$label:", MARGIN, y, headingPaint)
+                y += 15f
+                y = canvas.drawWrapped(text, MARGIN, y, right - MARGIN, bodyPaint)
+            }
 
-    /** QR sits bottom-right on both pages, clear of the footer line. */
-    private fun Canvas.drawQrBlock(receipt: Receipt) {
-        val qr = QrRenderer.encode(QrRenderer.payloadFor(receipt), QR_SIZE) ?: return
-        drawBitmap(
-            qr,
-            PAGE_WIDTH - MARGIN - QR_SIZE,
-            PAGE_HEIGHT - MARGIN - QR_SIZE - 12f,
-            null,
-        )
-        qr.recycle()
-    }
-
-    private fun drawPageTwo(canvas: Canvas, receipt: Receipt) {
-        var y = MARGIN + 18f
-        val right = PAGE_WIDTH - MARGIN
-
-        canvas.drawText("CASH MEMO (Page 2)", MARGIN, y, titlePaint)
-        y += 26f
-        canvas.drawText("NOTES", MARGIN, y, headingPaint)
-        y += 26f
-
-        listOf(receipt.notesPage1, receipt.notesPage2)
-            .filter { it.isNotBlank() }
-            .forEach { note ->
-                y = canvas.drawWrapped(note, MARGIN, y, right - MARGIN, bodyPaint)
+        if (receipt.issuerName.isNotBlank() || receipt.issuerEmail.isNotBlank()) {
+            y += 18f
+            canvas.drawLine(MARGIN, y, right, y, rulePaint)
+            y += 16f
+            canvas.drawText("Issuer Account:", MARGIN, y, headingPaint)
+            y += 15f
+            if (receipt.issuerName.isNotBlank()) {
+                canvas.drawText("  Name: ${receipt.issuerName}", MARGIN, y, bodyPaint)
                 y += 14f
             }
-
-        receipt.signatureBase64?.let { encoded ->
-            y += 20f
-            canvas.drawText("Authorised signature", MARGIN, y, headingPaint)
-            y += 10f
-            decodeSignature(encoded)?.let { bitmap ->
-                val scaled = Bitmap.createScaledBitmap(bitmap, 220, 90, true)
-                canvas.drawBitmap(scaled, MARGIN, y, null)
-                y += 100f
-                canvas.drawLine(MARGIN, y, MARGIN + 220f, y, rulePaint)
-                scaled.recycle()
-                bitmap.recycle()
+            if (receipt.issuerEmail.isNotBlank()) {
+                canvas.drawText("  Email: ${receipt.issuerEmail}", MARGIN, y, bodyPaint)
             }
         }
 
+        canvas.drawSignature(receipt, PAGE_HEIGHT - MARGIN - 120f)
         canvas.drawQrBlock(receipt)
-
         canvas.drawText(
             "Receipt #${receipt.id} · ${Format.timestamp(receipt.createdAt)}",
             MARGIN,
             PAGE_HEIGHT - MARGIN,
             bodyPaint,
         )
+    }
+
+    // ---- Shared blocks ------------------------------------------------------
+
+    /** Title, store, and the meta grid. Returns the next free baseline. */
+    private fun Canvas.drawHeader(receipt: Receipt, title: String): Float {
+        val right = PAGE_WIDTH - MARGIN
+        var y = MARGIN + 18f
+
+        drawText(title, MARGIN, y, titlePaint)
+        y += 20f
+        drawText(receipt.placeName.ifBlank { "Cash Memer" }, MARGIN, y, headingPaint)
+
+        y += 12f
+        drawLine(MARGIN, y, right, y, heavyRulePaint)
+        y += 18f
+
+        drawText("Receipt No: #${receipt.id}", MARGIN, y, bodyPaint)
+        drawTextRight("Date: ${Format.date(receipt.createdAt)}", right, y, bodyPaint)
+        y += 15f
+
+        drawText("Place/Store: ${receipt.placeName}", MARGIN, y, bodyPaint)
+        drawTextRight("Time: ${Format.time(receipt.createdAt)}", right, y, bodyPaint)
+        y += 15f
+
+        drawText(
+            "Category: ${ReceiptCategory.from(receipt.category).label}",
+            MARGIN,
+            y,
+            bodyPaint,
+        )
+        drawTextRight(
+            "Method: ${PaymentType.from(receipt.paymentType).label}",
+            right,
+            y,
+            bodyPaint,
+        )
+        y += 15f
+
+        drawText("Currency: ${receipt.currencyCode}", MARGIN, y, bodyPaint)
+        y += 20f
+
+        return y
+    }
+
+    private fun Canvas.drawItems(receipt: Receipt, startY: Float): Float {
+        val right = PAGE_WIDTH - MARGIN
+        var y = startY
+
+        drawLine(MARGIN, y - 12f, right, y - 12f, heavyRulePaint)
+        drawText("Item", MARGIN, y, headingPaint)
+        drawTextRight("Qty", QTY_COL, y, headingPaint)
+        drawTextRight("Price", PRICE_COL, y, headingPaint)
+        drawTextRight("Total", right, y, headingPaint)
+        y += 8f
+        drawLine(MARGIN, y, right, y, rulePaint)
+        y += 16f
+
+        val items = ReceiptItemCodec.decode(receipt.itemsJson)
+        items.forEach { item ->
+            if (y > PAGE_HEIGHT - 300f) {
+                drawText("… more items", MARGIN, y, bodyPaint)
+                y += 15f
+                return@forEach
+            }
+            drawText(item.productName.take(46), MARGIN, y, bodyPaint)
+            drawTextRight(Format.amount(item.qty), QTY_COL, y, bodyPaint)
+            drawTextRight(Format.amount(item.unitPrice), PRICE_COL, y, bodyPaint)
+            drawTextRight(
+                Format.amountWithCurrency(item.lineTotal, receipt.currencyCode),
+                right,
+                y,
+                bodyPaint,
+            )
+            y += 15f
+        }
+
+        y += 4f
+        drawLine(MARGIN, y, right, y, rulePaint)
+        return y + 18f
+    }
+
+    private fun Canvas.drawTotals(receipt: Receipt, startY: Float, right: Float): Float {
+        var y = startY
+
+        drawTotal("Subtotal", receipt.subtotal, receipt.currencyCode, right, y)
+        y += 15f
+
+        if (receipt.discount > 0) {
+            drawTotal("Discount", -receipt.discount, receipt.currencyCode, right, y)
+            y += 15f
+        }
+        if (receipt.taxPercent > 0) {
+            val tax = (receipt.subtotal - receipt.discount).coerceAtLeast(0.0) *
+                receipt.taxPercent / 100.0
+            drawTotal(
+                "Tax (${Format.amount(receipt.taxPercent)}%)",
+                tax,
+                receipt.currencyCode,
+                right,
+                y,
+            )
+            y += 15f
+        }
+
+        y += 4f
+        drawLine(MARGIN + 260f, y, right, y, heavyRulePaint)
+        y += 18f
+        drawTextRight("GRAND TOTAL:", PRICE_COL, y, totalPaint)
+        drawTextRight(
+            Format.amountWithCurrency(receipt.total, receipt.currencyCode),
+            right,
+            y,
+            totalPaint,
+        )
+        y += 20f
+
+        if (receipt.cashGiven > 0) {
+            drawTotal("Cash Given", receipt.cashGiven, receipt.currencyCode, right, y)
+            y += 15f
+            drawTotal("Change Amount", receipt.changeAmount, receipt.currencyCode, right, y)
+            y += 15f
+        }
+
+        return y
+    }
+
+    private fun Canvas.drawSignature(receipt: Receipt, y: Float) {
+        val encoded = receipt.signatureBase64 ?: return
+        val bitmap = decodeSignature(encoded) ?: return
+
+        val scaled = Bitmap.createScaledBitmap(bitmap, 180, 70, true)
+        val x = PAGE_WIDTH - MARGIN - 180f
+        drawBitmap(scaled, x, y, null)
+        drawLine(x, y + 74f, PAGE_WIDTH - MARGIN, y + 74f, rulePaint)
+        drawText("Authorized Signature", x, y + 88f, bodyPaint)
+
+        scaled.recycle()
+        bitmap.recycle()
+    }
+
+    /** QR sits bottom-left, clear of the signature block on the right. */
+    private fun Canvas.drawQrBlock(receipt: Receipt) {
+        val qr = QrRenderer.encode(QrRenderer.payloadFor(receipt), QR_SIZE) ?: return
+        drawBitmap(qr, MARGIN, PAGE_HEIGHT - MARGIN - QR_SIZE - 18f, null)
+        qr.recycle()
     }
 
     private fun decodeSignature(base64: String): Bitmap? = runCatching {
@@ -313,7 +375,7 @@ object ReceiptPdfRenderer {
         right: Float,
         y: Float,
     ) {
-        drawTextRight(label, MARGIN + 420f, y, bodyPaint)
+        drawTextRight("$label:", PRICE_COL, y, bodyPaint)
         drawTextRight(Format.amountWithCurrency(amount, currency), right, y, bodyPaint)
     }
 
@@ -332,7 +394,7 @@ object ReceiptPdfRenderer {
             val candidate = if (line.isEmpty()) word else "$line $word"
             if (paint.measureText(candidate) > maxWidth) {
                 drawText(line.toString(), x, y, paint)
-                y += 15f
+                y += 14f
                 line = StringBuilder(word)
             } else {
                 line = StringBuilder(candidate)
@@ -340,7 +402,7 @@ object ReceiptPdfRenderer {
         }
         if (line.isNotEmpty()) {
             drawText(line.toString(), x, y, paint)
-            y += 15f
+            y += 14f
         }
         return y
     }
