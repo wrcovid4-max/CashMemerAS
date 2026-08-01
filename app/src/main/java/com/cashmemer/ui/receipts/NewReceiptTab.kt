@@ -1,6 +1,7 @@
 package com.cashmemer.ui.receipts
 
 import android.Manifest
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -41,6 +43,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -104,6 +107,23 @@ fun NewReceiptTab(
                 viewModel.reportDelivery(done)
             }
         }
+    }
+
+    // Scan confirmations must not be scrollable away — a toast always shows.
+    LaunchedEffect(Unit) {
+        viewModel.toasts.collect { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    state.unknownBarcode?.let { barcode ->
+        UnknownBarcodeDialog(
+            barcode = barcode,
+            onDismiss = viewModel::dismissUnknownBarcode,
+            onSave = { name, price ->
+                viewModel.createProductForBarcode(barcode, name, price)
+            },
+        )
     }
     val locationPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
@@ -359,6 +379,53 @@ fun NewReceiptTab(
             }
         }
     }
+}
+
+/** Offers to save a scanned code that matched nothing in inventory. */
+@Composable
+private fun UnknownBarcodeDialog(
+    barcode: String,
+    onDismiss: () -> Unit,
+    onSave: (String, Double) -> Unit,
+) {
+    var name by remember(barcode) { mutableStateOf("") }
+    var price by remember(barcode) { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Product not found") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    "Barcode $barcode isn't in your inventory yet. " +
+                        "Add it now and it will be recognised next time.",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Product name") },
+                    singleLine = true,
+                )
+                OutlinedTextField(
+                    value = price,
+                    onValueChange = { price = it },
+                    label = { Text("Price") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onSave(name, price.toDoubleOrNull() ?: 0.0) },
+                enabled = name.isNotBlank(),
+            ) { Text("Save & add") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        },
+    )
 }
 
 @Composable

@@ -62,6 +62,8 @@ data class ReceiptFormState(
     val saveSignatureAsDefault: Boolean = true,
     val scanning: Boolean = false,
     val locatingAddress: Boolean = false,
+    /** Set when a scanned code matched nothing, so the UI can offer to add it. */
+    val unknownBarcode: String? = null,
     val message: String? = null,
     val draftSavedAt: Long? = null,
 ) {
@@ -89,6 +91,10 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
     /** Emitted after Generate so the UI can auto-print / auto-send. */
     private val _generated = MutableSharedFlow<Receipt>(extraBufferCapacity = 4)
     val generated: SharedFlow<Receipt> = _generated.asSharedFlow()
+
+    /** Transient confirmations. Shown as toasts so they cannot scroll away. */
+    private val _toasts = MutableSharedFlow<String>(extraBufferCapacity = 8)
+    val toasts: SharedFlow<String> = _toasts.asSharedFlow()
 
     init {
         // Bring back whatever was being typed when the app last went away.
@@ -239,21 +245,49 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
 
     fun setSignature(base64: String?) = _state.update { it.copy(signatureBase64 = base64) }
 
-    /** Barcode scan: look the code up in inventory and add it as a line. */
+    /**
+     * Barcode scan: look the code up in inventory and add it as a line.
+     *
+     * A miss used to leave a note at the bottom of a long form that nobody
+     * ever scrolled to, so scanning an unknown code looked like nothing had
+     * happened. Hits now toast, and misses raise a prompt to add the product
+     * on the spot — which is the whole point of scanning at a counter.
+     */
     fun addByBarcode(barcode: String) {
         viewModelScope.launch {
             val product = repository.productByBarcode(barcode)
+
             if (product == null) {
-                _state.update { it.copy(message = "No product for barcode $barcode") }
-            } else {
-                addItem(
-                    ReceiptItem(
-                        productName = product.name,
-                        qty = 1.0,
-                        unitPrice = product.price,
-                    )
-                )
+                _state.update { it.copy(unknownBarcode = barcode) }
+                _toasts.emit("Barcode $barcode is not in your inventory")
+                return@launch
             }
+
+            addItem(
+                ReceiptItem(
+                    productName = product.name,
+                    qty = 1.0,
+                    unitPrice = product.price,
+                )
+            )
+            _toasts.emit("Added — ${product.name} ×1")
+        }
+    }
+
+    fun dismissUnknownBarcode() = _state.update { it.copy(unknownBarcode = null) }
+
+    /**
+     * Saves a scanned-but-unknown code as a real product, then puts it on the
+     * receipt — so the next scan of the same item just works.
+     */
+    fun createProductForBarcode(barcode: String, name: String, price: Double) {
+        viewModelScope.launch {
+            repository.saveProduct(
+                Product(name = name.trim(), barcode = barcode, price = price)
+            )
+            addItem(ReceiptItem(productName = name.trim(), qty = 1.0, unitPrice = price))
+            _state.update { it.copy(unknownBarcode = null) }
+            _toasts.emit("Saved ${name.trim()} and added it")
         }
     }
 

@@ -236,6 +236,8 @@ private fun ScanScreen(
     }
 }
 
+// ImageProxy.getImage() is opt-in; the analyser cannot reach the frame without it.
+@androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
 private fun buildBarcodeAnalysis(
     executor: java.util.concurrent.Executor,
     onBarcode: (String) -> Unit,

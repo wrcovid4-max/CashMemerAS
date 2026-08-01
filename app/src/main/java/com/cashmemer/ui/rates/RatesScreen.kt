@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cashmemer.core.BuildConfig
 import com.cashmemer.core.data.CashMemerRepository
 import com.cashmemer.core.model.CurrencyRate
 import com.cashmemer.core.util.Format
@@ -61,6 +62,9 @@ class RatesViewModel(application: Application) : AndroidViewModel(application) {
 
     val rates: StateFlow<List<CurrencyRate>> = repository.observeRates()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** False when EXCHANGE_RATE_API_KEY was never put in local.properties. */
+    val keyConfigured: Boolean = BuildConfig.EXCHANGE_RATE_API_KEY.isNotBlank()
 
     init {
         viewModelScope.launch {
@@ -145,13 +149,59 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
             }
         }
 
+        // A silent empty list was indistinguishable from "still loading", so
+        // every failure state now says what is wrong and what to do about it.
+        if (!viewModel.keyConfigured) {
+            item {
+                SectionCard {
+                    Text(
+                        "No exchange-rate key",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                    Text(
+                        "Add EXCHANGE_RATE_API_KEY to local.properties in the project " +
+                            "root, then rebuild. Get a free key at exchangerate-api.com.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+
         ui.error?.let { error ->
             item {
-                Text(
-                    text = error,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                SectionCard {
+                    Text(
+                        "Could not load rates",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                    Text(
+                        text = error,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Button(
+                        onClick = viewModel::refresh,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text("Try again") }
+                }
+            }
+        }
+
+        if (rates.isEmpty() && ui.error == null && !ui.refreshing && viewModel.keyConfigured) {
+            item {
+                SectionCard {
+                    Text(
+                        "No rates yet",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Button(
+                        onClick = viewModel::refresh,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text("Load rates") }
+                }
             }
         }
 
