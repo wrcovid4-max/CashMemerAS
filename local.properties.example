@@ -1,5 +1,11 @@
-# Copy this file to `local.properties` and fill in real values.
-# `local.properties` is gitignored — never commit real keys.
+#  ⚠  DO NOT PUT REAL KEYS IN THIS FILE  ⚠
+#
+#  This is a TRACKED template. Real keys belong in `local.properties`
+#  (no `.example`), which is gitignored and is the only file the build reads.
+#  The build will refuse to run if it finds real keys here.
+#
+#  Android Studio creates `local.properties` for you with `sdk.dir` already
+#  filled in — just add the key lines below it.
 
 # Path to your Android SDK (Android Studio fills this in automatically)
 sdk.dir=/Users/you/Library/Android/sdk
