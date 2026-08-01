@@ -170,6 +170,24 @@ New receipts also upload on their own the moment you hit Generate.
 `google-services.json` is gitignored, so it will not come down with a clone —
 re-download it from the Firebase console (takes 30 seconds) on a new machine.
 
+### 4b. Drop in the real app icon
+
+The launcher icon in the repo is a vector stand-in. To use the real artwork:
+
+1. Save the two PNGs somewhere on your Mac — the **squircle** one for the phone,
+   the **round** one for the watch
+2. In Android Studio, right-click the **`app`** module →
+   **New → Image Asset**
+3. Icon Type: **Launcher Icons (Adaptive and Legacy)**, Foreground Layer →
+   **Image**, pick the squircle PNG, set Resize so nothing is clipped → Next →
+   Finish
+4. Repeat on the **`wear`** module with the round PNG
+5. Delete `app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml` if Image Asset
+   Studio did not overwrite it
+
+Image Asset Studio generates every density automatically, which is why this is
+better than copying one PNG in by hand.
+
 ### 5. Sync Gradle
 
 Android Studio shows a **"Gradle files have changed"** banner → click

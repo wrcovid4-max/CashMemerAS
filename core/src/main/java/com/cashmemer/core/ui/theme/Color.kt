@@ -13,7 +13,9 @@ val OnBrandGreenContainer = Color(0xFF1B4712)
 val PaperBackground = Color(0xFFF8F9EF)
 val PaperSurface = Color(0xFFFFFFFF)
 val PaperSurfaceVariant = Color(0xFFEDF0E2)
-val PaperOutline = Color(0xFFD5DAC6)
+
+/** Card hairline. Darkened from the old value, which was invisible on white. */
+val PaperOutline = Color(0xFFC9D0B6)
 
 val InkPrimary = Color(0xFF11150C)
 val InkSecondary = Color(0xFF4A5140)

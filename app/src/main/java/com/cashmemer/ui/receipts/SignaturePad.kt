@@ -7,7 +7,8 @@ import android.graphics.Path as AndroidPath
 import android.util.Base64
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,6 +28,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import java.io.ByteArrayOutputStream
@@ -57,21 +59,34 @@ fun SignaturePad(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(160.dp)
+                // The pad lives inside a LazyColumn. Claim the gesture in the
+                // Initial pass so the list's vertical scroll never steals the
+                // stroke — without this, signing just scrolls the page.
                 .pointerInput(Unit) {
-                    detectDragGestures(
-                        onDragStart = { offset -> current = listOf(offset) },
-                        onDrag = { change, _ ->
-                            change.consume()
-                            current = current + change.position
-                        },
-                        onDragEnd = {
-                            if (current.size > 1) strokes.add(current)
-                            current = emptyList()
-                            onSignatureChanged(
-                                encodeSignature(strokes, canvasWidth, canvasHeight, strokeWidthPx)
-                            )
-                        },
-                    )
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        down.consume()
+                        current = listOf(down.position)
+
+                        var dragging = true
+                        while (dragging) {
+                            val event = awaitPointerEvent(PointerEventPass.Initial)
+                            val change = event.changes.firstOrNull { it.id == down.id }
+
+                            if (change == null || !change.pressed) {
+                                dragging = false
+                            } else {
+                                change.consume()
+                                current = current + change.position
+                            }
+                        }
+
+                        if (current.size > 1) strokes.add(current)
+                        current = emptyList()
+                        onSignatureChanged(
+                            encodeSignature(strokes, canvasWidth, canvasHeight, strokeWidthPx)
+                        )
+                    }
                 }
         ) {
             canvasWidth = size.width.toInt()

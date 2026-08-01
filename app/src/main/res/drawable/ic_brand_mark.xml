@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Cash Memer mark: receipt over a folder with a confirmation tick.
+  Vector stand-in for the artwork — replace with the real PNG when adding it
+  through Image Asset Studio (see README).
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Stacked folder backs -->
+    <path
+        android:fillColor="#5B9BFF"
+        android:pathData="M22,34h30l6,8h28a4,4 0,0 1,4 4v34a4,4 0,0 1,-4 4H22a4,4 0,0 1,-4 -4V38a4,4 0,0 1,4 -4z" />
+
+    <!-- Receipt -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M33,20h42v52l-5.25,-4 -5.25,4 -5.25,-4 -5.25,4 -5.25,-4 -5.25,4 -5.25,-4 -5.25,4z" />
+
+    <!-- Receipt rules -->
+    <path
+        android:fillColor="#3D7BE0"
+        android:pathData="M39,29h30v3h-30z" />
+    <path
+        android:fillColor="#3D7BE0"
+        android:pathData="M39,37h30v3h-30z" />
+    <path
+        android:fillColor="#3D7BE0"
+        android:pathData="M39,45h30v3h-30z" />
+    <path
+        android:fillColor="#3D7BE0"
+        android:pathData="M39,53h20v3h-20z" />
+
+    <!-- Folder front -->
+    <path
+        android:fillColor="#2F7BF6"
+        android:pathData="M18,62h72v22a4,4 0,0 1,-4 4H22a4,4 0,0 1,-4 -4z" />
+
+    <!-- Confirmation tick -->
+    <path
+        android:fillColor="#3DBB5B"
+        android:pathData="M78,78m-14,0a14,14 0,1 1,28 0a14,14 0,1 1,-28 0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M71,78l4.5,4.5 10,-10 3.5,3.5 -13.5,13.5 -8,-8z" />
+</vector>

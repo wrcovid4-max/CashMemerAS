@@ -41,16 +41,18 @@ val CashMemerTypography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
     ),
+    // Secondary text was 14sp against a warm background — legible on a desk,
+    // not across a counter. 15sp with more leading reads far better.
     bodyMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
+        fontSize = 15.sp,
+        lineHeight = 22.sp,
     ),
     labelLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 14.sp,
+        fontSize = 15.sp,
         lineHeight = 20.sp,
     ),
 )
