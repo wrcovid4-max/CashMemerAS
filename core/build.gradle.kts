@@ -55,6 +55,8 @@ dependencies {
     api(libs.androidx.core.ktx)
     api(libs.androidx.lifecycle.runtime.ktx)
     api(libs.androidx.lifecycle.viewmodel.compose)
+    // Supplies the non-deprecated LocalLifecycleOwner.
+    api(libs.androidx.lifecycle.runtime.compose)
 
     api(platform(libs.androidx.compose.bom))
     api(libs.androidx.compose.ui)

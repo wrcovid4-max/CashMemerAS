@@ -13,6 +13,7 @@ import android.print.PrintManager
 import androidx.core.content.FileProvider
 import com.cashmemer.core.data.MassPrintOption
 import com.cashmemer.core.model.Receipt
+import com.cashmemer.core.util.Format
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -28,11 +29,30 @@ object ReceiptOutput {
         MassPrintOption.BOTH -> ReceiptPages.BOTH
     }
 
+    /**
+     * Names the file the way the original app did:
+     * `Receipt_41___Mart_Example___20260801_22_32_29___Cash_Memer.pdf`
+     * — the store name matters because these end up in a Downloads folder
+     * alongside everything else.
+     */
     fun outputFile(context: Context, receipts: List<Receipt>): File {
-        val name = if (receipts.size == 1) "receipt-${receipts.first().id}.pdf"
-        else "receipts-${receipts.size}-${System.currentTimeMillis()}.pdf"
+        val stamp = Format.fileStamp(System.currentTimeMillis())
+
+        val name = if (receipts.size == 1) {
+            val receipt = receipts.first()
+            "Receipt_${receipt.id}___${receipt.placeName.forFileName()}___${stamp}___Cash_Memer.pdf"
+        } else {
+            "Receipts_${receipts.size}___${stamp}___Cash_Memer.pdf"
+        }
+
         return File(File(context.cacheDir, "receipts"), name)
     }
+
+    /** Collapses anything not alphanumeric to single underscores. */
+    private fun String.forFileName(): String = trim()
+        .replace(Regex("[^A-Za-z0-9]+"), "_")
+        .trim('_')
+        .ifBlank { "Cash_Memer" }
 
     /** Hands the PDF to the system print dialog. */
     fun print(context: Context, file: File, jobName: String) {

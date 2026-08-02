@@ -18,6 +18,7 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
+import androidx.camera.core.UseCase
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -153,48 +154,45 @@ private fun ScanScreen(
         onDispose { executor.shutdown() }
     }
 
+    val previewView = remember { PreviewView(context) }
+
+    // Bind from a coroutine rather than a ListenableFuture listener: the Guava
+    // future type is not on the classpath, and this reads better anyway.
+    LaunchedEffect(mode) {
+        runCatching {
+            val provider = ProcessCameraProvider.awaitInstance(context)
+
+            val preview = Preview.Builder().build().also {
+                it.surfaceProvider = previewView.surfaceProvider
+            }
+
+            val useCases: Array<UseCase> = if (mode == ScanMode.CAPTURE_RECEIPT) {
+                arrayOf(preview, imageCapture)
+            } else {
+                arrayOf(
+                    preview,
+                    buildBarcodeAnalysis(executor) { value ->
+                        if (!barcodeHandled) {
+                            barcodeHandled = true
+                            onBarcode(value)
+                        }
+                    },
+                )
+            }
+
+            provider.unbindAll()
+            provider.bindToLifecycle(
+                lifecycleOwner,
+                CameraSelector.DEFAULT_BACK_CAMERA,
+                *useCases,
+            )
+        }.onFailure { error = it.message ?: "Could not start the camera" }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
-            factory = { viewContext ->
-                val previewView = PreviewView(viewContext)
-                val providerFuture = ProcessCameraProvider.getInstance(viewContext)
-
-                providerFuture.addListener({
-                    val provider = providerFuture.get()
-
-                    val preview = Preview.Builder().build().also {
-                        it.setSurfaceProvider(previewView.surfaceProvider)
-                    }
-
-                    val useCases = buildList {
-                        add(preview)
-                        if (mode == ScanMode.CAPTURE_RECEIPT) {
-                            add(imageCapture)
-                        } else {
-                            add(
-                                buildBarcodeAnalysis(executor) { value ->
-                                    if (!barcodeHandled) {
-                                        barcodeHandled = true
-                                        onBarcode(value)
-                                    }
-                                }
-                            )
-                        }
-                    }
-
-                    runCatching {
-                        provider.unbindAll()
-                        provider.bindToLifecycle(
-                            lifecycleOwner,
-                            CameraSelector.DEFAULT_BACK_CAMERA,
-                            *useCases.toTypedArray(),
-                        )
-                    }.onFailure { error = it.message }
-                }, ContextCompat.getMainExecutor(viewContext))
-
-                previewView
-            },
+            factory = { previewView },
         )
 
         Column(

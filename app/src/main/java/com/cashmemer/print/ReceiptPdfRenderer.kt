@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import android.util.Base64
+import com.cashmemer.core.data.CurrencyNames
 import com.cashmemer.core.data.ReceiptItemCodec
 import com.cashmemer.core.model.PaymentType
 import com.cashmemer.core.model.Receipt
@@ -21,61 +22,66 @@ import java.io.File
 enum class ReceiptPages { PAGE_1, PAGE_2, BOTH }
 
 /**
- * Renders receipts to A4 PDF using the platform PdfDocument — no external
- * library, so nothing extra to keep up to date.
+ * Renders the cash memo to match the original app's output: a cream receipt
+ * column with a navy title, everything bold, rules separating each block.
  *
- * Every receipt is two pages by design:
+ * Pages are a fixed width and a **variable height sized to their content** —
+ * a receipt roll, not a sheet of A4. Each page is therefore laid out twice:
+ * once with a null canvas purely to measure, then again for real once the
+ * page has been created at the right height. Running the same code for both
+ * passes is what keeps the measurement honest.
  *
- *  - **Page 1 is the customer's copy.** Their name, what they bought, what
- *    they paid. It deliberately omits their phone, address and the issuing
- *    account, none of which belong on a slip handed across a counter.
- *  - **Page 2 is the shop's record.** Everything, including full customer
- *    contact details, both note fields and the issuing account.
+ * Page 1 is the customer's copy — name, goods, money, note, where the sale
+ * happened. Page 2 is the shop's record and adds full contact details, the
+ * shopkeeper's own note and the issuing account.
  */
 object ReceiptPdfRenderer {
 
-    // A4 at 72 dpi, the unit PdfDocument works in.
-    private const val PAGE_WIDTH = 595
-    private const val PAGE_HEIGHT = 842
-    private const val MARGIN = 42f
-    private const val QR_SIZE = 96
+    private const val PAGE_W = 600f
 
-    private val brandGreen = Color.rgb(0x2E, 0x6B, 0x1F)
+    // Content column. Deliberately not centred on the page — this reproduces
+    // the reference layout rather than "improving" it.
+    private const val L = 37f
+    private const val R = 517f
+    private const val CENTRE = (L + R) / 2f
+    private const val QTY_X = 360f
 
-    private val titlePaint = Paint().apply {
-        color = brandGreen
-        textSize = 22f
+    private const val FRAME = 5f
+    private const val ROW = 32.5f
+    private const val ROW_TIGHT = 23f
+
+    private val navy = Color.rgb(0x1E, 0x3A, 0x6E)
+    private val cream = Color.rgb(0xF7, 0xF6, 0xF0)
+    private val pageGrey = Color.rgb(0xD5, 0xD4, 0xCC)
+    private val muted = Color.rgb(0x6B, 0x6B, 0x6B)
+
+    private fun bold(size: Float, colour: Int = Color.BLACK) = Paint().apply {
+        color = colour
+        textSize = size
         isAntiAlias = true
         isFakeBoldText = true
     }
-    private val headingPaint = Paint().apply {
-        color = Color.BLACK
+
+    private val titlePaint = bold(33f, navy)
+    private val storePaint = bold(16f, muted)
+    private val bodyPaint = bold(16f)
+    private val grandPaint = bold(20f)
+    private val subLinePaint = Paint().apply {
+        color = muted
         textSize = 13f
         isAntiAlias = true
         isFakeBoldText = true
     }
-    private val bodyPaint = Paint().apply {
-        color = Color.DKGRAY
-        textSize = 11f
+    private val footerSmall = Paint().apply {
+        color = muted
+        textSize = 12f
         isAntiAlias = true
     }
-    private val totalPaint = Paint().apply {
-        color = brandGreen
-        textSize = 15f
-        isAntiAlias = true
-        isFakeBoldText = true
-    }
+    private val footerPaint = bold(15.5f, muted)
     private val rulePaint = Paint().apply {
-        color = Color.LTGRAY
-        strokeWidth = 0.8f
-    }
-    private val heavyRulePaint = Paint().apply {
-        color = Color.DKGRAY
+        color = Color.BLACK
         strokeWidth = 1.4f
     }
-
-    private const val QTY_COL = 330f
-    private const val PRICE_COL = 430f
 
     suspend fun render(
         context: Context,
@@ -88,13 +94,13 @@ object ReceiptPdfRenderer {
             var pageNumber = 1
 
             receipts.forEach { receipt ->
-                // Page 2 always renders — it is the shop's record, so it must
-                // exist even when both note fields happen to be empty.
                 if (pages != ReceiptPages.PAGE_2) {
-                    document.newPage(pageNumber++) { drawPageOne(it, receipt) }
+                    document.addPage(pageNumber++, receipt, secondPage = false)
                 }
+                // Page 2 always renders — it is the shop's record, so it has to
+                // exist even when its optional blocks are empty.
                 if (pages != ReceiptPages.PAGE_1) {
-                    document.newPage(pageNumber++) { drawPageTwo(it, receipt) }
+                    document.addPage(pageNumber++, receipt, secondPage = true)
                 }
             }
 
@@ -107,303 +113,282 @@ object ReceiptPdfRenderer {
         }
     }
 
-    private inline fun PdfDocument.newPage(number: Int, draw: (Canvas) -> Unit) {
-        val info = PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, number).create()
+    /** Measures the page, creates it at that exact height, then draws it. */
+    private fun PdfDocument.addPage(number: Int, receipt: Receipt, secondPage: Boolean) {
+        val height = layout(null, receipt, secondPage, 0f)
+        val info = PdfDocument.PageInfo.Builder(PAGE_W.toInt(), height.toInt(), number)
+            .create()
         val page = startPage(info)
-        draw(page.canvas)
+        layout(page.canvas, receipt, secondPage, height)
         finishPage(page)
     }
 
-    // ---- Page 1: the customer's copy ---------------------------------------
+    /**
+     * Single source of layout truth. With a null [canvas] nothing is drawn and
+     * only the running baseline advances, giving the page height; that height
+     * comes back in as [pageHeight] on the draw pass so the cream fill knows
+     * how far down to reach.
+     */
+    private fun layout(
+        canvas: Canvas?,
+        receipt: Receipt,
+        secondPage: Boolean,
+        pageHeight: Float,
+    ): Float {
+        var y = 55f
 
-    private fun drawPageOne(canvas: Canvas, receipt: Receipt) {
-        val right = PAGE_WIDTH - MARGIN
-        var y = canvas.drawHeader(receipt, "CASH MEMO")
-
-        // Customer name only. Phone, address and the issuing account are the
-        // shop's record, not the customer's slip.
-        if (receipt.customerName.isNotBlank()) {
-            canvas.drawText("Customer: ${receipt.customerName}", MARGIN, y, headingPaint)
-            y += 20f
-        }
-
-        y = canvas.drawItems(receipt, y)
-        y = canvas.drawTotals(receipt, y, right)
-
-        if (receipt.notesPage1.isNotBlank()) {
-            y += 16f
-            canvas.drawText("Notes:", MARGIN, y, headingPaint)
-            y += 15f
-            y = canvas.drawWrapped(receipt.notesPage1, MARGIN, y, right - MARGIN, bodyPaint)
-        }
-
-        canvas.drawSignature(receipt, PAGE_HEIGHT - MARGIN - 120f)
-        canvas.drawQrBlock(receipt)
-        canvas.drawText("Generated by Cash Memer", MARGIN, PAGE_HEIGHT - MARGIN, bodyPaint)
-    }
-
-    // ---- Page 2: the shop's record -----------------------------------------
-
-    private fun drawPageTwo(canvas: Canvas, receipt: Receipt) {
-        val right = PAGE_WIDTH - MARGIN
-        var y = canvas.drawHeader(receipt, "CASH MEMO (Page 2)")
-
-        canvas.drawText("Customer Details:", MARGIN, y, headingPaint)
-        y += 15f
-        listOf(
-            "Name" to receipt.customerName,
-            "Phone" to receipt.customerPhone,
-            "Email" to receipt.customerEmail,
-        ).forEach { (label, value) ->
-            if (value.isNotBlank()) {
-                canvas.drawText("  $label: $value", MARGIN, y, bodyPaint)
-                y += 14f
-            }
-        }
-        if (receipt.locationAddress.isNotBlank()) {
-            canvas.drawText("  Address: ${receipt.locationAddress}", MARGIN, y, bodyPaint)
-            y += 14f
-        }
-        if (receipt.hasCoordinates) {
-            canvas.drawText(
-                "  GPS: ${receipt.latitude}, ${receipt.longitude}",
-                MARGIN,
-                y,
-                bodyPaint,
-            )
-            y += 14f
-        }
-        y += 8f
-
-        y = canvas.drawItems(receipt, y)
-        y = canvas.drawTotals(receipt, y, right)
-
-        // Both note fields, page 2 only — note 2 is the shopkeeper's own.
-        listOf("Notes (Page 1)" to receipt.notesPage1, "Notes (Page 2)" to receipt.notesPage2)
-            .filter { it.second.isNotBlank() }
-            .forEach { (label, text) ->
-                y += 16f
-                canvas.drawText("$label:", MARGIN, y, headingPaint)
-                y += 15f
-                y = canvas.drawWrapped(text, MARGIN, y, right - MARGIN, bodyPaint)
-            }
-
-        if (receipt.issuerName.isNotBlank() || receipt.issuerEmail.isNotBlank()) {
-            y += 18f
-            canvas.drawLine(MARGIN, y, right, y, rulePaint)
-            y += 16f
-            canvas.drawText("Issuer Account:", MARGIN, y, headingPaint)
-            y += 15f
-            if (receipt.issuerName.isNotBlank()) {
-                canvas.drawText("  Name: ${receipt.issuerName}", MARGIN, y, bodyPaint)
-                y += 14f
-            }
-            if (receipt.issuerEmail.isNotBlank()) {
-                canvas.drawText("  Email: ${receipt.issuerEmail}", MARGIN, y, bodyPaint)
-            }
-        }
-
-        canvas.drawSignature(receipt, PAGE_HEIGHT - MARGIN - 120f)
-        canvas.drawQrBlock(receipt)
-        canvas.drawText(
-            "Receipt #${receipt.id} · ${Format.timestamp(receipt.createdAt)}",
-            MARGIN,
-            PAGE_HEIGHT - MARGIN,
-            bodyPaint,
+        canvas?.drawColor(pageGrey)
+        canvas?.drawRect(
+            FRAME,
+            FRAME,
+            PAGE_W - FRAME,
+            pageHeight - FRAME,
+            Paint().apply { color = cream },
         )
-    }
 
-    // ---- Shared blocks ------------------------------------------------------
+        val title = if (secondPage) "CASH MEMO (Page 2)" else "CASH MEMO"
+        canvas.centred(title, y, titlePaint)
+        y += 31f
+        canvas.centred(receipt.placeName.ifBlank { "Cash Memer" }, y, storePaint)
+        y += 39f
 
-    /** Title, store, and the meta grid. Returns the next free baseline. */
-    private fun Canvas.drawHeader(receipt: Receipt, title: String): Float {
-        val right = PAGE_WIDTH - MARGIN
-        var y = MARGIN + 18f
+        y = canvas.rule(y, double = true)
 
-        drawText(title, MARGIN, y, titlePaint)
-        y += 20f
-        drawText(receipt.placeName.ifBlank { "Cash Memer" }, MARGIN, y, headingPaint)
+        // ---- Meta grid ------------------------------------------------------
+        canvas.text("Receipt No: #${receipt.id}", L, y)
+        canvas.textRight("Date: ${Format.isoDate(receipt.createdAt)}", R, y)
+        y += ROW
 
-        y += 12f
-        drawLine(MARGIN, y, right, y, heavyRulePaint)
-        y += 18f
+        canvas.text("Place/Store: ${receipt.placeName}", L, y)
+        canvas.textRight("Time: ${Format.clockTime(receipt.createdAt)}", R, y)
+        y += ROW
 
-        drawText("Receipt No: #${receipt.id}", MARGIN, y, bodyPaint)
-        drawTextRight("Date: ${Format.date(receipt.createdAt)}", right, y, bodyPaint)
-        y += 15f
+        canvas.text("Category: ${ReceiptCategory.from(receipt.category).label}", L, y)
+        canvas.textRight("Method: ${PaymentType.from(receipt.paymentType).label}", R, y)
+        y += ROW
 
-        drawText("Place/Store: ${receipt.placeName}", MARGIN, y, bodyPaint)
-        drawTextRight("Time: ${Format.time(receipt.createdAt)}", right, y, bodyPaint)
-        y += 15f
-
-        drawText(
-            "Category: ${ReceiptCategory.from(receipt.category).label}",
-            MARGIN,
-            y,
-            bodyPaint,
-        )
-        drawTextRight(
-            "Method: ${PaymentType.from(receipt.paymentType).label}",
-            right,
-            y,
-            bodyPaint,
-        )
-        y += 15f
-
-        drawText("Currency: ${receipt.currencyCode}", MARGIN, y, bodyPaint)
-        y += 20f
-
-        return y
-    }
-
-    private fun Canvas.drawItems(receipt: Receipt, startY: Float): Float {
-        val right = PAGE_WIDTH - MARGIN
-        var y = startY
-
-        drawLine(MARGIN, y - 12f, right, y - 12f, heavyRulePaint)
-        drawText("Item", MARGIN, y, headingPaint)
-        drawTextRight("Qty", QTY_COL, y, headingPaint)
-        drawTextRight("Price", PRICE_COL, y, headingPaint)
-        drawTextRight("Total", right, y, headingPaint)
-        y += 8f
-        drawLine(MARGIN, y, right, y, rulePaint)
-        y += 16f
-
-        val items = ReceiptItemCodec.decode(receipt.itemsJson)
-        items.forEach { item ->
-            if (y > PAGE_HEIGHT - 300f) {
-                drawText("… more items", MARGIN, y, bodyPaint)
-                y += 15f
-                return@forEach
+        if (secondPage) {
+            canvas.text("Customer Details:", L, y)
+            y += ROW
+            listOf(
+                "Name" to receipt.customerName,
+                "Phone" to receipt.customerPhone,
+                "Email" to receipt.customerEmail,
+            ).forEach { (label, value) ->
+                if (value.isNotBlank()) {
+                    canvas.text("  $label: $value", L, y)
+                    y += ROW
+                }
             }
-            drawText(item.productName.take(46), MARGIN, y, bodyPaint)
-            drawTextRight(Format.amount(item.qty), QTY_COL, y, bodyPaint)
-            drawTextRight(Format.amount(item.unitPrice), PRICE_COL, y, bodyPaint)
-            drawTextRight(
+        } else if (receipt.customerName.isNotBlank()) {
+            canvas.text("Customer: ${receipt.customerName}", L, y)
+            y += ROW
+        }
+
+        y = canvas.rule(y - 4f, double = true)
+
+        // ---- Items ----------------------------------------------------------
+        canvas.text("Item", L, y)
+        canvas.textRight("Qty", QTY_X, y)
+        canvas.textRight("Total", R, y)
+        y = canvas.rule(y + 8f)
+
+        val symbol = CurrencyNames.symbolOf(receipt.currencyCode)
+        ReceiptItemCodec.decode(receipt.itemsJson).forEach { item ->
+            canvas.text(item.productName.take(30), L, y)
+            canvas.textRight(Format.amount(item.qty), QTY_X, y)
+            canvas.textRight(
                 Format.amountWithCurrency(item.lineTotal, receipt.currencyCode),
-                right,
+                R,
                 y,
-                bodyPaint,
             )
-            y += 15f
+            y += ROW_TIGHT
+            canvas.text("@ $symbol${Format.amount(item.unitPrice)} each", L + 8f, y, subLinePaint)
+            y += ROW
         }
 
-        y += 4f
-        drawLine(MARGIN, y, right, y, rulePaint)
-        return y + 18f
-    }
+        y = canvas.rule(y - 4f)
 
-    private fun Canvas.drawTotals(receipt: Receipt, startY: Float, right: Float): Float {
-        var y = startY
-
-        drawTotal("Subtotal", receipt.subtotal, receipt.currencyCode, right, y)
-        y += 15f
+        // ---- Totals ---------------------------------------------------------
+        canvas.money("Subtotal:", receipt.subtotal, symbol, y)
+        y += ROW
 
         if (receipt.discount > 0) {
-            drawTotal("Discount", -receipt.discount, receipt.currencyCode, right, y)
-            y += 15f
+            canvas.money("Discount:", receipt.discount, symbol, y, sign = "- ")
+            y += ROW
         }
         if (receipt.taxPercent > 0) {
             val tax = (receipt.subtotal - receipt.discount).coerceAtLeast(0.0) *
                 receipt.taxPercent / 100.0
-            drawTotal(
-                "Tax (${Format.amount(receipt.taxPercent)}%)",
-                tax,
-                receipt.currencyCode,
-                right,
-                y,
+            canvas.money("Tax (${Format.amount(receipt.taxPercent)}%):", tax, symbol, y, "+ ")
+            y += ROW
+        }
+
+        y = canvas.rule(y - 6f)
+
+        canvas.text("GRAND TOTAL:", L, y, grandPaint)
+        canvas.textRight("$symbol ${Format.amount(receipt.total)}", R, y)
+        y = canvas.rule(y + 10f, double = true)
+
+        canvas.money("Cash Given:", receipt.cashGiven, symbol, y)
+        y += ROW
+        canvas.money("Change Amount:", receipt.changeAmount, symbol, y)
+        y = canvas.rule(y + 8f, double = true)
+
+        // ---- Notes ----------------------------------------------------------
+        // Page 1 carries the customer-facing note; page 2 carries the
+        // shopkeeper's own, which must never reach the customer copy.
+        val note = if (secondPage) receipt.notesPage2 else receipt.notesPage1
+        val noteLabel = if (secondPage) "Note (Page 2):" else "Note:"
+        if (note.isNotBlank()) {
+            canvas.text(noteLabel, L, y)
+            y += ROW - 3f
+            y = canvas.wrapped(note, L + 12f, y)
+            y = canvas.rule(y + 10f)
+        }
+
+        // ---- Location (page 1) ----------------------------------------------
+        if (!secondPage && (receipt.locationAddress.isNotBlank() || receipt.hasCoordinates)) {
+            canvas.text("Saved Location:", L, y)
+            y += ROW - 3f
+            if (receipt.locationAddress.isNotBlank()) {
+                y = canvas.wrapped(receipt.locationAddress, L + 12f, y)
+            }
+            if (receipt.hasCoordinates) {
+                canvas.text(
+                    "  GPS: ${Format.coordinate(receipt.latitude)}, " +
+                        Format.coordinate(receipt.longitude),
+                    L,
+                    y,
+                )
+                y += ROW_TIGHT
+            }
+            y = canvas.rule(y + 10f)
+        }
+
+        // ---- Issuer (page 2) -------------------------------------------------
+        if (secondPage &&
+            (receipt.issuerName.isNotBlank() || receipt.issuerEmail.isNotBlank())
+        ) {
+            canvas.text("Issuer Account:", L, y)
+            y += ROW - 4f
+            if (receipt.issuerName.isNotBlank()) {
+                canvas.text("  Name: ${receipt.issuerName}", L, y)
+                y += ROW_TIGHT
+            }
+            if (receipt.issuerEmail.isNotBlank()) {
+                canvas.text("  Email: ${receipt.issuerEmail}", L, y)
+                y += ROW_TIGHT
+            }
+            y = canvas.rule(y + 8f)
+        }
+
+        // ---- Signature -------------------------------------------------------
+        receipt.signatureBase64?.let { encoded ->
+            canvas.text("Authorized Signature:", L, y + 32f)
+            if (canvas != null) {
+                decodeSignature(encoded)?.let { bitmap ->
+                    val scaled = Bitmap.createScaledBitmap(bitmap, 126, 62, true)
+                    canvas.drawBitmap(scaled, R - 126f, y - 8f, null)
+                    scaled.recycle()
+                    bitmap.recycle()
+                }
+            }
+            y = canvas.rule(y + 50f)
+        }
+
+        // ---- Footer ----------------------------------------------------------
+        val qrSize = 94
+        if (canvas != null) {
+            canvas.drawRect(
+                CENTRE - 56f,
+                y - 8f,
+                CENTRE + 56f,
+                y + qrSize + 8f,
+                Paint().apply { color = Color.WHITE },
             )
-            y += 15f
+            QrRenderer.encode(QrRenderer.payloadFor(receipt), qrSize)?.let { qr ->
+                canvas.drawBitmap(qr, CENTRE - qrSize / 2f, y, null)
+                qr.recycle()
+            }
         }
+        y += qrSize + 30f
 
-        y += 4f
-        drawLine(MARGIN + 260f, y, right, y, heavyRulePaint)
-        y += 18f
-        drawTextRight("GRAND TOTAL:", PRICE_COL, y, totalPaint)
-        drawTextRight(
-            Format.amountWithCurrency(receipt.total, receipt.currencyCode),
-            right,
-            y,
-            totalPaint,
-        )
-        y += 20f
-
-        if (receipt.cashGiven > 0) {
-            drawTotal("Cash Given", receipt.cashGiven, receipt.currencyCode, right, y)
-            y += 15f
-            drawTotal("Change Amount", receipt.changeAmount, receipt.currencyCode, right, y)
-            y += 15f
-        }
+        canvas.centred("Scan QR Code for details", y, footerSmall)
+        y += 24f
+        canvas.centred("Thank you for shopping with us!", y, footerPaint)
+        y += 40f
 
         return y
     }
 
-    private fun Canvas.drawSignature(receipt: Receipt, y: Float) {
-        val encoded = receipt.signatureBase64 ?: return
-        val bitmap = decodeSignature(encoded) ?: return
+    // ---- Null-safe drawing primitives --------------------------------------
+    // Every helper accepts a null canvas so the measure pass runs the exact
+    // same code path as the draw pass.
 
-        val scaled = Bitmap.createScaledBitmap(bitmap, 180, 70, true)
-        val x = PAGE_WIDTH - MARGIN - 180f
-        drawBitmap(scaled, x, y, null)
-        drawLine(x, y + 74f, PAGE_WIDTH - MARGIN, y + 74f, rulePaint)
-        drawText("Authorized Signature", x, y + 88f, bodyPaint)
-
-        scaled.recycle()
-        bitmap.recycle()
-    }
-
-    /** QR sits bottom-left, clear of the signature block on the right. */
-    private fun Canvas.drawQrBlock(receipt: Receipt) {
-        val qr = QrRenderer.encode(QrRenderer.payloadFor(receipt), QR_SIZE) ?: return
-        drawBitmap(qr, MARGIN, PAGE_HEIGHT - MARGIN - QR_SIZE - 18f, null)
-        qr.recycle()
-    }
-
-    private fun decodeSignature(base64: String): Bitmap? = runCatching {
-        val bytes = Base64.decode(base64, Base64.NO_WRAP)
-        BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-    }.getOrNull()
-
-    private fun Canvas.drawTextRight(text: String, right: Float, y: Float, paint: Paint) {
-        drawText(text, right - paint.measureText(text), y, paint)
-    }
-
-    private fun Canvas.drawTotal(
-        label: String,
-        amount: Double,
-        currency: String,
-        right: Float,
-        y: Float,
-    ) {
-        drawTextRight("$label:", PRICE_COL, y, bodyPaint)
-        drawTextRight(Format.amountWithCurrency(amount, currency), right, y, bodyPaint)
-    }
-
-    /** Naive word wrap — enough for free-text notes. Returns the new baseline. */
-    private fun Canvas.drawWrapped(
+    private fun Canvas?.text(
         text: String,
         x: Float,
-        startY: Float,
-        maxWidth: Float,
-        paint: Paint,
-    ): Float {
+        y: Float,
+        paint: Paint = bodyPaint,
+    ) {
+        this?.drawText(text, x, y, paint)
+    }
+
+    private fun Canvas?.textRight(
+        text: String,
+        right: Float,
+        y: Float,
+        paint: Paint = bodyPaint,
+    ) {
+        this?.drawText(text, right - paint.measureText(text), y, paint)
+    }
+
+    private fun Canvas?.centred(text: String, y: Float, paint: Paint) {
+        this?.drawText(text, CENTRE - paint.measureText(text) / 2f, y, paint)
+    }
+
+    private fun Canvas?.money(
+        label: String,
+        amount: Double,
+        symbol: String,
+        y: Float,
+        sign: String = "",
+    ) {
+        text(label, L, y)
+        textRight("$sign$symbol ${Format.amount(amount)}", R, y)
+    }
+
+    private fun Canvas?.rule(y: Float, double: Boolean = false): Float {
+        this?.drawLine(L, y, R, y, rulePaint)
+        if (double) this?.drawLine(L, y + 4f, R, y + 4f, rulePaint)
+        return y + (if (double) 4f else 0f) + 28f
+    }
+
+    private fun Canvas?.wrapped(text: String, x: Float, startY: Float): Float {
         var y = startY
         var line = StringBuilder()
+        val maxWidth = R - x
 
         text.split(Regex("\\s+")).forEach { word ->
             val candidate = if (line.isEmpty()) word else "$line $word"
-            if (paint.measureText(candidate) > maxWidth) {
-                drawText(line.toString(), x, y, paint)
-                y += 14f
+            if (bodyPaint.measureText(candidate) > maxWidth) {
+                text(line.toString(), x, y)
+                y += ROW_TIGHT
                 line = StringBuilder(word)
             } else {
                 line = StringBuilder(candidate)
             }
         }
         if (line.isNotEmpty()) {
-            drawText(line.toString(), x, y, paint)
-            y += 14f
+            text(line.toString(), x, y)
+            y += ROW_TIGHT
         }
         return y
     }
+
+    private fun decodeSignature(base64: String): Bitmap? = runCatching {
+        val bytes = Base64.decode(base64, Base64.NO_WRAP)
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+    }.getOrNull()
 }
