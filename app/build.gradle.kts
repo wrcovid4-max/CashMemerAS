@@ -23,6 +23,12 @@ if (firebaseConfig.exists()) {
     apply(plugin = "com.google.gms.google-services")
 }
 
+// Real Guava already contains ListenableFuture, so keep the placeholder
+// artifact out entirely rather than letting the two race to define the class.
+configurations.configureEach {
+    exclude(group = "com.google.guava", module = "listenablefuture")
+}
+
 android {
     namespace = "com.cashmemer"
     compileSdk = 35
@@ -103,6 +109,12 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.mlkit.barcode.scanning)
     implementation(libs.androidx.concurrent.futures.ktx)
+
+    // CameraX hands back a Guava ListenableFuture. Play Services pulls in the
+    // deliberately EMPTY "9999.0-empty-to-avoid-conflict-with-guava" stub of
+    // that artifact, which wins on version and contains no classes at all —
+    // hence "cannot access class ListenableFuture". Real Guava supplies it.
+    implementation(libs.guava)
 
     // GPS + map picker for the receipt's location field
     implementation(libs.play.services.location)
