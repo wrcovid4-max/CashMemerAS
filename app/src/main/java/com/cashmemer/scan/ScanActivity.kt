@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.concurrent.futures.await
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.cashmemer.core.ui.theme.CashMemerTheme
@@ -156,14 +157,15 @@ private fun ScanScreen(
 
     val previewView = remember { PreviewView(context) }
 
-    // Bind from a coroutine rather than a ListenableFuture listener: the Guava
-    // future type is not on the classpath, and this reads better anyway.
+    // getInstance returns a Guava ListenableFuture; concurrent-futures-ktx both
+    // supplies that class and gives it a suspend await(), so the binding reads
+    // as straight-line code instead of a listener callback.
     LaunchedEffect(mode) {
         runCatching {
-            val provider = ProcessCameraProvider.awaitInstance(context)
+            val provider = ProcessCameraProvider.getInstance(context).await()
 
             val preview = Preview.Builder().build().also {
-                it.surfaceProvider = previewView.surfaceProvider
+                it.setSurfaceProvider(previewView.surfaceProvider)
             }
 
             val useCases: Array<UseCase> = if (mode == ScanMode.CAPTURE_RECEIPT) {

@@ -102,6 +102,7 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.mlkit.barcode.scanning)
+    implementation(libs.androidx.concurrent.futures.ktx)
 
     // GPS + map picker for the receipt's location field
     implementation(libs.play.services.location)
