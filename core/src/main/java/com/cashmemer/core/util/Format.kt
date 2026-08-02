@@ -31,7 +31,7 @@ object Format {
         DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault())
 
     /** Filename stamp: 20260801_22_32_29. */
-    private val fileStamp: DateTimeFormatter =
+    private val fileStampFormat: DateTimeFormatter =
         DateTimeFormatter.ofPattern("yyyyMMdd_HH_mm_ss").withZone(ZoneId.systemDefault())
 
     fun amount(value: Double): String = money.format(value)
@@ -52,7 +52,7 @@ object Format {
 
     fun clockTime(millis: Long): String = clockFormat.format(Instant.ofEpochMilli(millis))
 
-    fun fileStamp(millis: Long): String = fileStamp.format(Instant.ofEpochMilli(millis))
+    fun fileStamp(millis: Long): String = fileStampFormat.format(Instant.ofEpochMilli(millis))
 
     /** Six decimals — roughly 10cm, plenty to find a shopfront. */
     fun coordinate(value: Double?): String =

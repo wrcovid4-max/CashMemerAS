@@ -155,20 +155,20 @@ object ReceiptPdfRenderer {
         y = canvas.rule(y, double = true)
 
         // ---- Meta grid ------------------------------------------------------
-        canvas.text("Receipt No: #${receipt.id}", L, y)
+        canvas.write("Receipt No: #${receipt.id}", L, y)
         canvas.textRight("Date: ${Format.isoDate(receipt.createdAt)}", R, y)
         y += ROW
 
-        canvas.text("Place/Store: ${receipt.placeName}", L, y)
+        canvas.write("Place/Store: ${receipt.placeName}", L, y)
         canvas.textRight("Time: ${Format.clockTime(receipt.createdAt)}", R, y)
         y += ROW
 
-        canvas.text("Category: ${ReceiptCategory.from(receipt.category).label}", L, y)
+        canvas.write("Category: ${ReceiptCategory.from(receipt.category).label}", L, y)
         canvas.textRight("Method: ${PaymentType.from(receipt.paymentType).label}", R, y)
         y += ROW
 
         if (secondPage) {
-            canvas.text("Customer Details:", L, y)
+            canvas.write("Customer Details:", L, y)
             y += ROW
             listOf(
                 "Name" to receipt.customerName,
@@ -176,26 +176,26 @@ object ReceiptPdfRenderer {
                 "Email" to receipt.customerEmail,
             ).forEach { (label, value) ->
                 if (value.isNotBlank()) {
-                    canvas.text("  $label: $value", L, y)
+                    canvas.write("  $label: $value", L, y)
                     y += ROW
                 }
             }
         } else if (receipt.customerName.isNotBlank()) {
-            canvas.text("Customer: ${receipt.customerName}", L, y)
+            canvas.write("Customer: ${receipt.customerName}", L, y)
             y += ROW
         }
 
         y = canvas.rule(y - 4f, double = true)
 
         // ---- Items ----------------------------------------------------------
-        canvas.text("Item", L, y)
+        canvas.write("Item", L, y)
         canvas.textRight("Qty", QTY_X, y)
         canvas.textRight("Total", R, y)
         y = canvas.rule(y + 8f)
 
         val symbol = CurrencyNames.symbolOf(receipt.currencyCode)
         ReceiptItemCodec.decode(receipt.itemsJson).forEach { item ->
-            canvas.text(item.productName.take(30), L, y)
+            canvas.write(item.productName.take(30), L, y)
             canvas.textRight(Format.amount(item.qty), QTY_X, y)
             canvas.textRight(
                 Format.amountWithCurrency(item.lineTotal, receipt.currencyCode),
@@ -203,7 +203,7 @@ object ReceiptPdfRenderer {
                 y,
             )
             y += ROW_TIGHT
-            canvas.text("@ $symbol${Format.amount(item.unitPrice)} each", L + 8f, y, subLinePaint)
+            canvas.write("@ $symbol${Format.amount(item.unitPrice)} each", L + 8f, y, subLinePaint)
             y += ROW
         }
 
@@ -226,7 +226,7 @@ object ReceiptPdfRenderer {
 
         y = canvas.rule(y - 6f)
 
-        canvas.text("GRAND TOTAL:", L, y, grandPaint)
+        canvas.write("GRAND TOTAL:", L, y, grandPaint)
         canvas.textRight("$symbol ${Format.amount(receipt.total)}", R, y)
         y = canvas.rule(y + 10f, double = true)
 
@@ -241,7 +241,7 @@ object ReceiptPdfRenderer {
         val note = if (secondPage) receipt.notesPage2 else receipt.notesPage1
         val noteLabel = if (secondPage) "Note (Page 2):" else "Note:"
         if (note.isNotBlank()) {
-            canvas.text(noteLabel, L, y)
+            canvas.write(noteLabel, L, y)
             y += ROW - 3f
             y = canvas.wrapped(note, L + 12f, y)
             y = canvas.rule(y + 10f)
@@ -249,13 +249,13 @@ object ReceiptPdfRenderer {
 
         // ---- Location (page 1) ----------------------------------------------
         if (!secondPage && (receipt.locationAddress.isNotBlank() || receipt.hasCoordinates)) {
-            canvas.text("Saved Location:", L, y)
+            canvas.write("Saved Location:", L, y)
             y += ROW - 3f
             if (receipt.locationAddress.isNotBlank()) {
                 y = canvas.wrapped(receipt.locationAddress, L + 12f, y)
             }
             if (receipt.hasCoordinates) {
-                canvas.text(
+                canvas.write(
                     "  GPS: ${Format.coordinate(receipt.latitude)}, " +
                         Format.coordinate(receipt.longitude),
                     L,
@@ -270,14 +270,14 @@ object ReceiptPdfRenderer {
         if (secondPage &&
             (receipt.issuerName.isNotBlank() || receipt.issuerEmail.isNotBlank())
         ) {
-            canvas.text("Issuer Account:", L, y)
+            canvas.write("Issuer Account:", L, y)
             y += ROW - 4f
             if (receipt.issuerName.isNotBlank()) {
-                canvas.text("  Name: ${receipt.issuerName}", L, y)
+                canvas.write("  Name: ${receipt.issuerName}", L, y)
                 y += ROW_TIGHT
             }
             if (receipt.issuerEmail.isNotBlank()) {
-                canvas.text("  Email: ${receipt.issuerEmail}", L, y)
+                canvas.write("  Email: ${receipt.issuerEmail}", L, y)
                 y += ROW_TIGHT
             }
             y = canvas.rule(y + 8f)
@@ -285,7 +285,7 @@ object ReceiptPdfRenderer {
 
         // ---- Signature -------------------------------------------------------
         receipt.signatureBase64?.let { encoded ->
-            canvas.text("Authorized Signature:", L, y + 32f)
+            canvas.write("Authorized Signature:", L, y + 32f)
             if (canvas != null) {
                 decodeSignature(encoded)?.let { bitmap ->
                     val scaled = Bitmap.createScaledBitmap(bitmap, 126, 62, true)
@@ -326,7 +326,7 @@ object ReceiptPdfRenderer {
     // Every helper accepts a null canvas so the measure pass runs the exact
     // same code path as the draw pass.
 
-    private fun Canvas?.text(
+    private fun Canvas?.write(
         text: String,
         x: Float,
         y: Float,
@@ -355,7 +355,7 @@ object ReceiptPdfRenderer {
         y: Float,
         sign: String = "",
     ) {
-        text(label, L, y)
+        write(label, L, y)
         textRight("$sign$symbol ${Format.amount(amount)}", R, y)
     }
 
@@ -373,7 +373,7 @@ object ReceiptPdfRenderer {
         text.split(Regex("\\s+")).forEach { word ->
             val candidate = if (line.isEmpty()) word else "$line $word"
             if (bodyPaint.measureText(candidate) > maxWidth) {
-                text(line.toString(), x, y)
+                write(line.toString(), x, y)
                 y += ROW_TIGHT
                 line = StringBuilder(word)
             } else {
@@ -381,7 +381,7 @@ object ReceiptPdfRenderer {
             }
         }
         if (line.isNotEmpty()) {
-            text(line.toString(), x, y)
+            write(line.toString(), x, y)
             y += ROW_TIGHT
         }
         return y
