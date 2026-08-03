@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.text.input.KeyboardType
@@ -37,6 +38,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.cashmemer.R
 import com.cashmemer.core.data.AppSettings
 
 private const val AUTHENTICATORS =
@@ -100,9 +102,12 @@ private fun LockScreen(
     var error by remember { mutableStateOf<String?>(null) }
     var promptShown by remember { mutableStateOf(false) }
 
+    // Resolved up front: the click handler is not a composable scope.
+    val wrongPasscodeMessage = stringResource(R.string.wrong_passcode)
+
     fun promptBiometric() {
         val activity = context as? FragmentActivity ?: run {
-            error = "Cannot show the biometric prompt here"
+            error = context.getString(R.string.camera_failed)
             return
         }
 
@@ -131,8 +136,8 @@ private fun LockScreen(
 
         prompt.authenticate(
             BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Unlock Cash Memer")
-                .setSubtitle("Confirm it's you to open your till")
+                .setTitle(context.getString(R.string.unlock_title))
+                .setSubtitle(context.getString(R.string.unlock_subtitle))
                 .setAllowedAuthenticators(AUTHENTICATORS)
                 .build()
         )
@@ -160,7 +165,7 @@ private fun LockScreen(
                 tint = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = "Cash Memer is locked",
+                text = stringResource(R.string.app_locked),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(vertical = 16.dp),
             )
@@ -171,7 +176,7 @@ private fun LockScreen(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(Icons.Filled.Fingerprint, contentDescription = null)
-                    Text("  Use fingerprint or face")
+                    Text(stringResource(R.string.use_biometrics))
                 }
             }
 
@@ -182,7 +187,7 @@ private fun LockScreen(
                         if (it.length <= 4) passcode = it.filter(Char::isDigit)
                         error = null
                     },
-                    label = { Text("Passcode") },
+                    label = { Text(stringResource(R.string.passcode)) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(
@@ -197,7 +202,7 @@ private fun LockScreen(
                         if (onCheckPasscode(passcode)) {
                             onUnlocked()
                         } else {
-                            error = "Wrong passcode"
+                            error = wrongPasscodeMessage
                             passcode = ""
                         }
                     },
@@ -205,12 +210,11 @@ private fun LockScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 12.dp),
-                ) { Text("Unlock") }
+                ) { Text(stringResource(R.string.unlock)) }
             } else if (!biometricsAvailable) {
                 // Nothing to authenticate with — never strand the owner.
                 Text(
-                    text = "No passcode is set and this device has no biometrics, " +
-                        "so App Lock cannot be enforced.",
+                    text = stringResource(R.string.no_lock_available),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -219,7 +223,7 @@ private fun LockScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 12.dp),
-                ) { Text("Continue") }
+                ) { Text(stringResource(R.string.action_continue)) }
             }
 
             error?.let {

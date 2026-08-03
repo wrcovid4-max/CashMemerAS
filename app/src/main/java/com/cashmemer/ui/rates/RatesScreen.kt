@@ -28,11 +28,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cashmemer.R
 import com.cashmemer.core.BuildConfig
 import com.cashmemer.core.data.CashMemerRepository
 import com.cashmemer.core.model.CurrencyRate
@@ -127,10 +129,10 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    SectionTitle("Exchange Rates (USD Base)")
+                    SectionTitle(stringResource(R.string.exchange_rates))
                     Text(
-                        text = if (ui.lastUpdated == 0L) "Not refreshed yet"
-                        else "Last updated: ${Format.timestamp(ui.lastUpdated)}",
+                        text = if (ui.lastUpdated == 0L) stringResource(R.string.not_refreshed)
+                        else stringResource(R.string.last_updated, Format.timestamp(ui.lastUpdated)),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -141,7 +143,7 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
                     IconButton(onClick = viewModel::refresh) {
                         Icon(
                             Icons.Filled.Refresh,
-                            contentDescription = "Refresh rates",
+                            contentDescription = stringResource(R.string.action_refresh),
                             tint = MaterialTheme.colorScheme.primary,
                         )
                     }
@@ -155,13 +157,12 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
             item {
                 SectionCard {
                     Text(
-                        "No exchange-rate key",
+                        stringResource(R.string.no_rate_key),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.error,
                     )
                     Text(
-                        "Add EXCHANGE_RATE_API_KEY to local.properties in the project " +
-                            "root, then rebuild. Get a free key at exchangerate-api.com.",
+                        stringResource(R.string.no_rate_key_body),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -173,7 +174,7 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
             item {
                 SectionCard {
                     Text(
-                        "Could not load rates",
+                        stringResource(R.string.rates_failed),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.error,
                     )
@@ -185,7 +186,7 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
                     Button(
                         onClick = viewModel::refresh,
                         modifier = Modifier.fillMaxWidth(),
-                    ) { Text("Try again") }
+                    ) { Text(stringResource(R.string.action_retry)) }
                 }
             }
         }
@@ -194,13 +195,13 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
             item {
                 SectionCard {
                     Text(
-                        "No rates yet",
+                        stringResource(R.string.no_rates_yet),
                         style = MaterialTheme.typography.titleMedium,
                     )
                     Button(
                         onClick = viewModel::refresh,
                         modifier = Modifier.fillMaxWidth(),
-                    ) { Text("Load rates") }
+                    ) { Text(stringResource(R.string.load_rates)) }
                 }
             }
         }
@@ -209,7 +210,7 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                placeholder = { Text("Search currency…") },
+                placeholder = { Text(stringResource(R.string.search_currency)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -245,19 +246,19 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
 
         item {
             SectionCard {
-                SectionTitle("Register Custom Currency")
+                SectionTitle(stringResource(R.string.register_custom_currency))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = customCode,
                         onValueChange = { customCode = it.uppercase().take(3) },
-                        label = { Text("Code") },
+                        label = { Text(stringResource(R.string.code)) },
                         singleLine = true,
                         modifier = Modifier.weight(1f),
                     )
                     OutlinedTextField(
                         value = customRate,
                         onValueChange = { customRate = it },
-                        label = { Text("Rate vs USD") },
+                        label = { Text(stringResource(R.string.rate_vs_usd)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         modifier = Modifier.weight(1f),
@@ -266,7 +267,7 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
                 OutlinedTextField(
                     value = customName,
                     onValueChange = { customName = it },
-                    label = { Text("Display name") },
+                    label = { Text(stringResource(R.string.display_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -283,7 +284,7 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
                     },
                     enabled = customCode.length == 3,
                     modifier = Modifier.fillMaxWidth(),
-                ) { Text("Register Custom Currency") }
+                ) { Text(stringResource(R.string.register_custom_currency)) }
             }
         }
     }

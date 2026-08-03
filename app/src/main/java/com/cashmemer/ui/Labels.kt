@@ -53,3 +53,27 @@ fun ReceiptCategory.localized(): String = stringResource(labelRes)
 fun PaymentType.localized(context: Context): String = context.getString(labelRes)
 
 fun ReceiptCategory.localized(context: Context): String = context.getString(labelRes)
+
+/** Connection-preference switch labels, translated. */
+@get:StringRes
+val com.cashmemer.core.data.SettingsStore.DeviceToggle.labelRes: Int
+    get() = when (this) {
+        com.cashmemer.core.data.SettingsStore.DeviceToggle.PAYMENT_TERMINAL ->
+            R.string.payment_terminal
+        com.cashmemer.core.data.SettingsStore.DeviceToggle.OCR_COMPANION ->
+            R.string.ocr_companion
+        com.cashmemer.core.data.SettingsStore.DeviceToggle.AUTO_RECONNECT ->
+            R.string.auto_reconnect
+        com.cashmemer.core.data.SettingsStore.DeviceToggle.AUTO_CONNECT_DEFAULT ->
+            R.string.auto_connect_default
+        com.cashmemer.core.data.SettingsStore.DeviceToggle.ASK_BEFORE_NEW ->
+            R.string.ask_before_new
+        com.cashmemer.core.data.SettingsStore.DeviceToggle.SHOW_STATUS_BAR ->
+            R.string.show_status_bar
+        com.cashmemer.core.data.SettingsStore.DeviceToggle.CONNECTION_NOTIFICATIONS ->
+            R.string.connection_notifications
+        com.cashmemer.core.data.SettingsStore.DeviceToggle.CONFIRMATION_SOUNDS ->
+            R.string.confirmation_sounds
+        com.cashmemer.core.data.SettingsStore.DeviceToggle.VIBRATION_FEEDBACK ->
+            R.string.vibration_feedback
+    }

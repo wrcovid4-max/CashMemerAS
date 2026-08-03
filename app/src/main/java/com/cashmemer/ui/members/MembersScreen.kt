@@ -36,12 +36,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cashmemer.R
 import com.cashmemer.core.data.CashMemerRepository
 import com.cashmemer.core.model.Member
 import com.cashmemer.ui.components.SectionCard
@@ -78,7 +80,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item { SectionTitle("Members Directory") }
+            item { SectionTitle(stringResource(R.string.members_directory)) }
 
             items(members, key = { it.id }) { member ->
                 SectionCard {
@@ -114,12 +116,12 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                         }
 
                         IconButton(onClick = { editing = member }) {
-                            Icon(Icons.Filled.Edit, contentDescription = "Edit member")
+                            Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.action_edit))
                         }
                         IconButton(onClick = { viewModel.delete(member) }) {
                             Icon(
                                 Icons.Filled.Delete,
-                                contentDescription = "Delete member",
+                                contentDescription = stringResource(R.string.delete_member),
                                 tint = MaterialTheme.colorScheme.error,
                             )
                         }
@@ -130,7 +132,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
             if (members.isEmpty()) {
                 item {
                     Text(
-                        "No members yet — tap + to add your first customer.",
+                        stringResource(R.string.members_empty),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -145,7 +147,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
         ) {
-            Icon(Icons.Filled.Add, contentDescription = "Add member")
+            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_member))
         }
     }
 
@@ -157,33 +159,33 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
 
         AlertDialog(
             onDismissRequest = { editing = null },
-            title = { Text(if (member.id == 0L) "Add Member" else "Edit Member") },
+            title = { Text(stringResource(if (member.id == 0L) R.string.add_member else R.string.edit_member)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("Name") },
+                        label = { Text(stringResource(R.string.name)) },
                         singleLine = true,
                     )
                     OutlinedTextField(
                         value = phone,
                         onValueChange = { phone = it },
-                        label = { Text("Phone") },
+                        label = { Text(stringResource(R.string.phone)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     )
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text("Email") },
+                        label = { Text(stringResource(R.string.email)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     )
                     OutlinedTextField(
                         value = address,
                         onValueChange = { address = it },
-                        label = { Text("Address") },
+                        label = { Text(stringResource(R.string.address)) },
                     )
                 }
             },
@@ -201,9 +203,9 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                         editing = null
                     },
                     enabled = name.isNotBlank(),
-                ) { Text("Save") }
+                ) { Text(stringResource(R.string.action_save)) }
             },
-            dismissButton = { TextButton(onClick = { editing = null }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { editing = null }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
 }

@@ -30,11 +30,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cashmemer.R
 import com.cashmemer.core.data.CashMemerRepository
 import com.cashmemer.core.model.Product
 import com.cashmemer.core.util.Format
@@ -82,7 +84,7 @@ fun PriceListScreen(viewModel: PriceListViewModel = viewModel()) {
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        item { SectionTitle("Price List") }
+        item { SectionTitle(stringResource(R.string.price_list_title)) }
 
         item {
             Button(
@@ -90,7 +92,7 @@ fun PriceListScreen(viewModel: PriceListViewModel = viewModel()) {
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Icon(Icons.Filled.Add, contentDescription = null)
-                Text("  Add New Product")
+                Text(stringResource(R.string.add_new_product))
             }
         }
 
@@ -111,14 +113,14 @@ fun PriceListScreen(viewModel: PriceListViewModel = viewModel()) {
                     IconButton(onClick = { editing = product }) {
                         Icon(
                             Icons.Filled.Edit,
-                            contentDescription = "Edit",
+                            contentDescription = stringResource(R.string.action_edit),
                             tint = MaterialTheme.colorScheme.primary,
                         )
                     }
                     IconButton(onClick = { viewModel.remove(product) }) {
                         Icon(
                             Icons.Filled.Delete,
-                            contentDescription = "Remove",
+                            contentDescription = stringResource(R.string.remove),
                             tint = MaterialTheme.colorScheme.error,
                         )
                     }
@@ -129,7 +131,7 @@ fun PriceListScreen(viewModel: PriceListViewModel = viewModel()) {
         if (entries.isEmpty()) {
             item {
                 Text(
-                    "Nothing here yet — add the products you ring up most often.",
+                    stringResource(R.string.price_list_empty),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -143,26 +145,26 @@ fun PriceListScreen(viewModel: PriceListViewModel = viewModel()) {
 
         AlertDialog(
             onDismissRequest = { editing = null },
-            title = { Text(if (product.id == 0L) "Add Product" else "Edit Product") },
+            title = { Text(stringResource(if (product.id == 0L) R.string.add_new_product else R.string.edit_product)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("Product name") },
+                        label = { Text(stringResource(R.string.product_name)) },
                         singleLine = true,
                     )
                     OutlinedTextField(
                         value = price,
                         onValueChange = { price = it },
-                        label = { Text("Price") },
+                        label = { Text(stringResource(R.string.price)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     )
                     OutlinedTextField(
                         value = unit,
                         onValueChange = { unit = it },
-                        label = { Text("Unit") },
+                        label = { Text(stringResource(R.string.unit)) },
                         singleLine = true,
                     )
                 }
@@ -180,9 +182,9 @@ fun PriceListScreen(viewModel: PriceListViewModel = viewModel()) {
                         editing = null
                     },
                     enabled = name.isNotBlank(),
-                ) { Text("Save") }
+                ) { Text(stringResource(R.string.action_save)) }
             },
-            dismissButton = { TextButton(onClick = { editing = null }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { editing = null }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
 }

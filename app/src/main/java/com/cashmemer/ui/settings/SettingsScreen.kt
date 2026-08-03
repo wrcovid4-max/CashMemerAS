@@ -47,6 +47,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cashmemer.R
 import com.cashmemer.core.data.AppSettings
 import com.cashmemer.core.data.CashMemerRepository
 import com.cashmemer.core.data.MassPrintOption
@@ -236,23 +238,23 @@ fun SettingsScreen(
 
         item {
             SectionCard {
-                RowTitle(Icons.Filled.Devices, "Connected Devices & Integrations")
+                RowTitle(Icons.Filled.Devices, stringResource(R.string.connected_devices))
                 Text(
-                    "Manage payment terminals and scanners",
+                    stringResource(R.string.connected_devices_body),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 OutlinedButton(onClick = onOpenDevices, modifier = Modifier.fillMaxWidth()) {
-                    Text("Open")
+                    Text(stringResource(R.string.action_open))
                 }
             }
         }
 
         item {
             SectionCard {
-                RowTitle(Icons.Filled.Palette, "Appearance settings")
+                RowTitle(Icons.Filled.Palette, stringResource(R.string.appearance_settings))
                 Text(
-                    "Customize theme look & feel representing your style",
+                    stringResource(R.string.appearance_body),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -262,7 +264,15 @@ fun SettingsScreen(
                             selected = settings.themeMode == mode,
                             onClick = { viewModel.setThemeMode(mode) },
                             label = {
-                                Text(mode.name.lowercase().replaceFirstChar { it.uppercase() })
+                                Text(
+                                    stringResource(
+                                        when (mode) {
+                                            ThemeMode.SYSTEM -> R.string.theme_system
+                                            ThemeMode.LIGHT -> R.string.theme_light
+                                            ThemeMode.DARK -> R.string.theme_dark
+                                        }
+                                    )
+                                )
                             },
                         )
                     }
@@ -272,20 +282,20 @@ fun SettingsScreen(
 
         item {
             SectionCard {
-                RowTitle(Icons.Filled.Settings, "General Settings")
-                ToggleRow("Auto-Send", settings.autoSend, viewModel::setAutoSend)
-                ToggleRow("Save Signature", settings.saveSignature, viewModel::setSaveSignature)
+                RowTitle(Icons.Filled.Settings, stringResource(R.string.general_settings))
+                ToggleRow(stringResource(R.string.auto_send), settings.autoSend, viewModel::setAutoSend)
+                ToggleRow(stringResource(R.string.save_signature), settings.saveSignature, viewModel::setSaveSignature)
             }
         }
 
         item {
             SectionCard {
-                RowTitle(Icons.Filled.Print, "Print Settings")
-                ToggleRow("Auto-Print", settings.autoPrint, viewModel::setAutoPrint)
-                ToggleRow("Show Page 1 (Viewer)", settings.showPage1, viewModel::setShowPage1)
-                ToggleRow("Show Page 2 (Viewer)", settings.showPage2, viewModel::setShowPage2)
+                RowTitle(Icons.Filled.Print, stringResource(R.string.print_settings))
+                ToggleRow(stringResource(R.string.auto_print), settings.autoPrint, viewModel::setAutoPrint)
+                ToggleRow(stringResource(R.string.show_page_1), settings.showPage1, viewModel::setShowPage1)
+                ToggleRow(stringResource(R.string.show_page_2), settings.showPage2, viewModel::setShowPage2)
 
-                Text("Mass Print Option", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.mass_print_option), style = MaterialTheme.typography.titleMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     MassPrintOption.entries.forEach { option ->
                         FilterChip(
@@ -294,9 +304,9 @@ fun SettingsScreen(
                             label = {
                                 Text(
                                     when (option) {
-                                        MassPrintOption.PAGE_1 -> "Page 1"
-                                        MassPrintOption.PAGE_2 -> "Page 2"
-                                        MassPrintOption.BOTH -> "Both"
+                                        MassPrintOption.PAGE_1 -> stringResource(R.string.page_1)
+                                        MassPrintOption.PAGE_2 -> stringResource(R.string.page_2)
+                                        MassPrintOption.BOTH -> stringResource(R.string.both)
                                     }
                                 )
                             },
@@ -304,7 +314,7 @@ fun SettingsScreen(
                     }
                 }
                 Text(
-                    "Automatically print, send email/SMS, and save signature upon generation",
+                    stringResource(R.string.mass_print_body),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -313,11 +323,10 @@ fun SettingsScreen(
 
         item {
             SectionCard {
-                RowTitle(Icons.Filled.Lock, "App Lock")
-                ToggleRow("Require secure lock", settings.appLock, viewModel::setAppLock)
+                RowTitle(Icons.Filled.Lock, stringResource(R.string.app_lock))
+                ToggleRow(stringResource(R.string.require_secure_lock), settings.appLock, viewModel::setAppLock)
                 Text(
-                    "Require secure lock (PIN, Password, Pattern, Fingerprint or Face Unlock) " +
-                        "on startup and returning from background to access the app",
+                    stringResource(R.string.app_lock_body),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -368,16 +377,16 @@ private fun PasscodeCard(onUpdate: (String, String) -> Unit) {
     var confirm by remember { mutableStateOf("") }
 
     SectionCard {
-        SectionTitle("Custom Passcode Lock")
+        SectionTitle(stringResource(R.string.custom_passcode_lock))
         Text(
-            "Set up a custom 4-digit passcode as a secure fallback.",
+            stringResource(R.string.custom_passcode_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         OutlinedTextField(
             value = passcode,
             onValueChange = { if (it.length <= 4) passcode = it.filter(Char::isDigit) },
-            label = { Text("Enter New Passcode") },
+            label = { Text(stringResource(R.string.enter_new_passcode)) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
@@ -386,7 +395,7 @@ private fun PasscodeCard(onUpdate: (String, String) -> Unit) {
         OutlinedTextField(
             value = confirm,
             onValueChange = { if (it.length <= 4) confirm = it.filter(Char::isDigit) },
-            label = { Text("Confirm New Passcode") },
+            label = { Text(stringResource(R.string.confirm_new_passcode)) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
@@ -399,11 +408,11 @@ private fun PasscodeCard(onUpdate: (String, String) -> Unit) {
                     confirm = ""
                 },
                 modifier = Modifier.weight(1f),
-            ) { Text("Cancel") }
+            ) { Text(stringResource(R.string.action_cancel)) }
             Button(
                 onClick = { onUpdate(passcode, confirm) },
                 modifier = Modifier.weight(1f),
-            ) { Text("Update") }
+            ) { Text(stringResource(R.string.action_update)) }
         }
     }
 }
@@ -423,7 +432,7 @@ private fun AccountCard(
     onSyncDown: () -> Unit,
 ) {
     SectionCard {
-        RowTitle(Icons.Filled.AccountCircle, "Cloud Sync & Backup")
+        RowTitle(Icons.Filled.AccountCircle, stringResource(R.string.cloud_sync_backup))
 
         if (settings.signedIn) {
             Text(
@@ -438,7 +447,7 @@ private fun AccountCard(
 
             if (cloudReady) {
                 Text(
-                    text = "Cloud sync connected",
+                    text = stringResource(R.string.cloud_sync_connected),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -449,7 +458,7 @@ private fun AccountCard(
                         modifier = Modifier.weight(1f),
                     ) {
                         Icon(Icons.Filled.CloudUpload, contentDescription = null)
-                        Text("  Sync")
+                        Text(stringResource(R.string.sync))
                     }
                     OutlinedButton(
                         onClick = onSyncDown,
@@ -457,20 +466,17 @@ private fun AccountCard(
                         modifier = Modifier.weight(1f),
                     ) {
                         Icon(Icons.Filled.CloudDownload, contentDescription = null)
-                        Text("  Restore")
+                        Text(stringResource(R.string.restore))
                     }
                 }
                 Text(
-                    text = "Restore replaces everything on this phone with the " +
-                        "cloud copy. Use it on a new device, not to merge.",
+                    text = stringResource(R.string.restore_warning),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             } else {
                 Text(
-                    text = "Cloud sync is off — add google-services.json to the app " +
-                        "module to switch it on. Your daily folder backups below " +
-                        "still run.",
+                    text = stringResource(R.string.cloud_sync_off),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -482,17 +488,17 @@ private fun AccountCard(
 
             OutlinedButton(onClick = onSignOut, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
-                Text("  Sign out")
+                Text(stringResource(R.string.sign_out))
             }
         } else {
             Text(
-                text = "Sign in with Google to tag receipts with who created them.",
+                text = stringResource(R.string.sign_in_prompt),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Button(onClick = onSignIn, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Filled.AccountCircle, contentDescription = null)
-                Text("  Sign in with Google")
+                Text(stringResource(R.string.sign_in_google))
             }
             if (!GoogleAuth.isConfigured) {
                 Text(
@@ -520,11 +526,9 @@ private fun AutoBackupCard(
     ) { uri -> uri?.let(viewModel::setBackupFolder) }
 
     SectionCard {
-        RowTitle(Icons.Filled.Schedule, "Automatic Backup")
+        RowTitle(Icons.Filled.Schedule, stringResource(R.string.automatic_backup))
         Text(
-            "Writes a dated JSON snapshot every day into a folder you choose. " +
-                "Pick a folder that syncs to the cloud and your records survive " +
-                "losing this phone.",
+            stringResource(R.string.automatic_backup_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -535,8 +539,8 @@ private fun AutoBackupCard(
         ) {
             Icon(Icons.Filled.FolderOpen, contentDescription = null)
             Text(
-                text = if (settings.backupFolderUri == null) "  Choose backup folder"
-                else "  Change backup folder",
+                text = if (settings.backupFolderUri == null) stringResource(R.string.choose_backup_folder)
+                else stringResource(R.string.change_backup_folder),
             )
         }
 
@@ -549,7 +553,7 @@ private fun AutoBackupCard(
         }
 
         ToggleRow(
-            label = "Daily automatic backup",
+            label = stringResource(R.string.daily_automatic_backup),
             checked = settings.autoBackup,
             onCheckedChange = viewModel::setAutoBackup,
         )
@@ -560,14 +564,17 @@ private fun AutoBackupCard(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Icon(Icons.Filled.Save, contentDescription = null)
-            Text("  Back up now")
+            Text(stringResource(R.string.back_up_now))
         }
 
         Text(
-            text = when {
-                settings.lastBackupError != null -> "Last backup failed: ${settings.lastBackupError}"
-                settings.lastBackupAt > 0L -> "Last backup: ${Format.timestamp(settings.lastBackupAt)}"
-                else -> "No backup taken yet"
+            text = when (val backupError = settings.lastBackupError) {
+                null -> if (settings.lastBackupAt > 0L) {
+                    stringResource(R.string.last_backup, Format.timestamp(settings.lastBackupAt))
+                } else {
+                    stringResource(R.string.no_backup_yet)
+                }
+                else -> stringResource(R.string.last_backup_failed, backupError)
             },
             style = MaterialTheme.typography.bodyMedium,
             color = if (settings.lastBackupError != null) MaterialTheme.colorScheme.error
@@ -581,9 +588,9 @@ private fun BackupCard(viewModel: SettingsViewModel) {
     var payload by remember { mutableStateOf("") }
 
     SectionCard {
-        RowTitle(Icons.Filled.CloudUpload, "Backup & Recovery (Offline Backup)")
+        RowTitle(Icons.Filled.CloudUpload, stringResource(R.string.backup_recovery))
         Text(
-            "Export all locally stored receipt rows or restore previous records instantly.",
+            stringResource(R.string.backup_recovery_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -594,7 +601,7 @@ private fun BackupCard(viewModel: SettingsViewModel) {
                 modifier = Modifier.weight(1f),
             ) {
                 Icon(Icons.Filled.Download, contentDescription = null)
-                Text("  Export JSON")
+                Text(stringResource(R.string.export_json))
             }
             OutlinedButton(
                 onClick = { viewModel.importJson(payload) },
@@ -602,14 +609,14 @@ private fun BackupCard(viewModel: SettingsViewModel) {
                 modifier = Modifier.weight(1f),
             ) {
                 Icon(Icons.Filled.Restore, contentDescription = null)
-                Text("  Restore JSON")
+                Text(stringResource(R.string.restore_json))
             }
         }
 
         OutlinedTextField(
             value = payload,
             onValueChange = { payload = it },
-            label = { Text("Backup payload") },
+            label = { Text(stringResource(R.string.backup_payload)) },
             minLines = 4,
             maxLines = 10,
             modifier = Modifier.fillMaxWidth(),

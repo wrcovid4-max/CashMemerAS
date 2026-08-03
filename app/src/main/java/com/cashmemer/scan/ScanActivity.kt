@@ -42,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
@@ -49,6 +50,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.concurrent.futures.await
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.cashmemer.R
 import com.cashmemer.core.ui.theme.CashMemerTheme
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
@@ -120,7 +122,7 @@ private fun ScanScreen(
         ActivityResultContracts.RequestPermission(),
     ) { granted ->
         hasPermission = granted
-        if (!granted) error = "Camera permission is needed to scan"
+        if (!granted) error = context.getString(R.string.camera_permission_needed)
     }
 
     LaunchedEffect(Unit) {
@@ -136,11 +138,11 @@ private fun ScanScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = error ?: "Waiting for camera permission…",
+                text = error ?: stringResource(R.string.waiting_for_camera),
                 style = MaterialTheme.typography.bodyLarge,
             )
             Button(onClick = onCancel, modifier = Modifier.padding(top = 16.dp)) {
-                Text("Back")
+                Text(stringResource(R.string.action_back))
             }
         }
         return
@@ -188,7 +190,7 @@ private fun ScanScreen(
                 CameraSelector.DEFAULT_BACK_CAMERA,
                 *useCases,
             )
-        }.onFailure { error = it.message ?: "Could not start the camera" }
+        }.onFailure { error = it.message ?: context.getString(R.string.camera_failed) }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -219,18 +221,18 @@ private fun ScanScreen(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(Icons.Filled.Camera, contentDescription = null)
-                    Text("  Capture")
+                    Text(stringResource(R.string.capture))
                 }
             } else {
                 Text(
-                    text = "Point the camera at a barcode",
+                    text = stringResource(R.string.point_at_barcode),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onPrimary,
                 )
             }
 
             Button(onClick = onCancel, modifier = Modifier.fillMaxWidth()) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     }
@@ -294,7 +296,7 @@ private fun captureTo(
 
             override fun onError(exception: ImageCaptureException) {
                 ContextCompat.getMainExecutor(context).execute {
-                    onError(exception.message ?: "Capture failed")
+                    onError(exception.message ?: context.getString(R.string.capture_failed))
                 }
             }
         },

@@ -40,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -47,12 +48,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cashmemer.R
 import com.cashmemer.core.data.AppSettings
 import com.cashmemer.core.data.SettingsStore
 import com.cashmemer.devices.ConnectionState
 import com.cashmemer.devices.IntegrationLog
 import com.cashmemer.devices.PairedDevice
 import com.cashmemer.devices.TerminalManager
+import com.cashmemer.ui.labelRes
 import com.cashmemer.ui.components.SectionCard
 import com.cashmemer.ui.components.SectionTitle
 import kotlinx.coroutines.launch
@@ -120,18 +123,18 @@ fun DevicesScreen(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item { SectionTitle("Connected Devices & Integrations") }
+        item { SectionTitle(stringResource(R.string.connected_devices)) }
 
         item { StatusBanner(status.state, status.lastError, status.bluetoothEnabled) }
 
         item {
             SectionCard {
-                SectionTitle("Core Integrations")
+                SectionTitle(stringResource(R.string.core_integrations))
 
                 DeviceToggleRow(
                     icon = Icons.Filled.PointOfSale,
-                    title = "Payment Terminal Integration",
-                    subtitle = "Enable or disable smart payment card readers.",
+                    title = stringResource(R.string.payment_terminal),
+                    subtitle = stringResource(R.string.payment_terminal_body),
                     checked = with(store) { settings.isEnabled(SettingsStore.DeviceToggle.PAYMENT_TERMINAL) },
                     onCheckedChange = {
                         viewModel.setToggle(SettingsStore.DeviceToggle.PAYMENT_TERMINAL, it)
@@ -140,8 +143,8 @@ fun DevicesScreen(
                 HorizontalDivider()
                 DeviceToggleRow(
                     icon = Icons.Filled.BugReport,
-                    title = "Android OCR Companion",
-                    subtitle = "Enable or disable Android OCR companion scanning.",
+                    title = stringResource(R.string.ocr_companion),
+                    subtitle = stringResource(R.string.ocr_companion_body),
                     checked = with(store) { settings.isEnabled(SettingsStore.DeviceToggle.OCR_COMPANION) },
                     onCheckedChange = {
                         viewModel.setToggle(SettingsStore.DeviceToggle.OCR_COMPANION, it)
@@ -152,7 +155,7 @@ fun DevicesScreen(
 
         item {
             SectionCard {
-                SectionTitle("Connection Preferences")
+                SectionTitle(stringResource(R.string.connection_preferences))
                 SettingsStore.DeviceToggle.entries
                     .filter {
                         it != SettingsStore.DeviceToggle.PAYMENT_TERMINAL &&
@@ -165,7 +168,7 @@ fun DevicesScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
-                                text = toggle.label,
+                                text = stringResource(toggle.labelRes),
                                 modifier = Modifier.weight(1f),
                                 style = MaterialTheme.typography.bodyLarge,
                             )
@@ -185,7 +188,7 @@ fun DevicesScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    SectionTitle("Manage Paired Devices")
+                    SectionTitle(stringResource(R.string.manage_paired_devices))
                     OutlinedButton(onClick = viewModel::refresh) {
                         Icon(Icons.Filled.Refresh, contentDescription = "Refresh")
                     }
@@ -193,25 +196,24 @@ fun DevicesScreen(
 
                 when {
                     !status.bluetoothSupported ->
-                        Text("This device has no Bluetooth radio.")
+                        Text(stringResource(R.string.no_bluetooth_radio))
 
                     !status.permissionsGranted -> {
-                        Text("Bluetooth permission is needed to see paired devices.")
+                        Text(stringResource(R.string.bluetooth_permission_needed))
                         Button(
                             onClick = {
                                 permissionLauncher.launch(TerminalManager.requiredPermissions())
                             },
                             modifier = Modifier.fillMaxWidth(),
-                        ) { Text("Grant permission") }
+                        ) { Text(stringResource(R.string.action_grant_permission)) }
                     }
 
                     !status.bluetoothEnabled ->
-                        Text("Switch Bluetooth on in system settings, then refresh.")
+                        Text(stringResource(R.string.bluetooth_switch_on))
 
                     status.paired.isEmpty() ->
                         Text(
-                            "Nothing paired yet. Pair your scanner, terminal or printer " +
-                                "in Android's Bluetooth settings first — it will show up here.",
+                            stringResource(R.string.nothing_paired),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
 
@@ -241,21 +243,21 @@ fun DevicesScreen(
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error,
                     )
-                    Text("  Forget All Paired Devices")
+                    Text(stringResource(R.string.forget_all_devices))
                 }
                 OutlinedButton(
                     onClick = { showDiagnostics = true },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(Icons.Filled.HealthAndSafety, contentDescription = null)
-                    Text("  Run Connection Diagnostics")
+                    Text(stringResource(R.string.run_diagnostics))
                 }
                 OutlinedButton(
                     onClick = { showLogs = true },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(Icons.Filled.BugReport, contentDescription = null)
-                    Text("  View Integration Logs (${logs.size})")
+                    Text(stringResource(R.string.view_logs, logs.size))
                 }
             }
         }
@@ -265,7 +267,7 @@ fun DevicesScreen(
         val results = remember { viewModel.diagnostics(context) }
         AlertDialog(
             onDismissRequest = { showDiagnostics = false },
-            title = { Text("Connection Diagnostics") },
+            title = { Text(stringResource(R.string.diagnostics_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     results.forEach { (label, ok) ->
@@ -282,7 +284,7 @@ fun DevicesScreen(
                     }
                     status.lastError?.let {
                         Text(
-                            "Last error: $it",
+                            stringResource(R.string.last_error, it),
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodyMedium,
                         )
@@ -290,7 +292,7 @@ fun DevicesScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showDiagnostics = false }) { Text("Close") }
+                TextButton(onClick = { showDiagnostics = false }) { Text(stringResource(R.string.action_close)) }
             },
         )
     }
@@ -298,10 +300,10 @@ fun DevicesScreen(
     if (showLogs) {
         AlertDialog(
             onDismissRequest = { showLogs = false },
-            title = { Text("Integration Logs") },
+            title = { Text(stringResource(R.string.integration_logs)) },
             text = {
                 if (logs.isEmpty()) {
-                    Text("Nothing logged yet.")
+                    Text(stringResource(R.string.nothing_logged))
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxWidth()) {
                         items(logs.reversed()) { entry ->
@@ -315,10 +317,10 @@ fun DevicesScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showLogs = false }) { Text("Close") }
+                TextButton(onClick = { showLogs = false }) { Text(stringResource(R.string.action_close)) }
             },
             dismissButton = {
-                TextButton(onClick = viewModel::clearLogs) { Text("Clear") }
+                TextButton(onClick = viewModel::clearLogs) { Text(stringResource(R.string.action_clear)) }
             },
         )
     }
@@ -326,12 +328,10 @@ fun DevicesScreen(
     if (confirmForgetAll) {
         AlertDialog(
             onDismissRequest = { confirmForgetAll = false },
-            title = { Text("Forget all paired devices?") },
+            title = { Text(stringResource(R.string.forget_all_title)) },
             text = {
                 Text(
-                    "Cash Memer will disconnect and clear its default device. " +
-                        "Android keeps the Bluetooth pairings themselves — remove " +
-                        "those in system Bluetooth settings if you want them gone."
+                    stringResource(R.string.forget_all_body)
                 )
             },
             confirmButton = {
@@ -341,10 +341,10 @@ fun DevicesScreen(
                         viewModel.setDefaultDevice(null)
                         confirmForgetAll = false
                     }
-                ) { Text("Forget") }
+                ) { Text(stringResource(R.string.forget)) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmForgetAll = false }) { Text("Cancel") }
+                TextButton(onClick = { confirmForgetAll = false }) { Text(stringResource(R.string.action_cancel)) }
             },
         )
     }
@@ -356,15 +356,16 @@ private fun StatusBanner(
     error: String?,
     bluetoothOn: Boolean,
 ) {
+    val context = LocalContext.current
     val (text, colour) = when {
         state == ConnectionState.CONNECTED ->
-            "Device connected" to MaterialTheme.colorScheme.primary
+            context.getString(R.string.device_connected) to MaterialTheme.colorScheme.primary
         state == ConnectionState.CONNECTING ->
-            "Connecting…" to MaterialTheme.colorScheme.onSurfaceVariant
+            context.getString(R.string.device_connecting) to MaterialTheme.colorScheme.onSurfaceVariant
         state == ConnectionState.FAILED ->
-            (error ?: "Connection failed") to MaterialTheme.colorScheme.error
-        !bluetoothOn -> "Bluetooth is off" to MaterialTheme.colorScheme.error
-        else -> "No device connected" to MaterialTheme.colorScheme.onSurfaceVariant
+            (error ?: context.getString(R.string.connection_failed)) to MaterialTheme.colorScheme.error
+        !bluetoothOn -> context.getString(R.string.bluetooth_off) to MaterialTheme.colorScheme.error
+        else -> context.getString(R.string.device_none) to MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     SectionCard(accent = state == ConnectionState.CONNECTED) {
@@ -434,7 +435,7 @@ private fun DeviceRow(
                 )
             }
             if (isDefault) {
-                AssistChip(onClick = {}, label = { Text("Default") })
+                AssistChip(onClick = {}, label = { Text(stringResource(R.string.default_device)) })
             }
         }
 
@@ -446,18 +447,18 @@ private fun DeviceRow(
         ) {
             if (device.connected) {
                 OutlinedButton(onClick = onDisconnect, modifier = Modifier.weight(1f)) {
-                    Text("Disconnect")
+                    Text(stringResource(R.string.action_disconnect))
                 }
             } else {
                 Button(
                     onClick = onConnect,
                     enabled = !connecting,
                     modifier = Modifier.weight(1f),
-                ) { Text(if (connecting) "Connecting…" else "Connect") }
+                ) { Text(stringResource(if (connecting) R.string.device_connecting else R.string.action_connect)) }
             }
             if (!isDefault) {
                 OutlinedButton(onClick = onMakeDefault, modifier = Modifier.weight(1f)) {
-                    Text("Make default")
+                    Text(stringResource(R.string.make_default))
                 }
             }
         }

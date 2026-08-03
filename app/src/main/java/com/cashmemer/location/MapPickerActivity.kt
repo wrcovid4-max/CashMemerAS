@@ -37,8 +37,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.cashmemer.R
 import com.cashmemer.core.ui.theme.CashMemerTheme
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -178,12 +180,12 @@ private fun MapPickerScreen(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onCancel) {
-                    Icon(Icons.Filled.Close, contentDescription = "Cancel")
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_cancel))
                 }
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
-                    placeholder = { Text("Search address or place…") },
+                    placeholder = { Text(stringResource(R.string.search_address)) },
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                 )
@@ -204,7 +206,7 @@ private fun MapPickerScreen(
                     if (searching) {
                         CircularProgressIndicator(modifier = Modifier.padding(4.dp))
                     } else {
-                        Icon(Icons.Filled.Search, contentDescription = "Search")
+                        Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.search))
                     }
                 }
             }
@@ -222,7 +224,7 @@ private fun MapPickerScreen(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text("Selected Address", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.selected_address), style = MaterialTheme.typography.labelLarge)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Filled.MyLocation,
@@ -230,7 +232,7 @@ private fun MapPickerScreen(
                         tint = MaterialTheme.colorScheme.primary,
                     )
                     Text(
-                        text = if (resolving) "Finding address…" else address,
+                        text = if (resolving) stringResource(R.string.finding_address) else address,
                         modifier = Modifier.padding(start = 8.dp),
                         style = MaterialTheme.typography.bodyLarge,
                     )
@@ -244,7 +246,7 @@ private fun MapPickerScreen(
                     },
                     enabled = !resolving && address.isNotBlank(),
                     modifier = Modifier.fillMaxWidth(),
-                ) { Text("Confirm Location") }
+                ) { Text(stringResource(R.string.confirm_location)) }
             }
         }
     }

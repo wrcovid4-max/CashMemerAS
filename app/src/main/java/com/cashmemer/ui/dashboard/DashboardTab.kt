@@ -16,10 +16,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cashmemer.R
 import com.cashmemer.core.data.CashMemerRepository
 import com.cashmemer.core.model.Receipt
 import com.cashmemer.core.util.Format
@@ -96,15 +98,15 @@ fun DashboardTab(viewModel: DashboardViewModel = viewModel()) {
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 StatTile(
-                    label = "Today",
+                    label = stringResource(R.string.today),
                     value = Format.amountWithCurrency(stats.todayTotal, stats.currencyCode),
-                    caption = "${stats.todayCount} receipt(s)",
+                    caption = stringResource(R.string.receipts_count, stats.todayCount),
                     modifier = Modifier.weight(1f),
                 )
                 StatTile(
-                    label = "This month",
+                    label = stringResource(R.string.this_month),
                     value = Format.amountWithCurrency(stats.monthTotal, stats.currencyCode),
-                    caption = "${stats.receiptCount} total",
+                    caption = stringResource(R.string.total_count, stats.receiptCount),
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -112,7 +114,7 @@ fun DashboardTab(viewModel: DashboardViewModel = viewModel()) {
 
         item {
             SectionCard {
-                SectionTitle("All-time sales")
+                SectionTitle(stringResource(R.string.all_time_sales))
                 Text(
                     text = Format.amountWithCurrency(stats.allTimeTotal, stats.currencyCode),
                     style = MaterialTheme.typography.headlineLarge,
@@ -123,10 +125,10 @@ fun DashboardTab(viewModel: DashboardViewModel = viewModel()) {
 
         item {
             SectionCard {
-                SectionTitle("Top stores")
+                SectionTitle(stringResource(R.string.top_stores))
                 if (stats.topStores.isEmpty()) {
                     Text(
-                        "No data yet.",
+                        stringResource(R.string.no_data_yet),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -143,7 +145,7 @@ fun DashboardTab(viewModel: DashboardViewModel = viewModel()) {
 
         item {
             SectionCard {
-                SectionTitle("By category")
+                SectionTitle(stringResource(R.string.by_category))
                 val max = stats.byCategory.maxOfOrNull { it.second } ?: 1.0
                 stats.byCategory.forEach { (category, total) ->
                     BarRow(

@@ -50,16 +50,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cashmemer.backup.BackupWriter
+import com.cashmemer.R
 import com.cashmemer.core.data.ReceiptItemCodec
 import com.cashmemer.core.model.PaymentType
 import com.cashmemer.core.model.Receipt
 import com.cashmemer.core.util.Format
 import com.cashmemer.print.ReceiptOutput
+import com.cashmemer.ui.localized
 import com.cashmemer.ui.components.SectionCard
 import com.cashmemer.ui.receipts.ReceiptEditBus
 
@@ -104,7 +107,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                     modifier = Modifier.weight(1f),
                 ) {
                     Icon(Icons.Filled.CloudDownload, contentDescription = null)
-                    Text("  Backup JSON")
+                    Text(stringResource(R.string.backup_json))
                 }
                 OutlinedButton(
                     onClick = {
@@ -113,7 +116,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                     modifier = Modifier.weight(1f),
                 ) {
                     Icon(Icons.Filled.CloudUpload, contentDescription = null)
-                    Text("  Restore JSON")
+                    Text(stringResource(R.string.restore_json))
                 }
             }
         }
@@ -123,7 +126,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                 value = query,
                 onValueChange = viewModel::setQuery,
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                placeholder = { Text("Search by title, location, customer…") },
+                placeholder = { Text(stringResource(R.string.search_receipts)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -147,8 +150,8 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                 ) {
                     Icon(Icons.Filled.CalendarMonth, contentDescription = null)
                     Text(
-                        text = if (range.from == 0L) "  Start Date"
-                        else "  ${Format.date(range.from)}",
+                        text = if (range.from == 0L) stringResource(R.string.start_date)
+                        else Format.date(range.from),
                     )
                 }
                 OutlinedButton(
@@ -157,8 +160,8 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                 ) {
                     Icon(Icons.Filled.CalendarMonth, contentDescription = null)
                     Text(
-                        text = if (range.to == 0L) "  End Date"
-                        else "  ${Format.date(range.to)}",
+                        text = if (range.to == 0L) stringResource(R.string.end_date)
+                        else Format.date(range.to),
                     )
                 }
             }
@@ -166,7 +169,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
 
         if (range.from != 0L || range.to != 0L) {
             item {
-                TextButton(onClick = viewModel::clearRange) { Text("Clear date filter") }
+                TextButton(onClick = viewModel::clearRange) { Text(stringResource(R.string.clear_date_filter)) }
             }
         }
 
@@ -180,7 +183,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                         checked = selected.size == receipts.size && receipts.isNotEmpty(),
                         onCheckedChange = { viewModel.selectAll(receipts.map { it.id }) },
                     )
-                    Text("Select All", modifier = Modifier.weight(1f))
+                    Text(stringResource(R.string.action_select_all), modifier = Modifier.weight(1f))
                     IconButton(
                         onClick = {
                             viewModel.renderPdf(selected, forPrinting = true) { file ->
@@ -218,7 +221,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error,
                     )
-                    TextButton(onClick = viewModel::consumeError) { Text("Dismiss") }
+                    TextButton(onClick = viewModel::consumeError) { Text(stringResource(R.string.action_dismiss)) }
                 }
             }
         }
@@ -255,7 +258,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
         if (receipts.isEmpty()) {
             item {
                 Text(
-                    text = "No receipts match.",
+                    text = stringResource(R.string.no_receipts_match),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -300,10 +303,10 @@ private fun DateDialog(
     DatePickerDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = { onPicked(state.selectedDateMillis) }) { Text("OK") }
+            TextButton(onClick = { onPicked(state.selectedDateMillis) }) { Text(stringResource(android.R.string.ok)) }
         },
         dismissButton = {
-            TextButton(onClick = { onPicked(null) }) { Text("Clear") }
+            TextButton(onClick = { onPicked(null) }) { Text(stringResource(R.string.action_clear)) }
         },
     ) {
         DatePicker(state = state)
@@ -332,9 +335,9 @@ private fun WeeklySummaryCard(
                     .weight(1f)
                     .padding(start = 12.dp)
             ) {
-                Text("Weekly AI Summary", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.weekly_ai_summary), style = MaterialTheme.typography.titleLarge)
                 Text(
-                    "Business Insights",
+                    stringResource(R.string.business_insights),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -343,7 +346,7 @@ private fun WeeklySummaryCard(
                 Icon(
                     imageVector = if (open) Icons.Filled.ExpandLess
                     else Icons.Filled.ExpandMore,
-                    contentDescription = if (open) "Collapse" else "Expand",
+                    contentDescription = null,
                 )
             }
         }
@@ -352,28 +355,28 @@ private fun WeeklySummaryCard(
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StatTile(
-                        "Total Spend",
+                        stringResource(R.string.total_spend),
                         Format.amountWithCurrency(summary.totalSpend, summary.currencyCode),
                         Modifier.weight(1f),
                     )
-                    StatTile("Txns", summary.transactions.toString(), Modifier.weight(1f))
+                    StatTile(stringResource(R.string.transactions), summary.transactions.toString(), Modifier.weight(1f))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StatTile(
-                        "Avg Value",
+                        stringResource(R.string.avg_value),
                         Format.amountWithCurrency(summary.averageValue, summary.currencyCode),
                         Modifier.weight(1f),
                     )
-                    StatTile("Top Customer", summary.topCustomer, Modifier.weight(1f))
+                    StatTile(stringResource(R.string.top_customer), summary.topCustomer, Modifier.weight(1f))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StatTile(
-                        "Total Tax",
+                        stringResource(R.string.total_tax),
                         Format.amountWithCurrency(summary.totalTax, summary.currencyCode),
                         Modifier.weight(1f),
                     )
                     StatTile(
-                        "Total Discount",
+                        stringResource(R.string.total_discount),
                         Format.amountWithCurrency(
                             summary.totalDiscount,
                             summary.currencyCode,
@@ -396,7 +399,7 @@ private fun WeeklySummaryCard(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(Icons.Filled.AutoAwesome, contentDescription = null)
-                    Text(if (summary.insight == null) "  Generate insight" else "  Regenerate")
+                    Text(stringResource(if (summary.insight == null) R.string.generate_insight else R.string.regenerate_insight))
                 }
             }
         }
@@ -439,11 +442,11 @@ private fun HistoryRow(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = receipt.placeName.ifBlank { "Untitled" },
+                    text = receipt.placeName.ifBlank { stringResource(R.string.untitled) },
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    text = receipt.customerName.ifBlank { "Walk-in customer" },
+                    text = receipt.customerName.ifBlank { stringResource(R.string.walk_in_customer) },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -463,7 +466,7 @@ private fun HistoryRow(
             IconButton(onClick = onPin) {
                 Icon(
                     Icons.Filled.PushPin,
-                    contentDescription = "Pin receipt",
+                    contentDescription = stringResource(R.string.pin_receipt),
                     tint = if (receipt.pinned) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -472,7 +475,7 @@ private fun HistoryRow(
                 Icon(
                     imageVector = if (expanded) Icons.Filled.ExpandLess
                     else Icons.Filled.ExpandMore,
-                    contentDescription = if (expanded) "Hide details" else "Show details",
+                    contentDescription = null,
                 )
             }
         }
@@ -505,7 +508,7 @@ private fun HistoryRow(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Text(
-                            text = "Notes (Page 1): ${receipt.notesPage1}",
+                            text = stringResource(R.string.notes_page_1) + ": " + receipt.notesPage1,
                             modifier = Modifier.padding(start = 8.dp),
                             style = MaterialTheme.typography.bodyMedium,
                             fontStyle = FontStyle.Italic,
@@ -521,7 +524,7 @@ private fun HistoryRow(
                             tint = MaterialTheme.colorScheme.primary,
                         )
                         Text(
-                            text = "Saved Location: ${receipt.locationAddress}",
+                            text = stringResource(R.string.saved_location) + ": " + receipt.locationAddress,
                             modifier = Modifier.padding(start = 8.dp),
                             style = MaterialTheme.typography.bodyMedium,
                         )
@@ -533,16 +536,11 @@ private fun HistoryRow(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        "Payment: ${PaymentType.from(receipt.paymentType).label}",
+                        stringResource(R.string.payment_label) + ": " + PaymentType.from(receipt.paymentType).localized(),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Text(
-                        "Change: ${
-                            Format.amountWithCurrency(
-                                receipt.changeAmount,
-                                receipt.currencyCode,
-                            )
-                        }",
+                        stringResource(R.string.change_label) + ": " + Format.amountWithCurrency(receipt.changeAmount, receipt.currencyCode),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -552,14 +550,14 @@ private fun HistoryRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    RowAction(Icons.Filled.Share, "Share", onShare)
-                    RowAction(Icons.Filled.PictureAsPdf, "PDF", onPdf)
-                    RowAction(Icons.Filled.Print, "Print", onPrint)
-                    RowAction(Icons.Filled.ContentCopy, "Dupe", onDuplicate)
-                    RowAction(Icons.Filled.Edit, "Edit", onEdit)
+                    RowAction(Icons.Filled.Share, stringResource(R.string.action_share), onShare)
+                    RowAction(Icons.Filled.PictureAsPdf, stringResource(R.string.action_pdf), onPdf)
+                    RowAction(Icons.Filled.Print, stringResource(R.string.action_print), onPrint)
+                    RowAction(Icons.Filled.ContentCopy, stringResource(R.string.action_duplicate), onDuplicate)
+                    RowAction(Icons.Filled.Edit, stringResource(R.string.action_edit), onEdit)
                     RowAction(
                         Icons.Filled.Delete,
-                        "Delete",
+                        stringResource(R.string.action_delete),
                         onDelete,
                         tint = MaterialTheme.colorScheme.error,
                     )
