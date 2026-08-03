@@ -301,6 +301,7 @@
     <string name="forget">Forget</string>
 
     <!-- App lock -->
+    <string name="biometric_unavailable">Cannot show the fingerprint prompt here</string>
     <string name="app_locked">Cash Memer is locked</string>
     <string name="unlock_title">Unlock Cash Memer</string>
     <string name="unlock_subtitle">Confirm it\'s you to open your till</string>

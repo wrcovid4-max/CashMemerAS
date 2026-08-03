@@ -107,7 +107,7 @@ private fun LockScreen(
 
     fun promptBiometric() {
         val activity = context as? FragmentActivity ?: run {
-            error = context.getString(R.string.camera_failed)
+            error = context.getString(R.string.biometric_unavailable)
             return
         }
 

@@ -301,6 +301,7 @@
     <string name="forget">بھول جائیں</string>
 
     <!-- App lock -->
+    <string name="biometric_unavailable">یہاں فنگر پرنٹ پرامپٹ نہیں دکھایا جا سکتا</string>
     <string name="app_locked">کیش میمر مقفل ہے</string>
     <string name="unlock_title">کیش میمر کھولیں</string>
     <string name="unlock_subtitle">اپنا حساب کھولنے کے لیے تصدیق کریں</string>
