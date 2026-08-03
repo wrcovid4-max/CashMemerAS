@@ -5,6 +5,7 @@ import com.cashmemer.core.model.CurrencyRate
 import com.cashmemer.core.model.Member
 import com.cashmemer.core.model.Product
 import com.cashmemer.core.model.Receipt
+import com.cashmemer.core.model.ReceiptAnnotation
 import com.cashmemer.core.network.ExchangeRateApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -63,6 +64,10 @@ class CashMemerRepository private constructor(context: Context) {
     suspend fun deleteReceipts(ids: List<Long>) = receipts.deleteByIds(ids)
 
     suspend fun setPinned(id: Long, pinned: Boolean) = receipts.setPinned(id, pinned)
+
+    /** Persists the marks made on a memo in the viewer. */
+    suspend fun setAnnotations(id: Long, annotations: List<ReceiptAnnotation>) =
+        receipts.setAnnotations(id, ReceiptAnnotationCodec.encode(annotations))
 
     // ---- Products -----------------------------------------------------------
 
@@ -166,6 +171,7 @@ class CashMemerRepository private constructor(context: Context) {
                     .put("notesPage1", r.notesPage1)
                     .put("notesPage2", r.notesPage2)
                     .put("items", JSONArray(r.itemsJson))
+                    .put("annotations", JSONArray(r.annotationsJson))
                     .put("pinned", r.pinned)
                     .put("createdAt", r.createdAt)
             )
@@ -246,6 +252,8 @@ class CashMemerRepository private constructor(context: Context) {
                                 notesPage1 = o.optString("notesPage1"),
                                 notesPage2 = o.optString("notesPage2"),
                                 itemsJson = o.optJSONArray("items")?.toString() ?: "[]",
+                                annotationsJson =
+                                    o.optJSONArray("annotations")?.toString() ?: "[]",
                                 pinned = o.optBoolean("pinned", false),
                                 createdAt = o.optLong("createdAt", System.currentTimeMillis()),
                             )

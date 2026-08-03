@@ -3,6 +3,7 @@ package com.cashmemer.ui.history
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,11 +25,11 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -65,6 +66,7 @@ import com.cashmemer.print.ReceiptOutput
 import com.cashmemer.ui.localized
 import com.cashmemer.ui.components.SectionCard
 import com.cashmemer.ui.receipts.ReceiptEditBus
+import com.cashmemer.ui.viewer.openReceiptViewer
 
 @Composable
 fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
@@ -197,11 +199,11 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                                 ReceiptOutput.share(context, file)
                             }
                         }
-                    ) { Icon(Icons.Filled.Share, contentDescription = "Share selected") }
+                    ) { Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.share_selected)) }
                     IconButton(onClick = viewModel::deleteSelected) {
                         Icon(
                             Icons.Filled.Delete,
-                            contentDescription = "Delete selected",
+                            contentDescription = stringResource(R.string.delete_selected),
                             tint = MaterialTheme.colorScheme.error,
                         )
                     }
@@ -239,14 +241,14 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                         ReceiptOutput.share(context, file)
                     }
                 },
-                onPdf = {
-                    viewModel.renderPdf(listOf(receipt.id)) { file ->
-                        ReceiptOutput.share(context, file)
-                    }
-                },
+                onOpen = { context.openReceiptViewer(receipt.id) },
                 onPrint = {
                     viewModel.renderPdf(listOf(receipt.id), forPrinting = true) { file ->
-                        ReceiptOutput.print(context, file, "Receipt ${receipt.id}")
+                        ReceiptOutput.print(
+                            context,
+                            file,
+                            context.getString(R.string.print_job_receipt, receipt.id),
+                        )
                     }
                 },
                 onDuplicate = { viewModel.duplicate(receipt) },
@@ -427,7 +429,7 @@ private fun HistoryRow(
     onToggleExpanded: () -> Unit,
     onPin: () -> Unit,
     onShare: () -> Unit,
-    onPdf: () -> Unit,
+    onOpen: () -> Unit,
     onPrint: () -> Unit,
     onDuplicate: () -> Unit,
     onEdit: () -> Unit,
@@ -440,7 +442,12 @@ private fun HistoryRow(
         ) {
             Checkbox(checked = checked, onCheckedChange = { onCheckedChange() })
 
-            Column(modifier = Modifier.weight(1f)) {
+            // Tapping the row opens the memo, the way it always did.
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(onClick = onOpen),
+            ) {
                 Text(
                     text = receipt.placeName.ifBlank { stringResource(R.string.untitled) },
                     style = MaterialTheme.typography.titleMedium,
@@ -550,8 +557,8 @@ private fun HistoryRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
+                    RowAction(Icons.Filled.Visibility, stringResource(R.string.open_receipt), onOpen)
                     RowAction(Icons.Filled.Share, stringResource(R.string.action_share), onShare)
-                    RowAction(Icons.Filled.PictureAsPdf, stringResource(R.string.action_pdf), onPdf)
                     RowAction(Icons.Filled.Print, stringResource(R.string.action_print), onPrint)
                     RowAction(Icons.Filled.ContentCopy, stringResource(R.string.action_duplicate), onDuplicate)
                     RowAction(Icons.Filled.Edit, stringResource(R.string.action_edit), onEdit)

@@ -71,6 +71,8 @@ data class Receipt(
     /** PNG bytes of the captured signature, base64 encoded. */
     val signatureBase64: String? = null,
     val itemsJson: String = "[]",
+    /** Marks the shopkeeper drew on the memo in the viewer. See [ReceiptAnnotation]. */
+    val annotationsJson: String = "[]",
     /** Local file uri of the scanned source image, when the receipt came from OCR. */
     val sourceImageUri: String? = null,
     val pinned: Boolean = false,
@@ -90,6 +92,26 @@ data class ReceiptItem(
 ) {
     val lineTotal: Double get() = qty * unitPrice
 }
+
+/** What a shopkeeper can stamp onto a memo in the viewer. */
+enum class AnnotationKind { TEXT, CHECK, CROSS }
+
+/**
+ * One mark placed on a rendered memo page.
+ *
+ * [x] and [y] are stored as fractions of the page, not pixels, so a mark stays
+ * where it was put whatever zoom the viewer happens to be at and whatever
+ * height the page turned out to be.
+ */
+data class ReceiptAnnotation(
+    /** 1 for the customer copy, 2 for the shop's record. */
+    val page: Int = 1,
+    val x: Float = 0f,
+    val y: Float = 0f,
+    val kind: AnnotationKind = AnnotationKind.CHECK,
+    /** Only meaningful for [AnnotationKind.TEXT]. */
+    val text: String = "",
+)
 
 /** Inventory product. Backs both the Inventory and Price List screens. */
 @Entity(tableName = "products")

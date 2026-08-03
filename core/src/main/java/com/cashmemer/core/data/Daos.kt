@@ -56,6 +56,9 @@ interface ReceiptDao {
     @Query("UPDATE receipts SET pinned = :pinned WHERE id = :id")
     suspend fun setPinned(id: Long, pinned: Boolean)
 
+    @Query("UPDATE receipts SET annotationsJson = :json WHERE id = :id")
+    suspend fun setAnnotations(id: Long, json: String)
+
     @Query("DELETE FROM receipts")
     suspend fun clear()
 }

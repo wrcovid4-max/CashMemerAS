@@ -155,6 +155,27 @@
     <string name="msg_no_recent_receipts">پچھلے سات دن میں کوئی رسید نہیں</string>
     <string name="msg_insight_failed">بصیرت تیار نہیں ہو سکی</string>
     <string name="msg_pdf_failed">پی ڈی ایف نہیں بن سکی</string>
+    <!-- رسید ویوَر -->
+    <string name="viewer_title">رسید نمبر %1$d</string>
+    <string name="viewer_unavailable">یہ رسید کھولی نہیں جا سکی</string>
+    <string name="open_receipt">کھولیں</string>
+    <string name="search_in_receipt">رسید میں تلاش کریں</string>
+    <string name="no_matches">کچھ نہیں ملا</string>
+    <string name="match_position">%2$d میں سے %1$d</string>
+    <string name="previous_match">پچھلا نتیجہ</string>
+    <string name="next_match">اگلا نتیجہ</string>
+    <string name="tool_pan">حرکت</string>
+    <string name="tool_text">متن</string>
+    <string name="tool_tick">درست کا نشان</string>
+    <string name="tool_cross">غلط کا نشان</string>
+    <string name="action_undo">واپس کریں</string>
+    <string name="page_number">صفحہ %1$d</string>
+    <string name="add_text_mark">متن شامل کریں</string>
+    <string name="mark_text">لکھنے کے لیے متن</string>
+    <string name="marks_saved">نشانات محفوظ ہو گئے</string>
+    <string name="share_selected">منتخب شدہ شیئر کریں</string>
+    <string name="delete_selected">منتخب شدہ حذف کریں</string>
+
     <string name="msg_file_write_failed">وہ فائل لکھنے کے لیے نہیں کھل سکی</string>
     <string name="msg_file_read_failed">وہ فائل پڑھی نہیں جا سکی</string>
     <string name="walk_in">آنے والا گاہک</string>
