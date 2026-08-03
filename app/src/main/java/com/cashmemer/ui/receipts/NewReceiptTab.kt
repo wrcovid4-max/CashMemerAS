@@ -61,7 +61,11 @@ import com.cashmemer.core.data.AppSettings
 import com.cashmemer.core.model.PaymentType
 import com.cashmemer.core.model.ReceiptCategory
 import com.cashmemer.core.model.ReceiptItem
+import androidx.compose.ui.res.stringResource
+import com.cashmemer.R
+import com.cashmemer.core.ui.theme.Dimens
 import com.cashmemer.core.util.Format
+import com.cashmemer.ui.localized
 import com.cashmemer.location.LocationResolver
 import com.cashmemer.location.PickLocationContract
 import com.cashmemer.print.ReceiptDelivery
@@ -162,10 +166,10 @@ fun NewReceiptTab(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    SectionTitle("Receipt Details")
+                    SectionTitle(stringResource(R.string.receipt_details))
                     state.draftSavedAt?.let {
                         Text(
-                            text = "Draft saved: ${Format.time(it)}",
+                            text = stringResource(R.string.draft_saved, Format.time(it)),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -175,7 +179,7 @@ fun NewReceiptTab(
                 OutlinedTextField(
                     value = state.placeName,
                     onValueChange = viewModel::setPlaceName,
-                    label = { Text("Place / Store Name") },
+                    label = { Text(stringResource(R.string.place_store_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -183,7 +187,7 @@ fun NewReceiptTab(
                 OutlinedTextField(
                     value = state.locationAddress,
                     onValueChange = viewModel::setLocationAddress,
-                    label = { Text("Location Address (GPS)") },
+                    label = { Text(stringResource(R.string.location_address)) },
                     trailingIcon = {
                         if (state.locatingAddress) {
                             CircularProgressIndicator(
@@ -244,14 +248,14 @@ fun NewReceiptTab(
                 OutlinedTextField(
                     value = state.customerName,
                     onValueChange = viewModel::setCustomerName,
-                    label = { Text("Customer Name") },
+                    label = { Text(stringResource(R.string.customer_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = state.customerPhone,
                     onValueChange = viewModel::setCustomerPhone,
-                    label = { Text("Customer Phone (Optional)") },
+                    label = { Text(stringResource(R.string.customer_phone)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     modifier = Modifier.fillMaxWidth(),
@@ -259,7 +263,7 @@ fun NewReceiptTab(
                 OutlinedTextField(
                     value = state.customerEmail,
                     onValueChange = viewModel::setCustomerEmail,
-                    label = { Text("Customer Email (Optional)") },
+                    label = { Text(stringResource(R.string.customer_email)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier.fillMaxWidth(),
@@ -269,12 +273,12 @@ fun NewReceiptTab(
 
         item {
             SectionCard {
-                Text("Select Currency / Category", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.select_currency_category), style = MaterialTheme.typography.titleMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedTextField(
                         value = state.currencyCode,
                         onValueChange = { viewModel.setCurrency(it.uppercase()) },
-                        label = { Text("Currency") },
+                        label = { Text(stringResource(R.string.currency)) },
                         singleLine = true,
                         modifier = Modifier.weight(1f),
                     )
@@ -285,7 +289,7 @@ fun NewReceiptTab(
                     )
                 }
 
-                Text("Payment Type", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.payment_type), style = MaterialTheme.typography.titleMedium)
                 PaymentTypeGrid(
                     selected = state.paymentType,
                     onSelect = viewModel::setPaymentType,
@@ -323,13 +327,13 @@ fun NewReceiptTab(
                 OutlinedTextField(
                     value = state.notesPage1,
                     onValueChange = viewModel::setNotesPage1,
-                    label = { Text("Notes (Page 1)") },
+                    label = { Text(stringResource(R.string.notes_page_1)) },
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = state.notesPage2,
                     onValueChange = viewModel::setNotesPage2,
-                    label = { Text("Notes (Page 2)") },
+                    label = { Text(stringResource(R.string.notes_page_2)) },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -355,7 +359,7 @@ fun NewReceiptTab(
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.error,
                     ),
-                ) { Text("Clear") }
+                ) { Text(stringResource(R.string.action_clear)) }
 
                 Button(
                     onClick = { viewModel.generate() },
@@ -363,7 +367,7 @@ fun NewReceiptTab(
                     modifier = Modifier.weight(1f),
                 ) {
                     Icon(Icons.Filled.Check, contentDescription = null)
-                    Text("  Generate")
+                    Text(stringResource(R.string.action_generate))
                 }
             }
         }
@@ -393,7 +397,7 @@ private fun UnknownBarcodeDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Product not found") },
+        title = { Text(stringResource(R.string.product_not_found)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
@@ -404,13 +408,13 @@ private fun UnknownBarcodeDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Product name") },
+                    label = { Text(stringResource(R.string.product_name)) },
                     singleLine = true,
                 )
                 OutlinedTextField(
                     value = price,
                     onValueChange = { price = it },
-                    label = { Text("Price") },
+                    label = { Text(stringResource(R.string.price)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 )
@@ -420,10 +424,10 @@ private fun UnknownBarcodeDialog(
             TextButton(
                 onClick = { onSave(name, price.toDoubleOrNull() ?: 0.0) },
                 enabled = name.isNotBlank(),
-            ) { Text("Save & add") }
+            ) { Text(stringResource(R.string.save_and_add)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         },
     )
 }
@@ -438,50 +442,45 @@ private fun ScannerCard(
 ) {
     SectionCard(accent = true) {
         Text(
-            text = "OCR Receipt Scanner (AI Gemini)",
-            style = MaterialTheme.typography.titleLarge,
+            text = stringResource(R.string.scanner_title),
+            style = MaterialTheme.typography.titleMedium,
         )
         Text(
-            text = "Take a picture of any paper receipt or pick one from your gallery, " +
-                "and Gemini AI will parse and auto-populate all forms!",
-            style = MaterialTheme.typography.bodyMedium,
+            text = stringResource(R.string.scanner_body),
+            style = MaterialTheme.typography.bodySmall,
         )
 
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedButton(
+        Row(horizontalArrangement = Arrangement.spacedBy(Dimens.gapTight)) {
+            SecondaryButton(
+                text = stringResource(R.string.scan_receipt),
+                icon = Icons.Filled.PhotoCamera,
                 onClick = onScanReceipt,
                 enabled = !scanning,
                 modifier = Modifier.weight(1f),
-            ) {
-                Icon(Icons.Filled.PhotoCamera, contentDescription = null)
-                Text("  Scan Receipt")
-            }
-            OutlinedButton(
+            )
+            SecondaryButton(
+                text = stringResource(R.string.import_image),
+                icon = Icons.Filled.Image,
                 onClick = onImportImage,
                 enabled = !scanning,
                 modifier = Modifier.weight(1f),
-            ) {
-                Icon(Icons.Filled.Image, contentDescription = null)
-                Text("  Import Image")
-            }
+            )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(
+        Row(horizontalArrangement = Arrangement.spacedBy(Dimens.gapTight)) {
+            PrimaryButton(
+                text = stringResource(R.string.bulk_scan),
+                icon = Icons.Filled.Image,
                 onClick = onBulkScan,
                 enabled = !scanning,
                 modifier = Modifier.weight(1f),
-            ) {
-                Icon(Icons.Filled.Image, contentDescription = null)
-                Text("  Bulk Scan")
-            }
-            Button(
+            )
+            PrimaryButton(
+                text = stringResource(R.string.barcode_scan),
+                icon = Icons.Filled.QrCodeScanner,
                 onClick = onBarcodeScan,
                 enabled = !scanning,
                 modifier = Modifier.weight(1f),
-            ) {
-                Icon(Icons.Filled.QrCodeScanner, contentDescription = null)
-                Text("  Barcode Scan")
-            }
+            )
         }
 
         if (scanning) {
@@ -517,7 +516,7 @@ private fun MemberPicker(
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
-                text = { Text("None") },
+                text = { Text(stringResource(R.string.none)) },
                 onClick = {
                     onSelect(null)
                     expanded = false
@@ -551,10 +550,10 @@ private fun CategoryPicker(
         modifier = modifier,
     ) {
         OutlinedTextField(
-            value = selected.label,
+            value = selected.localized(),
             onValueChange = {},
             readOnly = true,
-            label = { Text("Category") },
+            label = { Text(stringResource(R.string.category)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
@@ -563,7 +562,7 @@ private fun CategoryPicker(
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             ReceiptCategory.entries.forEach { category ->
                 DropdownMenuItem(
-                    text = { Text(category.label) },
+                    text = { Text(category.localized()) },
                     onClick = {
                         onSelect(category)
                         expanded = false
@@ -589,7 +588,7 @@ private fun PaymentTypeGrid(
             FilterChip(
                 selected = type == selected,
                 onClick = { onSelect(type) },
-                label = { Text(type.label) },
+                label = { Text(type.localized()) },
             )
         }
     }
@@ -606,7 +605,7 @@ private fun AddItemCard(
     var price by remember { mutableStateOf("") }
 
     SectionCard {
-        SectionTitle("Add Purchased Items")
+        SectionTitle(stringResource(R.string.add_purchased_items))
 
         ProductNameField(
             value = name,
@@ -621,7 +620,7 @@ private fun AddItemCard(
             OutlinedTextField(
                 value = qty,
                 onValueChange = { qty = it },
-                label = { Text("Qty") },
+                label = { Text(stringResource(R.string.qty)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
@@ -629,7 +628,7 @@ private fun AddItemCard(
             OutlinedTextField(
                 value = price,
                 onValueChange = { price = it },
-                label = { Text("Price (Total)") },
+                label = { Text(stringResource(R.string.price_total)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
@@ -651,7 +650,7 @@ private fun AddItemCard(
             },
             enabled = name.isNotBlank(),
             modifier = Modifier.fillMaxWidth(),
-        ) { Text("Add Item") }
+        ) { Text(stringResource(R.string.add_item)) }
     }
 }
 
@@ -678,7 +677,7 @@ private fun ProductNameField(
                 onValueChange(it)
                 expanded = true
             },
-            label = { Text("Product Name") },
+            label = { Text(stringResource(R.string.product_name)) },
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
@@ -749,7 +748,7 @@ private fun TotalsCard(
             OutlinedTextField(
                 value = if (state.discount == 0.0) "" else state.discount.toString(),
                 onValueChange = { onDiscountChange(it.toDoubleOrNull() ?: 0.0) },
-                label = { Text("Discount") },
+                label = { Text(stringResource(R.string.discount)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
@@ -757,7 +756,7 @@ private fun TotalsCard(
             OutlinedTextField(
                 value = if (state.taxPercent == 0.0) "" else state.taxPercent.toString(),
                 onValueChange = { onTaxChange(it.toDoubleOrNull() ?: 0.0) },
-                label = { Text("Tax %") },
+                label = { Text(stringResource(R.string.tax_percent)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
@@ -772,7 +771,7 @@ private fun TotalsCard(
         OutlinedTextField(
             value = if (state.cashGiven == 0.0) "" else state.cashGiven.toString(),
             onValueChange = { onCashGivenChange(it.toDoubleOrNull() ?: 0.0) },
-            label = { Text("Cash Given") },
+            label = { Text(stringResource(R.string.cash_given)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier.fillMaxWidth(),
@@ -822,11 +821,11 @@ private fun SignatureCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            SectionTitle("Digital Signature")
+            SectionTitle(stringResource(R.string.digital_signature))
             if (captured) {
                 AssistChip(
                     onClick = {},
-                    label = { Text("Captured") },
+                    label = { Text(stringResource(R.string.captured)) },
                     leadingIcon = { Icon(Icons.Filled.Check, contentDescription = null) },
                 )
             }
@@ -836,7 +835,7 @@ private fun SignatureCard(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(checked = saveAsDefault, onCheckedChange = onSaveAsDefaultChange)
-            Text("Save as Default Signature")
+            Text(stringResource(R.string.save_default_signature))
         }
 
         OutlinedButton(
@@ -847,7 +846,7 @@ private fun SignatureCard(
             ),
         ) {
             Icon(Icons.Filled.Delete, contentDescription = null)
-            Text("  Clear & Redraw")
+            Text(stringResource(R.string.clear_and_redraw))
         }
     }
 }

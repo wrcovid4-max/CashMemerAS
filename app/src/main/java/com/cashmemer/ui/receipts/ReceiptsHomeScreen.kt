@@ -15,6 +15,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import com.cashmemer.R
 import com.cashmemer.core.data.AppSettings
 import com.cashmemer.ui.dashboard.DashboardTab
@@ -50,7 +51,12 @@ fun ReceiptsHomeScreen(settings: AppSettings) {
                     text = {
                         Text(
                             text = title,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.labelLarge,
+                            // "Dashboard" was wrapping to two lines and pushing
+                            // the tab row out of shape.
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     },
                 )

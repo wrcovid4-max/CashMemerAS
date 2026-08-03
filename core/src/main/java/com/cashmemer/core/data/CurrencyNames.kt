@@ -10,7 +10,20 @@ import java.util.Locale
  */
 object CurrencyNames {
 
+    /**
+     * Iranian Toman. Not an ISO currency — Iran's formal unit is the Rial, but
+     * everyday prices are quoted in Toman, which is worth ten Rial. The rates
+     * feed only publishes IRR, so IRT is derived from it.
+     */
+    const val TOMAN = "IRT"
+    const val RIAL = "IRR"
+
+    /** 1 Toman = 10 Rial. */
+    const val RIAL_PER_TOMAN = 10.0
+
     private val overrides = mapOf(
+        "IRT" to "Iranian Toman",
+        "IRR" to "Iranian Rial",
         "PKR" to "Pakistani Rupee",
         "AED" to "United Arab Emirates Dirham",
         "AFN" to "Afghan Afghani",
@@ -38,6 +51,8 @@ object CurrencyNames {
 
     fun flagOf(code: String): String {
         if (code == "EUR") return "🇪🇺"
+        // IRT is invented, so its two-letter prefix would resolve to nothing.
+        if (code == TOMAN) return "🇮🇷"
         if (code.length != 3 || code in flagless) return ""
         val country = code.substring(0, 2).uppercase()
         if (country.any { it !in 'A'..'Z' }) return ""
@@ -49,6 +64,8 @@ object CurrencyNames {
 
     /** Symbol used on the receipt, e.g. PKR -> Rs. */
     fun symbolOf(code: String): String = when (code) {
+        "IRT" -> "تومان"
+        "IRR" -> "﷼"
         "PKR" -> "Rs"
         "USD" -> "$"
         "EUR" -> "€"

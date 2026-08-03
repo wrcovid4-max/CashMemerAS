@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -36,6 +37,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.cashmemer.R
 import com.cashmemer.core.ui.theme.Dimens
@@ -51,9 +53,12 @@ fun BrandHeader(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                // The app draws edge to edge, so the header has to step below
+                // the status bar itself — otherwise it sits on top of the clock.
+                .statusBarsPadding()
                 .padding(
                     horizontal = Dimens.screenPadding,
-                    vertical = Dimens.gap,
+                    vertical = Dimens.gapTight,
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -73,14 +78,16 @@ fun BrandHeader(
             ) {
                 Text(
                     text = stringResource(R.string.app_name),
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     text = stringResource(R.string.app_tagline),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
 
@@ -264,10 +271,14 @@ private fun RowScope.ButtonContent(text: String, icon: ImageVector?) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(Dimens.iconGap))
     }
+    // Half-width buttons hold labels like "Barcode Scan" that were wrapping to
+    // two lines and blowing up the row. One line, shrink to fit, never wrap.
     Text(
         text = text,
-        style = MaterialTheme.typography.labelLarge,
+        style = MaterialTheme.typography.labelMedium,
         maxLines = 1,
+        softWrap = false,
+        overflow = TextOverflow.Ellipsis,
     )
 }
 

@@ -114,8 +114,22 @@ class CashMemerRepository private constructor(context: Context) {
                         flagEmoji = CurrencyNames.flagOf(code),
                     )
                 }
-            rates.upsertAll(rows)
-            rows.size
+            // Toman is not in the feed — it is Rial divided by ten, and it is
+            // what Iranian prices are actually quoted in.
+            val toman = fetched[CurrencyNames.RIAL]
+                ?.takeIf { CurrencyNames.TOMAN !in customCodes }
+                ?.let { rial ->
+                    CurrencyRate(
+                        code = CurrencyNames.TOMAN,
+                        displayName = CurrencyNames.of(CurrencyNames.TOMAN),
+                        rate = rial / CurrencyNames.RIAL_PER_TOMAN,
+                        flagEmoji = CurrencyNames.flagOf(CurrencyNames.TOMAN),
+                    )
+                }
+
+            val all = rows + listOfNotNull(toman)
+            rates.upsertAll(all)
+            all.size
         }
     }
 

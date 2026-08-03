@@ -1,16 +1,347 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Brand -->
     <string name="app_name">کیش میمر</string>
     <string name="app_tagline">پروفیشنل رسید آرگنائزر</string>
 
+    <!-- Bottom navigation -->
     <string name="nav_receipts">رسیدیں</string>
     <string name="nav_inventory">انوینٹری</string>
-    <string name="nav_price_list">قیمت کی فہرست</string>
+    <string name="nav_price_list">قیمت فہرست</string>
     <string name="nav_rates">شرحیں</string>
     <string name="nav_members">ممبران</string>
     <string name="nav_more">مزید</string>
 
+    <!-- Home tabs -->
     <string name="tab_receipts">رسیدیں</string>
     <string name="tab_history">تاریخ</string>
     <string name="tab_dashboard">ڈیش بورڈ</string>
+
+    <!-- Shared actions -->
+    <string name="action_save">محفوظ کریں</string>
+    <string name="action_cancel">منسوخ</string>
+    <string name="action_delete">حذف کریں</string>
+    <string name="action_edit">ترمیم</string>
+    <string name="action_clear">صاف کریں</string>
+    <string name="action_close">بند کریں</string>
+    <string name="action_open">کھولیں</string>
+    <string name="action_add">شامل کریں</string>
+    <string name="action_update">اپ ڈیٹ</string>
+    <string name="action_retry">دوبارہ کوشش</string>
+    <string name="action_refresh">تازہ کریں</string>
+    <string name="action_share">شیئر</string>
+    <string name="action_print">پرنٹ</string>
+    <string name="action_pdf">پی ڈی ایف</string>
+    <string name="action_duplicate">نقل</string>
+    <string name="action_back">واپس</string>
+    <string name="action_continue">جاری رکھیں</string>
+    <string name="action_dismiss">ہٹائیں</string>
+    <string name="action_select_all">سب منتخب کریں</string>
+    <string name="action_generate">تیار کریں</string>
+    <string name="action_connect">جوڑیں</string>
+    <string name="action_disconnect">منقطع کریں</string>
+    <string name="action_grant_permission">اجازت دیں</string>
+
+    <!-- New receipt: scanner card -->
+    <string name="scanner_title">او سی آر رسید اسکینر (اے آئی جیمنی)</string>
+    <string name="scanner_body">کسی بھی کاغذی رسید کی تصویر لیں یا گیلری سے منتخب کریں، جیمنی اے آئی خود تمام خانے بھر دے گا!</string>
+    <string name="scan_receipt">رسید اسکین</string>
+    <string name="import_image">تصویر درآمد</string>
+    <string name="bulk_scan">بلک اسکین</string>
+    <string name="barcode_scan">بارکوڈ اسکین</string>
+
+    <!-- New receipt: details -->
+    <string name="receipt_details">رسید کی تفصیلات</string>
+    <string name="draft_saved">مسودہ محفوظ: %1$s</string>
+    <string name="place_store_name">جگہ / دکان کا نام</string>
+    <string name="location_address">مقام کا پتہ (جی پی ایس)</string>
+    <string name="use_current_location">موجودہ مقام استعمال کریں</string>
+    <string name="pick_on_map">نقشے پر منتخب کریں</string>
+    <string name="select_member">ممبر منتخب کریں</string>
+    <string name="none">کوئی نہیں</string>
+    <string name="customer_name">گاہک کا نام</string>
+    <string name="customer_phone">گاہک کا فون (اختیاری)</string>
+    <string name="customer_email">گاہک کا ای میل (اختیاری)</string>
+    <string name="select_currency_category">کرنسی / زمرہ منتخب کریں</string>
+    <string name="currency">کرنسی</string>
+    <string name="category">زمرہ</string>
+    <string name="payment_type">ادائیگی کی قسم</string>
+
+    <!-- New receipt: items and totals -->
+    <string name="add_purchased_items">خریدی گئی اشیاء شامل کریں</string>
+    <string name="product_name">پروڈکٹ کا نام</string>
+    <string name="qty">مقدار</string>
+    <string name="price_total">قیمت (کل)</string>
+    <string name="add_item">شے شامل کریں</string>
+    <string name="remove_item">شے ہٹائیں</string>
+    <string name="discount">رعایت</string>
+    <string name="tax_percent">ٹیکس ٪</string>
+    <string name="subtotal">ذیلی میزان</string>
+    <string name="tax">ٹیکس</string>
+    <string name="grand_total">کل میزان</string>
+    <string name="cash_given">دی گئی رقم</string>
+    <string name="change_amount">واپسی رقم</string>
+
+    <!-- New receipt: notes and signature -->
+    <string name="notes_page_1">نوٹ (صفحہ ۱)</string>
+    <string name="notes_page_2">نوٹ (صفحہ ۲)</string>
+    <string name="default_note_1">خریداری کا شکریہ !!!</string>
+    <string name="digital_signature">ڈیجیٹل دستخط</string>
+    <string name="captured">محفوظ ہو گیا</string>
+    <string name="save_default_signature">بطور طے شدہ دستخط محفوظ کریں</string>
+    <string name="clear_and_redraw">صاف کر کے دوبارہ بنائیں</string>
+
+    <!-- New receipt: messages -->
+    <string name="msg_need_store_and_item">دکان کا نام اور کم از کم ایک شے شامل کریں</string>
+    <string name="msg_receipt_generated">رسید نمبر %1$d تیار ہو گئی</string>
+    <string name="msg_added_item">شامل ہوا — %1$s ×۱</string>
+    <string name="msg_barcode_unknown">بارکوڈ %1$s آپ کی انوینٹری میں نہیں ہے</string>
+    <string name="msg_scanned_items">%1$d اشیاء اسکین ہوئیں</string>
+    <string name="msg_scan_failed">اسکین ناکام</string>
+    <string name="msg_image_unreadable">یہ تصویر پڑھی نہیں جا سکی</string>
+    <string name="msg_location_failed">آپ کا مقام معلوم نہیں ہو سکا</string>
+    <string name="msg_editing_receipt">رسید نمبر %1$d میں ترمیم</string>
+    <string name="msg_receipt_missing">رسید نمبر %1$d اب موجود نہیں</string>
+    <string name="msg_saved_and_added">%1$s محفوظ ہو کر شامل ہو گیا</string>
+    <string name="product_not_found">پروڈکٹ نہیں ملا</string>
+    <string name="product_not_found_body">بارکوڈ %1$s ابھی آپ کی انوینٹری میں نہیں۔ ابھی شامل کریں تاکہ اگلی بار پہچانا جائے۔</string>
+    <string name="save_and_add">محفوظ کر کے شامل کریں</string>
+    <string name="price">قیمت</string>
+
+    <!-- History -->
+    <string name="backup_json">بیک اپ JSON</string>
+    <string name="restore_json">بحال JSON</string>
+    <string name="search_receipts">عنوان، مقام یا گاہک سے تلاش کریں…</string>
+    <string name="weekly_ai_summary">ہفتہ وار اے آئی خلاصہ</string>
+    <string name="business_insights">کاروباری بصیرت</string>
+    <string name="total_spend">کل خرچ</string>
+    <string name="transactions">لین دین</string>
+    <string name="avg_value">اوسط قیمت</string>
+    <string name="top_customer">نمایاں گاہک</string>
+    <string name="total_tax">کل ٹیکس</string>
+    <string name="total_discount">کل رعایت</string>
+    <string name="generate_insight">بصیرت تیار کریں</string>
+    <string name="regenerate_insight">دوبارہ تیار کریں</string>
+    <string name="start_date">آغاز کی تاریخ</string>
+    <string name="end_date">اختتام کی تاریخ</string>
+    <string name="clear_date_filter">تاریخ فلٹر صاف کریں</string>
+    <string name="untitled">بلا عنوان</string>
+    <string name="walk_in_customer">عام گاہک</string>
+    <string name="pin_receipt">رسید پن کریں</string>
+    <string name="show_details">تفصیل دکھائیں</string>
+    <string name="hide_details">تفصیل چھپائیں</string>
+    <string name="saved_location">محفوظ مقام</string>
+    <string name="payment_label">ادائیگی</string>
+    <string name="change_label">واپسی</string>
+    <string name="no_receipts_match">کوئی رسید نہیں ملی۔</string>
+    <string name="msg_select_receipt">کم از کم ایک رسید منتخب کریں</string>
+    <string name="msg_backup_saved">بیک اپ محفوظ ہو گیا</string>
+    <string name="msg_backup_failed">بیک اپ ناکام</string>
+    <string name="msg_restored_records">%1$d ریکارڈ بحال ہوئے</string>
+    <string name="msg_restore_failed">بحالی ناکام</string>
+    <string name="msg_duplicated">رسید نمبر %1$d کی نقل بن گئی</string>
+    <string name="msg_no_recent_receipts">پچھلے سات دن میں کوئی رسید نہیں</string>
+    <string name="msg_insight_failed">بصیرت تیار نہیں ہو سکی</string>
+    <string name="msg_pdf_failed">پی ڈی ایف نہیں بن سکی</string>
+
+    <!-- Dashboard -->
+    <string name="overview">جائزہ</string>
+    <string name="today">آج</string>
+    <string name="this_month">اس مہینے</string>
+    <string name="all_time_sales">مجموعی فروخت</string>
+    <string name="top_stores">نمایاں دکانیں</string>
+    <string name="by_category">زمرے کے حساب سے</string>
+    <string name="receipts_count">%1$d رسیدیں</string>
+    <string name="total_count">کل %1$d</string>
+    <string name="no_data_yet">ابھی کوئی ڈیٹا نہیں۔</string>
+
+    <!-- Inventory -->
+    <string name="products">پروڈکٹس</string>
+    <string name="add_new">نیا شامل کریں</string>
+    <string name="add_new_product">نیا پروڈکٹ شامل کریں</string>
+    <string name="edit_product">پروڈکٹ میں ترمیم</string>
+    <string name="search_products">پروڈکٹس تلاش کریں…</string>
+    <string name="filter_all">سب</string>
+    <string name="filter_active">فعال</string>
+    <string name="filter_archived">محفوظ شدہ</string>
+    <string name="active">فعال</string>
+    <string name="archived">محفوظ شدہ</string>
+    <string name="archive">محفوظ کریں</string>
+    <string name="stock_summary">%1$d فعال · %2$d کم اسٹاک</string>
+    <string name="sell_value">فروخت مالیت: %1$s</string>
+    <string name="barcode">بارکوڈ</string>
+    <string name="brand">برانڈ</string>
+    <string name="cost">لاگت</string>
+    <string name="stock">اسٹاک</string>
+    <string name="unit">اکائی</string>
+    <string name="name">نام</string>
+    <string name="no_products_match">کوئی پروڈکٹ نہیں ملا۔</string>
+
+    <!-- Price list -->
+    <string name="price_list_title">قیمت فہرست</string>
+    <string name="price_list_empty">ابھی کچھ نہیں — وہ پروڈکٹس شامل کریں جو سب سے زیادہ بیچتے ہیں۔</string>
+    <string name="remove">ہٹائیں</string>
+
+    <!-- Rates -->
+    <string name="exchange_rates">زر مبادلہ کی شرحیں (ڈالر بنیاد)</string>
+    <string name="last_updated">آخری تازہ کاری: %1$s</string>
+    <string name="not_refreshed">ابھی تازہ نہیں کیا گیا</string>
+    <string name="search_currency">کرنسی تلاش کریں…</string>
+    <string name="register_custom_currency">اپنی کرنسی رجسٹر کریں</string>
+    <string name="code">کوڈ</string>
+    <string name="rate_vs_usd">ڈالر کے مقابلے شرح</string>
+    <string name="display_name">ظاہری نام</string>
+    <string name="no_rate_key">زر مبادلہ کی کلید موجود نہیں</string>
+    <string name="no_rate_key_body">پروجیکٹ کی local.properties میں EXCHANGE_RATE_API_KEY شامل کریں، پھر دوبارہ بلڈ کریں۔ مفت کلید exchangerate-api.com سے حاصل کریں۔</string>
+    <string name="rates_failed">شرحیں لوڈ نہیں ہو سکیں</string>
+    <string name="no_rates_yet">ابھی کوئی شرح نہیں</string>
+    <string name="load_rates">شرحیں لوڈ کریں</string>
+
+    <!-- Members -->
+    <string name="members_directory">ممبران کی فہرست</string>
+    <string name="add_member">ممبر شامل کریں</string>
+    <string name="edit_member">ممبر میں ترمیم</string>
+    <string name="delete_member">ممبر حذف کریں</string>
+    <string name="phone">فون</string>
+    <string name="email">ای میل</string>
+    <string name="address">پتہ</string>
+    <string name="members_empty">ابھی کوئی ممبر نہیں — پہلا گاہک شامل کرنے کے لیے + دبائیں۔</string>
+
+    <!-- Settings -->
+    <string name="cloud_sync_backup">کلاؤڈ سنک اور بیک اپ</string>
+    <string name="sign_in_google">گوگل سے سائن ان کریں</string>
+    <string name="sign_out">سائن آؤٹ</string>
+    <string name="sign_in_prompt">گوگل سے سائن ان کریں تاکہ رسید پر بنانے والے کا نام آئے۔</string>
+    <string name="cloud_sync_connected">کلاؤڈ سنک منسلک ہے</string>
+    <string name="sync">سنک</string>
+    <string name="restore">بحال کریں</string>
+    <string name="restore_warning">بحالی اس فون کا سارا ڈیٹا کلاؤڈ کاپی سے بدل دے گی۔ اسے نئے آلے پر استعمال کریں، ملانے کے لیے نہیں۔</string>
+    <string name="cloud_sync_off">کلاؤڈ سنک بند ہے — چالو کرنے کے لیے ایپ ماڈیول میں google-services.json شامل کریں۔ نیچے دیے روزانہ فولڈر بیک اپ بدستور چلتے رہیں گے۔</string>
+    <string name="connected_devices">منسلک آلات اور انٹیگریشنز</string>
+    <string name="connected_devices_body">ادائیگی ٹرمینلز اور اسکینرز کا انتظام</string>
+    <string name="appearance_settings">ظاہری ترتیبات</string>
+    <string name="appearance_body">اپنی پسند کے مطابق تھیم کی شکل و صورت بدلیں</string>
+    <string name="theme_system">سسٹم</string>
+    <string name="theme_light">روشن</string>
+    <string name="theme_dark">تاریک</string>
+    <string name="general_settings">عمومی ترتیبات</string>
+    <string name="auto_send">خودکار ارسال</string>
+    <string name="save_signature">دستخط محفوظ کریں</string>
+    <string name="print_settings">پرنٹ ترتیبات</string>
+    <string name="auto_print">خودکار پرنٹ</string>
+    <string name="show_page_1">صفحہ ۱ دکھائیں</string>
+    <string name="show_page_2">صفحہ ۲ دکھائیں</string>
+    <string name="mass_print_option">اجتماعی پرنٹ کا انتخاب</string>
+    <string name="page_1">صفحہ ۱</string>
+    <string name="page_2">صفحہ ۲</string>
+    <string name="both">دونوں</string>
+    <string name="mass_print_body">رسید بنتے ہی خودکار پرنٹ، ای میل/ایس ایم ایس اور دستخط محفوظ کریں</string>
+    <string name="app_lock">ایپ لاک</string>
+    <string name="require_secure_lock">محفوظ لاک لازمی کریں</string>
+    <string name="app_lock_body">ایپ کھولنے اور پس منظر سے واپس آنے پر محفوظ لاک (پن، پاس ورڈ، پیٹرن، فنگر پرنٹ یا فیس اَن لاک) لازمی کریں</string>
+    <string name="custom_passcode_lock">اپنا پاس کوڈ لاک</string>
+    <string name="custom_passcode_body">محفوظ متبادل کے طور پر چار ہندسوں کا پاس کوڈ مقرر کریں۔</string>
+    <string name="enter_new_passcode">نیا پاس کوڈ درج کریں</string>
+    <string name="confirm_new_passcode">نئے پاس کوڈ کی تصدیق کریں</string>
+    <string name="automatic_backup">خودکار بیک اپ</string>
+    <string name="automatic_backup_body">آپ کے منتخب کردہ فولڈر میں روزانہ تاریخ والا JSON بیک اپ لکھتا ہے۔ ایسا فولڈر چنیں جو کلاؤڈ سے سنک ہو، تاکہ فون گم ہونے پر بھی ریکارڈ محفوظ رہے۔</string>
+    <string name="choose_backup_folder">بیک اپ فولڈر منتخب کریں</string>
+    <string name="change_backup_folder">بیک اپ فولڈر تبدیل کریں</string>
+    <string name="daily_automatic_backup">روزانہ خودکار بیک اپ</string>
+    <string name="back_up_now">ابھی بیک اپ کریں</string>
+    <string name="last_backup">آخری بیک اپ: %1$s</string>
+    <string name="last_backup_failed">آخری بیک اپ ناکام: %1$s</string>
+    <string name="no_backup_yet">ابھی کوئی بیک اپ نہیں</string>
+    <string name="backup_recovery">بیک اپ اور بحالی (آف لائن)</string>
+    <string name="backup_recovery_body">مقامی طور پر محفوظ تمام رسیدیں برآمد کریں یا پرانے ریکارڈ فوراً بحال کریں۔</string>
+    <string name="export_json">JSON برآمد کریں</string>
+    <string name="backup_payload">بیک اپ ڈیٹا</string>
+    <string name="msg_passcode_mismatch">پاس کوڈ چار ہندسوں کا اور یکساں ہونا چاہیے</string>
+    <string name="msg_passcode_updated">پاس کوڈ اپ ڈیٹ ہو گیا</string>
+    <string name="msg_signed_in_as">%1$s کے طور پر سائن ان</string>
+    <string name="msg_signed_out">سائن آؤٹ ہو گیا</string>
+    <string name="msg_backup_folder_set">بیک اپ فولڈر مقرر ہو گیا</string>
+    <string name="msg_synced_records">%1$d ریکارڈ سنک ہوئے</string>
+
+    <!-- Connected devices -->
+    <string name="core_integrations">بنیادی انٹیگریشنز</string>
+    <string name="payment_terminal">ادائیگی ٹرمینل انٹیگریشن</string>
+    <string name="payment_terminal_body">اسمارٹ کارڈ ریڈر چالو یا بند کریں۔</string>
+    <string name="ocr_companion">اینڈرائیڈ او سی آر ساتھی</string>
+    <string name="ocr_companion_body">اینڈرائیڈ او سی آر ساتھی اسکیننگ چالو یا بند کریں۔</string>
+    <string name="connection_preferences">کنکشن کی ترجیحات</string>
+    <string name="auto_reconnect">جڑے آلات سے خودکار دوبارہ کنکشن</string>
+    <string name="auto_connect_default">طے شدہ آلے سے خودکار کنکشن</string>
+    <string name="ask_before_new">نئے آلے سے جوڑنے سے پہلے پوچھیں</string>
+    <string name="show_status_bar">اسٹیٹس بار میں حالت دکھائیں</string>
+    <string name="connection_notifications">کنکشن کی اطلاعات چالو کریں</string>
+    <string name="confirmation_sounds">اسکین/ادائیگی کی تصدیقی آواز</string>
+    <string name="vibration_feedback">وائبریشن فیڈ بیک</string>
+    <string name="manage_paired_devices">جڑے آلات کا انتظام</string>
+    <string name="forget_all_devices">تمام جڑے آلات بھول جائیں</string>
+    <string name="run_diagnostics">کنکشن کی جانچ چلائیں</string>
+    <string name="view_logs">انٹیگریشن لاگز دیکھیں (%1$d)</string>
+    <string name="device_connected">آلہ منسلک ہے</string>
+    <string name="device_connecting">جوڑا جا رہا ہے…</string>
+    <string name="device_none">کوئی آلہ منسلک نہیں</string>
+    <string name="bluetooth_off">بلوٹوتھ بند ہے</string>
+    <string name="connection_failed">کنکشن ناکام</string>
+    <string name="no_bluetooth_radio">اس آلے میں بلوٹوتھ نہیں ہے۔</string>
+    <string name="bluetooth_permission_needed">جڑے آلات دیکھنے کے لیے بلوٹوتھ کی اجازت درکار ہے۔</string>
+    <string name="bluetooth_switch_on">سسٹم ترتیبات میں بلوٹوتھ چالو کریں، پھر تازہ کریں۔</string>
+    <string name="nothing_paired">ابھی کوئی آلہ نہیں جڑا۔ پہلے اپنا اسکینر، ٹرمینل یا پرنٹر اینڈرائیڈ کی بلوٹوتھ ترتیبات میں جوڑیں — پھر یہاں نظر آئے گا۔</string>
+    <string name="make_default">طے شدہ بنائیں</string>
+    <string name="default_device">طے شدہ</string>
+    <string name="diagnostics_title">کنکشن کی جانچ</string>
+    <string name="integration_logs">انٹیگریشن لاگز</string>
+    <string name="nothing_logged">ابھی کچھ ریکارڈ نہیں ہوا۔</string>
+    <string name="last_error">آخری خرابی: %1$s</string>
+    <string name="forget_all_title">تمام جڑے آلات بھول جائیں؟</string>
+    <string name="forget_all_body">کیش میمر آلہ منقطع کر کے اپنا طے شدہ آلہ ہٹا دے گا۔ بلوٹوتھ جوڑ اینڈرائیڈ کے پاس رہتے ہیں — انہیں ہٹانے کے لیے سسٹم کی بلوٹوتھ ترتیبات میں جائیں۔</string>
+    <string name="forget">بھول جائیں</string>
+
+    <!-- App lock -->
+    <string name="app_locked">کیش میمر مقفل ہے</string>
+    <string name="unlock_title">کیش میمر کھولیں</string>
+    <string name="unlock_subtitle">اپنا حساب کھولنے کے لیے تصدیق کریں</string>
+    <string name="use_biometrics">فنگر پرنٹ یا چہرہ استعمال کریں</string>
+    <string name="passcode">پاس کوڈ</string>
+    <string name="unlock">کھولیں</string>
+    <string name="wrong_passcode">غلط پاس کوڈ</string>
+    <string name="no_lock_available">کوئی پاس کوڈ مقرر نہیں اور اس آلے میں بایومیٹرک نہیں، اس لیے ایپ لاک نافذ نہیں ہو سکتا۔</string>
+
+    <!-- Camera / map -->
+    <string name="capture">تصویر لیں</string>
+    <string name="point_at_barcode">کیمرہ بارکوڈ کی طرف کریں</string>
+    <string name="camera_permission_needed">اسکین کے لیے کیمرے کی اجازت درکار ہے</string>
+    <string name="waiting_for_camera">کیمرے کی اجازت کا انتظار…</string>
+    <string name="camera_failed">کیمرہ شروع نہیں ہو سکا</string>
+    <string name="capture_failed">تصویر نہیں لی جا سکی</string>
+    <string name="select_location">مقام منتخب کریں</string>
+    <string name="search_address">پتہ یا جگہ تلاش کریں…</string>
+    <string name="selected_address">منتخب پتہ</string>
+    <string name="finding_address">پتہ تلاش کیا جا رہا ہے…</string>
+    <string name="confirm_location">مقام کی تصدیق کریں</string>
+    <string name="search">تلاش</string>
+
+    <!-- Payment types -->
+    <string name="pay_cash">نقد</string>
+    <string name="pay_card">کارڈ</string>
+    <string name="pay_bank_transfer">بینک ٹرانسفر</string>
+    <string name="pay_mobile_wallet">موبائل والٹ</string>
+    <string name="pay_apple_pay">ایپل پے</string>
+    <string name="pay_google_wallet">گوگل والٹ</string>
+    <string name="pay_google_pay">گوگل پے</string>
+    <string name="pay_klarna">کلارنا</string>
+    <string name="pay_paypak">پے پاک</string>
+
+    <!-- Categories -->
+    <string name="cat_shopping">خریداری</string>
+    <string name="cat_groceries">کریانہ</string>
+    <string name="cat_food">کھانا پینا</string>
+    <string name="cat_fuel">ایندھن</string>
+    <string name="cat_utilities">یوٹیلیٹی بل</string>
+    <string name="cat_services">خدمات</string>
+    <string name="cat_medical">طبی</string>
+    <string name="cat_other">دیگر</string>
 </resources>
