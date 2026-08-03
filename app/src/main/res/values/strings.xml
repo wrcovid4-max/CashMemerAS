@@ -103,6 +103,18 @@
     <string name="msg_editing_receipt">Editing receipt #%1$d</string>
     <string name="msg_receipt_missing">Receipt #%1$d no longer exists</string>
     <string name="msg_saved_and_added">Saved %1$s and added it</string>
+    <string name="msg_receipt_saved_delivery">Receipt saved — %1$s</string>
+
+    <!-- Auto-print / auto-send -->
+    <string name="delivery_printing">printing</string>
+    <string name="delivery_emailing">emailing</string>
+    <string name="delivery_texting">texting</string>
+    <string name="delivery_and">and</string>
+    <string name="msg_auto_print_failed">Auto-print failed: %1$s</string>
+    <string name="send_receipt">Send receipt</string>
+    <string name="email_subject_receipt">Your receipt from %1$s</string>
+    <string name="print_job_receipt">Receipt %1$d</string>
+    <string name="receipt_summary_line">Receipt #%1$d from %2$s — %3$s on %4$s</string>
     <string name="product_not_found">Product not found</string>
     <string name="product_not_found_body">Barcode %1$s isn\'t in your inventory yet. Add it now and it will be recognised next time.</string>
     <string name="save_and_add">Save &amp; add</string>
@@ -143,6 +155,10 @@
     <string name="msg_no_recent_receipts">No receipts in the last seven days</string>
     <string name="msg_insight_failed">Could not generate insight</string>
     <string name="msg_pdf_failed">Could not build the PDF</string>
+    <string name="msg_file_write_failed">Could not open that file for writing</string>
+    <string name="msg_file_read_failed">Could not read that file</string>
+    <string name="walk_in">Walk-in</string>
+    <string name="no_value">—</string>
 
     <!-- Dashboard -->
     <string name="overview">Overview</string>
@@ -262,6 +278,19 @@
     <string name="msg_signed_out">Signed out</string>
     <string name="msg_backup_folder_set">Backup folder set</string>
     <string name="msg_synced_records">Synced %1$d record(s)</string>
+    <string name="msg_sign_in_sync_failed">Signed in, but cloud sync failed: %1$s</string>
+    <string name="msg_sign_in_failed">Sign-in failed</string>
+    <string name="msg_no_web_client_id">Add GOOGLE_WEB_CLIENT_ID to local.properties first</string>
+    <string name="msg_no_google_services">Add google-services.json to the app module first</string>
+    <string name="msg_sign_in_first">Sign in with Google first</string>
+    <string name="msg_sync_failed">Sync failed</string>
+    <string name="msg_saved_file">Saved %1$s</string>
+
+    <!-- Automatic backup failures -->
+    <string name="err_no_backup_folder">No backup folder chosen</string>
+    <string name="err_backup_folder_unwritable">Backup folder is no longer writable — pick it again</string>
+    <string name="err_backup_create_failed">Could not create %1$s in the backup folder</string>
+    <string name="err_backup_write_failed">Could not open %1$s for writing</string>
 
     <!-- Connected devices -->
     <string name="core_integrations">Core Integrations</string>

@@ -2,8 +2,10 @@ package com.cashmemer.ui.history
 
 import android.app.Application
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.cashmemer.R
 import com.cashmemer.core.data.CashMemerRepository
 import com.cashmemer.core.data.SettingsStore
 import com.cashmemer.core.model.Receipt
@@ -45,6 +47,10 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
 
     private val repository = CashMemerRepository.get(application)
     private val settingsStore = SettingsStore(application)
+
+    /** See ReceiptFormViewModel — no composable scope here either. */
+    private fun str(@StringRes id: Int, vararg args: Any): String =
+        getApplication<Application>().getString(id, *args)
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
@@ -91,10 +97,10 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
             totalSpend = spend,
             transactions = size,
             averageValue = spend / size,
-            topCustomer = groupBy { it.customerName.ifBlank { "Walk-in" } }
+            topCustomer = groupBy { it.customerName.ifBlank { str(R.string.walk_in) } }
                 .maxByOrNull { (_, list) -> list.sumOf { it.total } }
                 ?.key
-                ?: "—",
+                ?: str(R.string.no_value),
             totalTax = sumOf { r ->
                 (r.subtotal - r.discount).coerceAtLeast(0.0) * r.taxPercent / 100.0
             },
@@ -107,7 +113,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
     fun generateInsight() {
         val current = _summary.value
         if (current.transactions == 0) {
-            _error.value = "No receipts in the last seven days"
+            _error.value = str(R.string.msg_no_recent_receipts)
             return
         }
 
@@ -126,10 +132,12 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
                     "Top customer" to current.topCustomer,
                     "Total tax" to Format.amount(current.totalTax),
                     "Total discount" to Format.amount(current.totalDiscount),
-                )
+                ),
+                languageTag = getApplication<Application>().resources
+                    .configuration.locales[0].language,
             )
                 .onSuccess { text -> _summary.update { it.copy(insight = text) } }
-                .onFailure { _error.value = it.message ?: "Could not generate insight" }
+                .onFailure { _error.value = str(R.string.msg_insight_failed) }
         }
     }
 
@@ -174,7 +182,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
                     createdAt = System.currentTimeMillis(),
                 )
             )
-            _error.value = "Duplicated receipt #${receipt.id}"
+            _error.value = str(R.string.msg_duplicated, receipt.id)
         }
     }
 
@@ -195,7 +203,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
         onReady: (File) -> Unit,
     ) {
         if (ids.isEmpty()) {
-            _error.value = "Select at least one receipt"
+            _error.value = str(R.string.msg_select_receipt)
             return
         }
 
@@ -211,7 +219,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
             ReceiptPdfRenderer
                 .render(app, chosen, pages, ReceiptOutput.outputFile(app, chosen))
                 .onSuccess(onReady)
-                .onFailure { _error.value = it.message ?: "Could not build the PDF" }
+                .onFailure { _error.value = str(R.string.msg_pdf_failed) }
         }
     }
 
@@ -221,10 +229,10 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
             runCatching {
                 val json = repository.exportJson()
                 app.contentResolver.openOutputStream(uri)?.use { it.write(json.toByteArray()) }
-                    ?: error("Could not open that file for writing")
+                    ?: error(str(R.string.msg_file_write_failed))
             }
-                .onSuccess { _error.value = "Backup saved" }
-                .onFailure { _error.value = it.message ?: "Backup failed" }
+                .onSuccess { _error.value = str(R.string.msg_backup_saved) }
+                .onFailure { _error.value = it.message ?: str(R.string.msg_backup_failed) }
         }
     }
 
@@ -234,11 +242,11 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
             runCatching {
                 app.contentResolver.openInputStream(uri)?.use {
                     it.readBytes().decodeToString()
-                } ?: error("Could not read that file")
+                } ?: error(str(R.string.msg_file_read_failed))
             }
                 .mapCatching { json -> repository.importJson(json).getOrThrow() }
-                .onSuccess { _error.value = "Restored $it record(s)" }
-                .onFailure { _error.value = it.message ?: "Restore failed" }
+                .onSuccess { _error.value = str(R.string.msg_restored_records, it) }
+                .onFailure { _error.value = it.message ?: str(R.string.msg_restore_failed) }
         }
     }
 

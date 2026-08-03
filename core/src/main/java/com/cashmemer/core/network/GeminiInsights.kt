@@ -32,7 +32,15 @@ object GeminiInsights {
             .build()
     }
 
-    suspend fun weeklyInsight(facts: Map<String, String>): Result<String> =
+    /**
+     * The fact labels stay English because they are model input, not UI. Only
+     * [languageTag] decides what language the sentence comes back in, so the
+     * card reads Urdu when the app is in Urdu.
+     */
+    suspend fun weeklyInsight(
+        facts: Map<String, String>,
+        languageTag: String = "en",
+    ): Result<String> =
         withContext(Dispatchers.IO) {
             runCatching {
                 val key = BuildConfig.GEMINI_API_KEY
@@ -45,6 +53,9 @@ object GeminiInsights {
                             "highlighting the single most useful observation. " +
                             "No greeting, no preamble, no markdown."
                     )
+                    if (languageTag.startsWith("ur")) {
+                        appendLine("Write that sentence in Urdu.")
+                    }
                     facts.forEach { (label, value) -> appendLine("$label: $value") }
                 }
 

@@ -3,6 +3,7 @@ package com.cashmemer.backup
 import android.content.Context
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
+import com.cashmemer.R
 import com.cashmemer.core.data.CashMemerRepository
 import com.cashmemer.core.data.SettingsStore
 import kotlinx.coroutines.Dispatchers
@@ -40,11 +41,11 @@ object BackupWriter {
 
         val result = runCatching {
             val folderUri = currentFolderUri(settingsStore)
-                ?: error("No backup folder chosen")
+                ?: error(context.getString(R.string.err_no_backup_folder))
 
             val folder = DocumentFile.fromTreeUri(context, folderUri)
             check(folder != null && folder.isDirectory && folder.canWrite()) {
-                "Backup folder is no longer writable — pick it again"
+                context.getString(R.string.err_backup_folder_unwritable)
             }
 
             val json = repository.exportJson()
@@ -55,11 +56,11 @@ object BackupWriter {
             folder.findFile(name)?.delete()
 
             val target = folder.createFile(MIME_JSON, name)
-                ?: error("Could not create $name in the backup folder")
+                ?: error(context.getString(R.string.err_backup_create_failed, name))
 
             context.contentResolver.openOutputStream(target.uri)?.use { stream ->
                 stream.write(json.toByteArray())
-            } ?: error("Could not open $name for writing")
+            } ?: error(context.getString(R.string.err_backup_write_failed, name))
 
             pruneOldSnapshots(folder)
             name

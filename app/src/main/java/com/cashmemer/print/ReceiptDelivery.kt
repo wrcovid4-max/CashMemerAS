@@ -3,6 +3,7 @@ package com.cashmemer.print
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import com.cashmemer.R
 import com.cashmemer.core.data.AppSettings
 import com.cashmemer.core.model.Receipt
 import com.cashmemer.core.util.Format
@@ -33,32 +34,50 @@ object ReceiptDelivery {
             ReceiptPdfRenderer
                 .render(context, listOf(receipt), pages, ReceiptOutput.outputFile(context, listOf(receipt)))
                 .onSuccess { file ->
-                    ReceiptOutput.print(context, file, "Receipt ${receipt.id}")
-                    actions += "printing"
+                    ReceiptOutput.print(
+                        context,
+                        file,
+                        context.getString(R.string.print_job_receipt, receipt.id),
+                    )
+                    actions += context.getString(R.string.delivery_printing)
                 }
-                .onFailure { return "Auto-print failed: ${it.message}" }
+                .onFailure {
+                    return context.getString(
+                        R.string.msg_auto_print_failed,
+                        it.message.orEmpty(),
+                    )
+                }
         }
 
         if (settings.autoSend) {
             when {
                 receipt.customerEmail.isNotBlank() -> {
-                    if (sendEmail(context, receipt)) actions += "emailing"
+                    if (sendEmail(context, receipt)) {
+                        actions += context.getString(R.string.delivery_emailing)
+                    }
                 }
                 receipt.customerPhone.isNotBlank() -> {
-                    if (sendSms(context, receipt)) actions += "texting"
+                    if (sendSms(context, receipt)) {
+                        actions += context.getString(R.string.delivery_texting)
+                    }
                 }
                 // Nothing to send to is not a failure worth shouting about.
                 else -> Unit
             }
         }
 
-        return actions.takeIf { it.isNotEmpty() }?.joinToString(" and ")
+        val joiner = " ${context.getString(R.string.delivery_and)} "
+        return actions.takeIf { it.isNotEmpty() }?.joinToString(joiner)
     }
 
-    private fun summaryLine(receipt: Receipt): String =
-        "Receipt #${receipt.id} from ${receipt.placeName.ifBlank { "Cash Memer" }} — " +
-            "${Format.amountWithCurrency(receipt.total, receipt.currencyCode)} on " +
-            Format.timestamp(receipt.createdAt)
+    private fun summaryLine(context: Context, receipt: Receipt): String =
+        context.getString(
+            R.string.receipt_summary_line,
+            receipt.id,
+            receipt.placeName.ifBlank { context.getString(R.string.app_name) },
+            Format.amountWithCurrency(receipt.total, receipt.currencyCode),
+            Format.timestamp(receipt.createdAt),
+        )
 
     /**
      * Opens the mail client pre-filled with the receipt as an attachment.
@@ -78,8 +97,11 @@ object ReceiptDelivery {
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "application/pdf"
             putExtra(Intent.EXTRA_EMAIL, arrayOf(receipt.customerEmail))
-            putExtra(Intent.EXTRA_SUBJECT, "Your receipt from ${receipt.placeName}")
-            putExtra(Intent.EXTRA_TEXT, summaryLine(receipt))
+            putExtra(
+                Intent.EXTRA_SUBJECT,
+                context.getString(R.string.email_subject_receipt, receipt.placeName),
+            )
+            putExtra(Intent.EXTRA_TEXT, summaryLine(context, receipt))
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
             pdf?.let { file ->
@@ -95,14 +117,14 @@ object ReceiptDelivery {
         }
 
         return context.startActivitySafely(
-            Intent.createChooser(intent, "Send receipt")
+            Intent.createChooser(intent, context.getString(R.string.send_receipt))
         )
     }
 
     private fun sendSms(context: Context, receipt: Receipt): Boolean {
         val intent = Intent(Intent.ACTION_SENDTO).apply {
             data = Uri.parse("smsto:${receipt.customerPhone}")
-            putExtra("sms_body", summaryLine(receipt))
+            putExtra("sms_body", summaryLine(context, receipt))
         }
         return context.startActivitySafely(intent)
     }

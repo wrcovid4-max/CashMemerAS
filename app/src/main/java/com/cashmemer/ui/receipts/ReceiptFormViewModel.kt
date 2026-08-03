@@ -6,6 +6,8 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.annotation.StringRes
+import com.cashmemer.R
 import com.cashmemer.core.data.CashMemerRepository
 import com.cashmemer.core.data.ReceiptItemCodec
 import com.cashmemer.core.data.SettingsStore
@@ -84,6 +86,14 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
 
     private val repository = CashMemerRepository.get(application)
     private val settingsStore = SettingsStore(application)
+
+    /**
+     * ViewModels have no composable scope, so `stringResource` is unavailable —
+     * every message the user reads goes through here instead, which is what
+     * makes toasts follow the app language rather than staying English.
+     */
+    private fun str(@StringRes id: Int, vararg args: Any): String =
+        getApplication<Application>().getString(id, *args)
 
     private val _state = MutableStateFlow(ReceiptFormState())
     val state: StateFlow<ReceiptFormState> = _state.asStateFlow()
@@ -203,7 +213,9 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
 
     /** Surfaces what auto-print / auto-send actually did. */
     fun reportDelivery(description: String) =
-        _state.update { it.copy(message = "Receipt saved — $description") }
+        _state.update {
+            it.copy(message = str(R.string.msg_receipt_saved_delivery, description))
+        }
 
     /** Fills the location field from the device's current position. */
     fun useCurrentLocation() {
@@ -219,7 +231,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                     _state.update {
                         it.copy(
                             locatingAddress = false,
-                            message = error.message ?: "Could not find your location",
+                            message = str(R.string.msg_location_failed),
                         )
                     }
                 }
@@ -265,7 +277,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
 
             if (product == null) {
                 _state.update { it.copy(unknownBarcode = barcode) }
-                _toasts.emit("Barcode $barcode is not in your inventory")
+                _toasts.emit(str(R.string.msg_barcode_unknown, barcode))
                 return@launch
             }
 
@@ -276,7 +288,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                     unitPrice = product.price,
                 )
             )
-            _toasts.emit("Added — ${product.name} ×1")
+            _toasts.emit(str(R.string.msg_added_item, product.name))
         }
     }
 
@@ -293,7 +305,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
             )
             addItem(ReceiptItem(productName = name.trim(), qty = 1.0, unitPrice = price))
             _state.update { it.copy(unknownBarcode = null) }
-            _toasts.emit("Saved ${name.trim()} and added it")
+            _toasts.emit(str(R.string.msg_saved_and_added, name.trim()))
         }
     }
 
@@ -305,7 +317,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         viewModelScope.launch {
             val bitmap = decodeScaled(uri)
             if (bitmap == null) {
-                _state.update { it.copy(message = "Could not read that image") }
+                _state.update { it.copy(message = str(R.string.msg_image_unreadable)) }
                 return@launch
             }
             _state.update { it.copy(sourceImageUri = uri.toString()) }
@@ -368,13 +380,16 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                             taxPercent = parsed.taxPercent.takeIf { it > 0 }
                                 ?: current.taxPercent,
                             items = current.items + parsed.items,
-                            message = "Scanned ${parsed.items.size} item(s)",
+                            message = str(R.string.msg_scanned_items, parsed.items.size),
                         )
                     }
                 }
                 .onFailure { error ->
                     _state.update {
-                        it.copy(scanning = false, message = error.message ?: "Scan failed")
+                        it.copy(
+                            scanning = false,
+                            message = error.message ?: str(R.string.msg_scan_failed),
+                        )
                     }
                 }
         }
@@ -383,7 +398,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
     fun generate(onGenerated: (Long) -> Unit = {}) {
         val current = _state.value
         if (!current.canGenerate) {
-            _state.update { it.copy(message = "Add a store name and at least one item") }
+            _state.update { it.copy(message = str(R.string.msg_need_store_and_item)) }
             return
         }
 
@@ -448,7 +463,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                     null
                 },
                 saveSignatureAsDefault = current.saveSignatureAsDefault,
-                message = "Receipt #$id generated",
+                message = str(R.string.msg_receipt_generated, id),
             )
             onGenerated(id)
         }
@@ -461,7 +476,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
     fun loadForEdit(id: Long) {
         viewModelScope.launch {
             val receipt = repository.receipt(id) ?: run {
-                _state.update { it.copy(message = "Receipt #$id no longer exists") }
+                _state.update { it.copy(message = str(R.string.msg_receipt_missing, id)) }
                 return@launch
             }
 
@@ -485,7 +500,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                 notesPage2 = receipt.notesPage2,
                 signatureBase64 = receipt.signatureBase64,
                 sourceImageUri = receipt.sourceImageUri,
-                message = "Editing receipt #${receipt.id}",
+                message = str(R.string.msg_editing_receipt, receipt.id),
             )
         }
     }

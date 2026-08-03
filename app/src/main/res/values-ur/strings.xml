@@ -103,6 +103,18 @@
     <string name="msg_editing_receipt">رسید نمبر %1$d میں ترمیم</string>
     <string name="msg_receipt_missing">رسید نمبر %1$d اب موجود نہیں</string>
     <string name="msg_saved_and_added">%1$s محفوظ ہو کر شامل ہو گیا</string>
+    <string name="msg_receipt_saved_delivery">رسید محفوظ ہو گئی — %1$s</string>
+
+    <!-- خودکار پرنٹ / خودکار ارسال -->
+    <string name="delivery_printing">پرنٹنگ</string>
+    <string name="delivery_emailing">ای میل</string>
+    <string name="delivery_texting">پیغام</string>
+    <string name="delivery_and">اور</string>
+    <string name="msg_auto_print_failed">خودکار پرنٹ ناکام: %1$s</string>
+    <string name="send_receipt">رسید بھیجیں</string>
+    <string name="email_subject_receipt">%1$s کی طرف سے آپ کی رسید</string>
+    <string name="print_job_receipt">رسید %1$d</string>
+    <string name="receipt_summary_line">رسید نمبر %1$d، %2$s سے — %3$s، بتاریخ %4$s</string>
     <string name="product_not_found">پروڈکٹ نہیں ملا</string>
     <string name="product_not_found_body">بارکوڈ %1$s ابھی آپ کی انوینٹری میں نہیں۔ ابھی شامل کریں تاکہ اگلی بار پہچانا جائے۔</string>
     <string name="save_and_add">محفوظ کر کے شامل کریں</string>
@@ -143,6 +155,10 @@
     <string name="msg_no_recent_receipts">پچھلے سات دن میں کوئی رسید نہیں</string>
     <string name="msg_insight_failed">بصیرت تیار نہیں ہو سکی</string>
     <string name="msg_pdf_failed">پی ڈی ایف نہیں بن سکی</string>
+    <string name="msg_file_write_failed">وہ فائل لکھنے کے لیے نہیں کھل سکی</string>
+    <string name="msg_file_read_failed">وہ فائل پڑھی نہیں جا سکی</string>
+    <string name="walk_in">آنے والا گاہک</string>
+    <string name="no_value">—</string>
 
     <!-- Dashboard -->
     <string name="overview">جائزہ</string>
@@ -262,6 +278,19 @@
     <string name="msg_signed_out">سائن آؤٹ ہو گیا</string>
     <string name="msg_backup_folder_set">بیک اپ فولڈر مقرر ہو گیا</string>
     <string name="msg_synced_records">%1$d ریکارڈ سنک ہوئے</string>
+    <string name="msg_sign_in_sync_failed">سائن اِن ہو گیا، مگر کلاؤڈ سنک ناکام: %1$s</string>
+    <string name="msg_sign_in_failed">سائن اِن ناکام</string>
+    <string name="msg_no_web_client_id">پہلے local.properties میں GOOGLE_WEB_CLIENT_ID شامل کریں</string>
+    <string name="msg_no_google_services">پہلے ایپ ماڈیول میں google-services.json شامل کریں</string>
+    <string name="msg_sign_in_first">پہلے گوگل سے سائن اِن کریں</string>
+    <string name="msg_sync_failed">سنک ناکام</string>
+    <string name="msg_saved_file">%1$s محفوظ ہو گئی</string>
+
+    <!-- خودکار بیک اپ کی خرابیاں -->
+    <string name="err_no_backup_folder">کوئی بیک اپ فولڈر منتخب نہیں کیا گیا</string>
+    <string name="err_backup_folder_unwritable">بیک اپ فولڈر میں اب لکھا نہیں جا سکتا — دوبارہ منتخب کریں</string>
+    <string name="err_backup_create_failed">بیک اپ فولڈر میں %1$s نہیں بن سکی</string>
+    <string name="err_backup_write_failed">%1$s لکھنے کے لیے نہیں کھل سکی</string>
 
     <!-- Connected devices -->
     <string name="core_integrations">بنیادی انٹیگریشنز</string>

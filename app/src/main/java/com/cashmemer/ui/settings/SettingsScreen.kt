@@ -78,6 +78,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val store = SettingsStore(application)
     private val repository = CashMemerRepository.get(application)
 
+    /** See ReceiptFormViewModel — no composable scope here either. */
+    private fun str(@androidx.annotation.StringRes id: Int, vararg args: Any): String =
+        getApplication<Application>().getString(id, *args)
+
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message.asStateFlow()
 
@@ -92,12 +96,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun setPasscode(passcode: String, confirm: String) {
         if (passcode.length != 4 || passcode != confirm) {
-            _message.value = "Passcodes must match and be 4 digits"
+            _message.value = str(R.string.msg_passcode_mismatch)
             return
         }
         launch {
             store.setPasscode(passcode)
-            _message.value = "Passcode updated"
+            _message.value = str(R.string.msg_passcode_updated)
         }
     }
 
@@ -119,7 +123,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             )
         }
         store.setBackupFolder(uri.toString())
-        _message.value = "Backup folder set"
+        _message.value = str(R.string.msg_backup_folder_set)
     }
 
     private val _syncing = MutableStateFlow(false)
@@ -136,19 +140,21 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 if (FirebaseSync.isConfigured(app)) {
                     FirebaseSync.authenticate(app, account.idToken)
                         .onFailure { error ->
-                            _message.value =
-                                "Signed in, but cloud sync failed: ${error.message}"
+                            _message.value = str(
+                                R.string.msg_sign_in_sync_failed,
+                                error.message.orEmpty(),
+                            )
                             return@onSuccess
                         }
                 }
-                _message.value = "Signed in as ${account.email}"
+                _message.value = str(R.string.msg_signed_in_as, account.email)
             }
             .onFailure { error ->
                 _message.value = when (error) {
                     is GoogleAuth.CancelledException -> null
                     is GoogleAuth.NotConfiguredException ->
-                        "Add GOOGLE_WEB_CLIENT_ID to local.properties first"
-                    else -> error.message ?: "Sign-in failed"
+                        str(R.string.msg_no_web_client_id)
+                    else -> error.message ?: str(R.string.msg_sign_in_failed)
                 }
             }
     }
@@ -156,7 +162,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun signOut(activityContext: Context) = launch {
         FirebaseSync.signOut(getApplication<Application>())
         GoogleAuth.signOut(activityContext, store)
-        _message.value = "Signed out"
+        _message.value = str(R.string.msg_signed_out)
     }
 
     /** Uploads everything local to Firestore. */
@@ -169,13 +175,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         if (_syncing.value) return@launch
         _syncing.value = true
         block()
-            .onSuccess { _message.value = "Synced $it record(s)" }
+            .onSuccess { _message.value = str(R.string.msg_synced_records, it) }
             .onFailure { error ->
                 _message.value = when (error) {
                     is FirebaseSync.NotConfiguredException ->
-                        "Add google-services.json to the app module first"
-                    is FirebaseSync.NotSignedInException -> "Sign in with Google first"
-                    else -> error.message ?: "Sync failed"
+                        str(R.string.msg_no_google_services)
+                    is FirebaseSync.NotSignedInException -> str(R.string.msg_sign_in_first)
+                    else -> error.message ?: str(R.string.msg_sync_failed)
                 }
             }
         _syncing.value = false
@@ -189,14 +195,14 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun backupNow() = launch {
         BackupWriter.run(getApplication<Application>())
-            .onSuccess { _message.value = "Saved $it" }
-            .onFailure { _message.value = it.message ?: "Backup failed" }
+            .onSuccess { _message.value = str(R.string.msg_saved_file, it) }
+            .onFailure { _message.value = it.message ?: str(R.string.msg_backup_failed) }
     }
 
     fun importJson(json: String) = launch {
         repository.importJson(json)
-            .onSuccess { _message.value = "Restored $it record(s)" }
-            .onFailure { _message.value = it.message ?: "Restore failed" }
+            .onSuccess { _message.value = str(R.string.msg_restored_records, it) }
+            .onFailure { _message.value = it.message ?: str(R.string.msg_restore_failed) }
     }
 
     fun consumeMessage() {
