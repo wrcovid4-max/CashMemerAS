@@ -191,6 +191,36 @@
     <string name="receipts_count">%1$d رسیدیں</string>
     <string name="total_count">کل %1$d</string>
     <string name="no_data_yet">ابھی کوئی ڈیٹا نہیں۔</string>
+    <string name="receipt_figures">رسیدیں</string>
+    <string name="stock_figures">اسٹاک</string>
+    <string name="app_figures">یہ ایپ</string>
+    <string name="avg_receipt">اوسط رسید</string>
+    <string name="highest_receipt">سب سے بڑی رسید</string>
+    <string name="lowest_receipt">سب سے چھوٹی رسید</string>
+    <string name="all_time">ابتدا سے اب تک</string>
+    <string name="receipts_scanned">اسکین شدہ رسیدیں</string>
+    <string name="from_camera">کیمرے سے پڑھی گئیں</string>
+    <string name="most_visited_store">سب سے زیادہ جانے والی دکان</string>
+    <string name="visits_count">%1$d بار</string>
+    <string name="unique_stores">مختلف دکانیں</string>
+    <string name="stores_recorded">اب تک درج ہوئیں</string>
+    <string name="top_product">سب سے زیادہ بکنے والا</string>
+    <string name="sold_qty">%1$s فروخت ہوئے</string>
+    <string name="total_products">پروڈکٹس</string>
+    <string name="low_stock_count">%1$d کا اسٹاک کم ہے</string>
+    <string name="avg_product_cost">اوسط لاگت</string>
+    <string name="purchase_price_label">آپ نے جو ادا کیا</string>
+    <string name="inventory_value">اسٹاک کی مالیت</string>
+    <string name="at_selling_price">فروخت قیمت پر</string>
+    <string name="saved_customers">محفوظ گاہک</string>
+    <string name="storage_used">استعمال شدہ جگہ</string>
+    <string name="data_and_cache">ریکارڈ اور کیش</string>
+    <string name="last_backup_tile">آخری بیک اپ</string>
+    <string name="never">کبھی نہیں</string>
+    <string name="cloud_sync">کلاؤڈ سنک</string>
+    <string name="sync_on">آن</string>
+    <string name="sync_off">آف</string>
+    <string name="not_signed_in">سائن اِن نہیں</string>
 
     <!-- Inventory -->
     <string name="products">پروڈکٹس</string>

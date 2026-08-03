@@ -191,6 +191,36 @@
     <string name="receipts_count">%1$d receipt(s)</string>
     <string name="total_count">%1$d total</string>
     <string name="no_data_yet">No data yet.</string>
+    <string name="receipt_figures">Receipts</string>
+    <string name="stock_figures">Stock</string>
+    <string name="app_figures">This app</string>
+    <string name="avg_receipt">Average receipt</string>
+    <string name="highest_receipt">Highest receipt</string>
+    <string name="lowest_receipt">Lowest receipt</string>
+    <string name="all_time">All time</string>
+    <string name="receipts_scanned">Scanned receipts</string>
+    <string name="from_camera">Read by the camera</string>
+    <string name="most_visited_store">Most visited store</string>
+    <string name="visits_count">%1$d visit(s)</string>
+    <string name="unique_stores">Different stores</string>
+    <string name="stores_recorded">Recorded so far</string>
+    <string name="top_product">Top product</string>
+    <string name="sold_qty">%1$s sold</string>
+    <string name="total_products">Products</string>
+    <string name="low_stock_count">%1$d low on stock</string>
+    <string name="avg_product_cost">Average product cost</string>
+    <string name="purchase_price_label">What you paid</string>
+    <string name="inventory_value">Stock value</string>
+    <string name="at_selling_price">At selling price</string>
+    <string name="saved_customers">Saved customers</string>
+    <string name="storage_used">Storage used</string>
+    <string name="data_and_cache">Records and cache</string>
+    <string name="last_backup_tile">Last backup</string>
+    <string name="never">Never</string>
+    <string name="cloud_sync">Cloud sync</string>
+    <string name="sync_on">On</string>
+    <string name="sync_off">Off</string>
+    <string name="not_signed_in">Not signed in</string>
 
     <!-- Inventory -->
     <string name="products">Products</string>
