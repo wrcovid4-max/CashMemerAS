@@ -16,8 +16,9 @@ private val Context.draftDataStore by preferencesDataStore(name = "receipt_draft
  * Persists the half-typed receipt so a crash, a battery death or an accidental
  * back-out at the counter does not lose the sale in progress.
  *
- * Only the typed fields are kept — the signature bitmap is deliberately left
- * out, since re-signing is trivial and the base64 would bloat every write.
+ * The signature is kept too. It was left out originally on the theory that
+ * re-signing is trivial — it is not, when a customer has already handed the
+ * phone back and you only stepped away to check a message.
  */
 object DraftStore {
 
@@ -40,9 +41,11 @@ object DraftStore {
             .put("cashGiven", state.cashGiven)
             .put("notesPage1", state.notesPage1)
             .put("notesPage2", state.notesPage2)
+            .put("saveSignatureAsDefault", state.saveSignatureAsDefault)
             .apply {
                 state.latitude?.let { put("latitude", it) }
                 state.longitude?.let { put("longitude", it) }
+                state.signatureBase64?.let { put("signature", it) }
             }
             .toString()
 
@@ -73,11 +76,18 @@ object DraftStore {
                 longitude = if (o.has("longitude")) o.optDouble("longitude") else null,
                 notesPage1 = o.optString("notesPage1"),
                 notesPage2 = o.optString("notesPage2"),
+                signatureBase64 = o.optString("signature").takeIf { it.isNotBlank() },
+                saveSignatureAsDefault = o.optBoolean("saveSignatureAsDefault", true),
             )
 
             // An empty shell is worse than nothing — it would stomp the
-            // defaults restored from settings.
-            state.takeIf { it.placeName.isNotBlank() || it.items.isNotEmpty() }
+            // defaults restored from settings. A signature on its own counts:
+            // somebody signed, and throwing that away is the bug this fixes.
+            state.takeIf {
+                it.placeName.isNotBlank() ||
+                    it.items.isNotEmpty() ||
+                    it.signatureBase64 != null
+            }
         }.getOrNull()
     }
 

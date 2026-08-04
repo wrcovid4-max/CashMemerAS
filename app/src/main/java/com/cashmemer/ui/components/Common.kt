@@ -29,19 +29,78 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.cashmemer.R
 import com.cashmemer.core.ui.theme.Dimens
 import com.cashmemer.ui.Destination
+
+/**
+ * One line of text that gets smaller until it fits, instead of being cut off
+ * with an ellipsis or wrapped onto a second line.
+ *
+ * "Barcode Scan" on a half-width button and "Professional Receipt Organizer"
+ * beside the language switch were both being chopped to "Barcode …". A label
+ * a shade smaller reads fine; a label with its ending missing does not.
+ *
+ * It draws nothing until the size has settled, so there is no visible jump
+ * while it steps down.
+ */
+@Composable
+fun FitText(
+    text: String,
+    modifier: Modifier = Modifier,
+    style: TextStyle = LocalTextStyle.current,
+    color: Color = Color.Unspecified,
+    fontWeight: FontWeight? = null,
+    /** How far it may shrink before it gives up and clips. */
+    smallestScale: Float = 0.65f,
+) {
+    val startSize = if (style.fontSize == TextUnit.Unspecified) 14.sp else style.fontSize
+    val smallest = startSize.value * smallestScale
+
+    var size by remember(text, startSize) { mutableStateOf(startSize) }
+    var settled by remember(text, startSize) { mutableStateOf(false) }
+
+    Text(
+        text = text,
+        modifier = modifier.drawWithContent { if (settled) drawContent() },
+        style = style.copy(fontSize = size),
+        color = color,
+        fontWeight = fontWeight,
+        maxLines = 1,
+        softWrap = false,
+        overflow = TextOverflow.Clip,
+        onTextLayout = { result ->
+            if (result.hasVisualOverflow && size.value > smallest) {
+                size = (size.value * STEP).sp
+            } else {
+                settled = true
+            }
+        },
+    )
+}
+
+/** Small enough to converge quickly, large enough not to look stepped. */
+private const val STEP = 0.94f
 
 /** App bar: mark, wordmark, tagline and the ENG / اردو switch. */
 @Composable
@@ -76,18 +135,14 @@ fun BrandHeader(
                     .weight(1f)
                     .padding(start = Dimens.gap)
             ) {
-                Text(
+                FitText(
                     text = stringResource(R.string.app_name),
                     style = MaterialTheme.typography.titleLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
                 )
-                Text(
+                FitText(
                     text = stringResource(R.string.app_tagline),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
                 )
             }
 
@@ -202,7 +257,7 @@ fun SectionCard(
 
 @Composable
 fun SectionTitle(text: String, modifier: Modifier = Modifier) {
-    Text(
+    FitText(
         text = text,
         modifier = modifier,
         style = MaterialTheme.typography.titleLarge,
@@ -213,7 +268,7 @@ fun SectionTitle(text: String, modifier: Modifier = Modifier) {
 /** Heading for a screen, above its first card. */
 @Composable
 fun ScreenTitle(text: String, modifier: Modifier = Modifier) {
-    Text(
+    FitText(
         text = text,
         modifier = modifier.padding(bottom = Dimens.gapTight),
         style = MaterialTheme.typography.headlineMedium,
@@ -272,13 +327,12 @@ private fun RowScope.ButtonContent(text: String, icon: ImageVector?) {
         Spacer(Modifier.width(Dimens.iconGap))
     }
     // Half-width buttons hold labels like "Barcode Scan" that were wrapping to
-    // two lines and blowing up the row. One line, shrink to fit, never wrap.
-    Text(
+    // two lines and blowing up the row, then being cut to "Barcode …" when that
+    // was stopped. Shrinking the label is the only version that reads.
+    FitText(
         text = text,
         style = MaterialTheme.typography.labelMedium,
-        maxLines = 1,
-        softWrap = false,
-        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.weight(1f, fill = false),
     )
 }
 

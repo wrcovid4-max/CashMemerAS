@@ -278,13 +278,18 @@
     <string name="cloud_sync_backup">Cloud Sync &amp; Backup</string>
     <string name="sign_in_google">Sign in with Google</string>
     <string name="sign_out">Sign out</string>
+    <string name="sign_in_optional">Signing in is optional — everything in the app works without it. It adds your name to the receipts you issue and turns on cloud backup. It has not been set up on this build yet.</string>
+    <string name="sign_in_how_to">How to turn this on</string>
+    <string name="setup_sign_in_title">Turning on Google sign-in</string>
+    <string name="setup_sign_in_steps">This is a one-time setup done on the computer, not on the phone.\n\n1. Go to the Google Cloud Console and create an OAuth client ID of type \"Web application\".\n\n2. Copy the client ID. It ends in .apps.googleusercontent.com\n\n3. In Android Studio, open the file called local.properties\n\n4. Add this line, with your own ID:\nGOOGLE_WEB_CLIENT_ID=your_id_here\n\n5. Sync Gradle and run the app again.\n\nThe full walkthrough is in README.md under \"Sign in with Google\".</string>
+    <string name="action_got_it">Got it</string>
     <string name="sign_in_prompt">Sign in with Google to tag receipts with who created them.</string>
     <string name="cloud_sync_connected">Cloud sync connected</string>
     <string name="sync">Sync</string>
     <string name="restore">Restore</string>
     <string name="restore_warning">Restore replaces everything on this phone with the cloud copy. Use it on a new device, not to merge.</string>
     <string name="cloud_sync_off">Cloud sync is off — add google-services.json to the app module to switch it on. Your daily folder backups below still run.</string>
-    <string name="connected_devices">Connected Devices &amp; Integrations</string>
+    <string name="connected_devices">Connected Devices</string>
     <string name="connected_devices_body">Manage payment terminals and scanners</string>
     <string name="appearance_settings">Appearance settings</string>
     <string name="appearance_body">Customize theme look &amp; feel representing your style</string>
@@ -319,7 +324,7 @@
     <string name="last_backup">Last backup: %1$s</string>
     <string name="last_backup_failed">Last backup failed: %1$s</string>
     <string name="no_backup_yet">No backup taken yet</string>
-    <string name="backup_recovery">Backup &amp; Recovery (Offline Backup)</string>
+    <string name="backup_recovery">Backup &amp; Recovery</string>
     <string name="backup_recovery_body">Export all locally stored receipt rows or restore previous records instantly.</string>
     <string name="export_json">Export JSON</string>
     <string name="backup_payload">Backup payload</string>
@@ -345,7 +350,7 @@
 
     <!-- Connected devices -->
     <string name="core_integrations">Core Integrations</string>
-    <string name="payment_terminal">Payment Terminal Integration</string>
+    <string name="payment_terminal">Payment Terminals</string>
     <string name="payment_terminal_body">Enable or disable smart payment card readers.</string>
     <string name="ocr_companion">Android OCR Companion</string>
     <string name="ocr_companion_body">Enable or disable Android OCR companion scanning.</string>
@@ -425,4 +430,12 @@
     <string name="cat_services">Services</string>
     <string name="cat_medical">Medical</string>
     <string name="cat_other">Other</string>
+
+    <!-- Map picker -->
+    <string name="maps_key_missing_title">The map cannot be shown</string>
+    <string name="maps_key_missing_body">This build has no Google Maps key, so there is nothing to draw. You can still search for an address above, or use your current location, and confirm it — those do not need the map. To show the map, add MAPS_API_KEY to local.properties in Android Studio.</string>
+    <string name="map_not_loading">Map not loading?</string>
+    <string name="maps_troubleshoot_title">If the map is blank</string>
+    <string name="maps_troubleshoot_body">A key on its own is not enough. In the Google Cloud Console, check all three:\n\n1. \"Maps SDK for Android\" is switched on for the project. This is a different one from the Geocoding API.\n\n2. Billing is set up on the project. Google will not draw map tiles without it, even on the free tier.\n\n3. If the key is restricted, this app\'s package name and signing certificate are on the allowed list.\n\nSearching for an address and confirming it works either way.</string>
+
 </resources>

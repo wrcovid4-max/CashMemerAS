@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -15,11 +14,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import com.cashmemer.R
 import com.cashmemer.core.data.AppSettings
 import com.cashmemer.ui.dashboard.DashboardTab
 import com.cashmemer.ui.history.HistoryTab
+import com.cashmemer.ui.components.FitText
 
 /** Receipts · History · Dashboard — the three tabs of the app's home screen. */
 @Composable
@@ -48,15 +47,12 @@ fun ReceiptsHomeScreen(settings: AppSettings) {
                 Tab(
                     selected = selectedTab == index,
                     onClick = { selectedTab = index },
+                    // "Dashboard" was wrapping to two lines and pushing the tab
+                    // row out of shape; it now shrinks instead.
                     text = {
-                        Text(
+                        FitText(
                             text = title,
                             style = MaterialTheme.typography.labelLarge,
-                            // "Dashboard" was wrapping to two lines and pushing
-                            // the tab row out of shape.
-                            maxLines = 1,
-                            softWrap = false,
-                            overflow = TextOverflow.Ellipsis,
                         )
                     },
                 )

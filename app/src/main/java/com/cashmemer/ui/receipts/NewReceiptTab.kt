@@ -343,7 +343,7 @@ fun NewReceiptTab(
 
         item {
             SignatureCard(
-                captured = state.signatureBase64 != null,
+                signatureBase64 = state.signatureBase64,
                 saveAsDefault = state.saveSignatureAsDefault,
                 onSaveAsDefaultChange = viewModel::setSaveSignatureAsDefault,
                 onSignatureChanged = viewModel::setSignature,
@@ -812,7 +812,7 @@ private fun TotalRow(
 
 @Composable
 private fun SignatureCard(
-    captured: Boolean,
+    signatureBase64: String?,
     saveAsDefault: Boolean,
     onSaveAsDefaultChange: (Boolean) -> Unit,
     onSignatureChanged: (String?) -> Unit,
@@ -824,7 +824,7 @@ private fun SignatureCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             SectionTitle(stringResource(R.string.digital_signature))
-            if (captured) {
+            if (signatureBase64 != null) {
                 AssistChip(
                     onClick = {},
                     label = { Text(stringResource(R.string.captured)) },
@@ -833,7 +833,10 @@ private fun SignatureCard(
             }
         }
 
-        SignaturePad(onSignatureChanged = onSignatureChanged)
+        SignaturePad(
+            signatureBase64 = signatureBase64,
+            onSignatureChanged = onSignatureChanged,
+        )
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(checked = saveAsDefault, onCheckedChange = onSaveAsDefaultChange)

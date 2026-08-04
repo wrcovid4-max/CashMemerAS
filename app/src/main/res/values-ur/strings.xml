@@ -278,13 +278,18 @@
     <string name="cloud_sync_backup">کلاؤڈ سنک اور بیک اپ</string>
     <string name="sign_in_google">گوگل سے سائن ان کریں</string>
     <string name="sign_out">سائن آؤٹ</string>
+    <string name="sign_in_optional">سائن اِن اختیاری ہے — ایپ اس کے بغیر بھی مکمل کام کرتی ہے۔ یہ آپ کی جاری کردہ رسیدوں پر آپ کا نام لگاتا ہے اور کلاؤڈ بیک اپ چالو کرتا ہے۔ اس بلڈ میں ابھی یہ ترتیب نہیں دیا گیا۔</string>
+    <string name="sign_in_how_to">اسے چالو کرنے کا طریقہ</string>
+    <string name="setup_sign_in_title">گوگل سائن اِن چالو کرنا</string>
+    <string name="setup_sign_in_steps">یہ ایک بار کی ترتیب ہے جو کمپیوٹر پر کی جاتی ہے، فون پر نہیں۔\n\n۱۔ گوگل کلاؤڈ کنسول میں جائیں اور \"Web application\" قسم کا OAuth client ID بنائیں۔\n\n۲۔ وہ client ID کاپی کریں۔ یہ .apps.googleusercontent.com پر ختم ہوتا ہے۔\n\n۳۔ اینڈرائیڈ اسٹوڈیو میں local.properties نامی فائل کھولیں۔\n\n۴۔ اپنی ID کے ساتھ یہ سطر شامل کریں:\nGOOGLE_WEB_CLIENT_ID=your_id_here\n\n۵۔ Gradle سنک کر کے ایپ دوبارہ چلائیں۔\n\nمکمل تفصیل README.md میں \"Sign in with Google\" کے تحت ہے۔</string>
+    <string name="action_got_it">سمجھ گیا</string>
     <string name="sign_in_prompt">گوگل سے سائن ان کریں تاکہ رسید پر بنانے والے کا نام آئے۔</string>
     <string name="cloud_sync_connected">کلاؤڈ سنک منسلک ہے</string>
     <string name="sync">سنک</string>
     <string name="restore">بحال کریں</string>
     <string name="restore_warning">بحالی اس فون کا سارا ڈیٹا کلاؤڈ کاپی سے بدل دے گی۔ اسے نئے آلے پر استعمال کریں، ملانے کے لیے نہیں۔</string>
     <string name="cloud_sync_off">کلاؤڈ سنک بند ہے — چالو کرنے کے لیے ایپ ماڈیول میں google-services.json شامل کریں۔ نیچے دیے روزانہ فولڈر بیک اپ بدستور چلتے رہیں گے۔</string>
-    <string name="connected_devices">منسلک آلات اور انٹیگریشنز</string>
+    <string name="connected_devices">منسلک آلات</string>
     <string name="connected_devices_body">ادائیگی ٹرمینلز اور اسکینرز کا انتظام</string>
     <string name="appearance_settings">ظاہری ترتیبات</string>
     <string name="appearance_body">اپنی پسند کے مطابق تھیم کی شکل و صورت بدلیں</string>
@@ -319,7 +324,7 @@
     <string name="last_backup">آخری بیک اپ: %1$s</string>
     <string name="last_backup_failed">آخری بیک اپ ناکام: %1$s</string>
     <string name="no_backup_yet">ابھی کوئی بیک اپ نہیں</string>
-    <string name="backup_recovery">بیک اپ اور بحالی (آف لائن)</string>
+    <string name="backup_recovery">بیک اپ اور بحالی</string>
     <string name="backup_recovery_body">مقامی طور پر محفوظ تمام رسیدیں برآمد کریں یا پرانے ریکارڈ فوراً بحال کریں۔</string>
     <string name="export_json">JSON برآمد کریں</string>
     <string name="backup_payload">بیک اپ ڈیٹا</string>
@@ -345,7 +350,7 @@
 
     <!-- Connected devices -->
     <string name="core_integrations">بنیادی انٹیگریشنز</string>
-    <string name="payment_terminal">ادائیگی ٹرمینل انٹیگریشن</string>
+    <string name="payment_terminal">ادائیگی ٹرمینل</string>
     <string name="payment_terminal_body">اسمارٹ کارڈ ریڈر چالو یا بند کریں۔</string>
     <string name="ocr_companion">اینڈرائیڈ او سی آر ساتھی</string>
     <string name="ocr_companion_body">اینڈرائیڈ او سی آر ساتھی اسکیننگ چالو یا بند کریں۔</string>
@@ -425,4 +430,12 @@
     <string name="cat_services">خدمات</string>
     <string name="cat_medical">طبی</string>
     <string name="cat_other">دیگر</string>
+
+    <!-- نقشہ منتخب کرنے کی سکرین -->
+    <string name="maps_key_missing_title">نقشہ نہیں دکھایا جا سکتا</string>
+    <string name="maps_key_missing_body">اس بلڈ میں گوگل میپس کی کلید موجود نہیں، اس لیے دکھانے کو کچھ نہیں۔ آپ اوپر پتہ تلاش کر کے یا اپنا موجودہ مقام لے کر تصدیق کر سکتے ہیں — ان کے لیے نقشے کی ضرورت نہیں۔ نقشہ دکھانے کے لیے اینڈرائیڈ اسٹوڈیو میں local.properties میں MAPS_API_KEY شامل کریں۔</string>
+    <string name="map_not_loading">نقشہ نہیں کھل رہا؟</string>
+    <string name="maps_troubleshoot_title">اگر نقشہ خالی ہو</string>
+    <string name="maps_troubleshoot_body">صرف کلید کافی نہیں۔ گوگل کلاؤڈ کنسول میں تینوں چیزیں دیکھیں:\n\n۱۔ پروجیکٹ کے لیے \"Maps SDK for Android\" چالو ہو۔ یہ Geocoding API سے الگ ہے۔\n\n۲۔ پروجیکٹ پر بلنگ ترتیب دی گئی ہو۔ اس کے بغیر گوگل نقشہ نہیں بناتا، مفت حد میں بھی نہیں۔\n\n۳۔ اگر کلید محدود ہے تو اس ایپ کا پیکیج نام اور سائننگ سرٹیفکیٹ اجازت کی فہرست میں ہوں۔\n\nپتہ تلاش کر کے تصدیق کرنا ہر صورت کام کرتا ہے۔</string>
+
 </resources>

@@ -3,6 +3,7 @@ package com.cashmemer.location
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,8 +18,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -27,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -150,25 +154,34 @@ private fun MapPickerScreen(
             }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        GoogleMap(
-            modifier = Modifier.fillMaxSize(),
-            cameraPositionState = cameraPositionState,
-            properties = MapProperties(
-                isMyLocationEnabled = LocationResolver.hasPermission(context),
-            ),
-            uiSettings = MapUiSettings(zoomControlsEnabled = false),
-        )
+    // A missing key gives a blank beige rectangle with no explanation at all,
+    // which reads as a broken app rather than a build that is missing a value.
+    val hasMapsKey = remember { mapsApiKey(context).isNotBlank() }
+    var showingMapHelp by remember { mutableStateOf(false) }
 
-        // The pin is UI, not a map marker — it never moves.
-        Icon(
-            imageVector = Icons.Filled.Place,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(bottom = 24.dp),
-        )
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (hasMapsKey) {
+            GoogleMap(
+                modifier = Modifier.fillMaxSize(),
+                cameraPositionState = cameraPositionState,
+                properties = MapProperties(
+                    isMyLocationEnabled = LocationResolver.hasPermission(context),
+                ),
+                uiSettings = MapUiSettings(zoomControlsEnabled = false),
+            )
+
+            // The pin is UI, not a map marker — it never moves.
+            Icon(
+                imageVector = Icons.Filled.Place,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(bottom = 24.dp),
+            )
+        } else {
+            MissingKeyNotice(modifier = Modifier.align(Alignment.Center))
+        }
 
         Surface(
             modifier = Modifier
@@ -247,10 +260,74 @@ private fun MapPickerScreen(
                     enabled = !resolving && address.isNotBlank(),
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text(stringResource(R.string.confirm_location)) }
+
+                // A key can be present and the tiles still not draw, because
+                // the Cloud project has the wrong API turned on. Nothing in the
+                // SDK says so, so there has to be a way to ask.
+                if (hasMapsKey) {
+                    TextButton(
+                        onClick = { showingMapHelp = true },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text(stringResource(R.string.map_not_loading)) }
+                }
             }
         }
     }
+
+    if (showingMapHelp) {
+        AlertDialog(
+            onDismissRequest = { showingMapHelp = false },
+            title = { Text(stringResource(R.string.maps_troubleshoot_title)) },
+            text = { Text(stringResource(R.string.maps_troubleshoot_body)) },
+            confirmButton = {
+                TextButton(onClick = { showingMapHelp = false }) {
+                    Text(stringResource(R.string.action_got_it))
+                }
+            },
+        )
+    }
 }
+
+/**
+ * Explains a blank map instead of showing one.
+ *
+ * Searching and confirming still work from here — the address comes from the
+ * device's own geocoder, which needs no key at all — so the screen stays usable
+ * while the key is sorted out.
+ */
+@Composable
+private fun MissingKeyNotice(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Map,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = stringResource(R.string.maps_key_missing_title),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Text(
+            text = stringResource(R.string.maps_key_missing_body),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/** Reads back the key Gradle injected, so the app can tell when it is absent. */
+private fun mapsApiKey(context: Context): String = runCatching {
+    context.packageManager
+        .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+        .metaData
+        ?.getString("com.google.android.geo.API_KEY")
+        .orEmpty()
+        .trim()
+}.getOrDefault("")
 
 /** Opens the map picker, optionally centred on a point already chosen. */
 class PickLocationContract : ActivityResultContract<Pair<Double, Double>?, PickedLocation?>() {

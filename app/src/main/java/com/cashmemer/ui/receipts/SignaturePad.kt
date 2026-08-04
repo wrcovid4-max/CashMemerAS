@@ -1,9 +1,11 @@
 package com.cashmemer.ui.receipts
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas as AndroidCanvas
 import android.graphics.Paint
 import android.graphics.Path as AndroidPath
+import android.graphics.Rect
 import android.util.Base64
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -18,32 +20,49 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import java.io.ByteArrayOutputStream
+import kotlin.math.roundToInt
 
 /**
- * Freehand signature capture. Strokes are kept as point lists so the same data
- * can be rasterised to a PNG for storage without re-reading the canvas.
+ * Freehand signature capture.
+ *
+ * The pad shows [signatureBase64] as its starting point rather than only what
+ * has been drawn in this composition. That matters because the pad sits in a
+ * scrolling list: scrolling it off screen, switching apps, or rotating all
+ * throw away the in-memory strokes, and a pad that only knew about those went
+ * blank even though the receipt still held a perfectly good signature.
+ *
+ * New strokes are drawn on top of that picture and flattened into it, so
+ * signing, leaving, coming back and adding a flourish all works.
  */
 @Composable
 fun SignaturePad(
+    signatureBase64: String?,
+    onSignatureChanged: (String?) -> Unit,
     modifier: Modifier = Modifier,
     strokeWidthPx: Float = 4f,
-    onSignatureChanged: (String?) -> Unit,
 ) {
-    val strokes = remember { mutableListOf<List<Offset>>().toMutableStateList() }
+    // Decoded once per distinct signature, not on every frame.
+    val existing = remember(signatureBase64) { decodeSignature(signatureBase64) }
+    val existingImage = remember(existing) { existing?.asImageBitmap() }
+
+    val strokes = remember(signatureBase64) { mutableListOf<List<Offset>>() }
+    var strokeCount by remember(signatureBase64) { mutableStateOf(0) }
     var current by remember { mutableStateOf<List<Offset>>(emptyList()) }
     var canvasWidth by remember { mutableStateOf(0) }
     var canvasHeight by remember { mutableStateOf(0) }
@@ -81,16 +100,38 @@ fun SignaturePad(
                             }
                         }
 
-                        if (current.size > 1) strokes.add(current)
+                        if (current.size > 1) {
+                            strokes.add(current)
+                            strokeCount = strokes.size
+                        }
                         current = emptyList()
+
                         onSignatureChanged(
-                            encodeSignature(strokes, canvasWidth, canvasHeight, strokeWidthPx)
+                            flatten(
+                                base = existing,
+                                strokes = strokes,
+                                width = canvasWidth,
+                                height = canvasHeight,
+                                strokeWidth = strokeWidthPx,
+                            )
                         )
                     }
                 }
         ) {
             canvasWidth = size.width.toInt()
             canvasHeight = size.height.toInt()
+
+            existingImage?.let { image ->
+                drawImage(
+                    image = image,
+                    dstOffset = IntOffset.Zero,
+                    dstSize = IntSize(size.width.roundToInt(), size.height.roundToInt()),
+                )
+            }
+
+            // strokeCount is read so that finishing a stroke redraws; the list
+            // itself is a plain list and would not trigger recomposition.
+            @Suppress("UNUSED_EXPRESSION") strokeCount
 
             (strokes + listOf(current)).forEach { points ->
                 if (points.size < 2) return@forEach
@@ -112,18 +153,43 @@ fun SignaturePad(
     }
 }
 
-/** Rasterises captured strokes into a base64 PNG for the receipt row. */
-private fun encodeSignature(
-    strokes: SnapshotStateList<List<Offset>>,
+private fun decodeSignature(base64: String?): Bitmap? {
+    if (base64.isNullOrBlank()) return null
+    return runCatching {
+        val bytes = Base64.decode(base64, Base64.NO_WRAP)
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+    }.getOrNull()
+}
+
+/**
+ * Paints [base] and then [strokes] into one PNG.
+ *
+ * Flattening on every finished stroke keeps a single source of truth: whatever
+ * the receipt holds is exactly what was on the pad, whether it was drawn a
+ * second ago or restored from a draft written yesterday.
+ */
+private fun flatten(
+    base: Bitmap?,
+    strokes: List<List<Offset>>,
     width: Int,
     height: Int,
     strokeWidth: Float,
 ): String? {
-    if (strokes.isEmpty() || width <= 0 || height <= 0) return null
+    if (width <= 0 || height <= 0) return null
+    if (base == null && strokes.isEmpty()) return null
 
     val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     val canvas = AndroidCanvas(bitmap)
     canvas.drawColor(android.graphics.Color.WHITE)
+
+    base?.let {
+        canvas.drawBitmap(
+            it,
+            Rect(0, 0, it.width, it.height),
+            Rect(0, 0, width, height),
+            null,
+        )
+    }
 
     val paint = Paint().apply {
         color = android.graphics.Color.BLACK

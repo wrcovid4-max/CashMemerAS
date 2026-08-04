@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -39,6 +40,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -496,7 +498,7 @@ private fun AccountCard(
                 Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
                 Text(stringResource(R.string.sign_out))
             }
-        } else {
+        } else if (GoogleAuth.isConfigured) {
             Text(
                 text = stringResource(R.string.sign_in_prompt),
                 style = MaterialTheme.typography.bodyMedium,
@@ -506,12 +508,35 @@ private fun AccountCard(
                 Icon(Icons.Filled.AccountCircle, contentDescription = null)
                 Text(stringResource(R.string.sign_in_google))
             }
-            if (!GoogleAuth.isConfigured) {
-                Text(
-                    text = "Needs GOOGLE_WEB_CLIENT_ID in local.properties — " +
-                        "see the README.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error,
+        } else {
+            // Not an error — nothing is broken and nothing is lost. Offering a
+            // button that can only fail, under a red line of code-speak, made
+            // it look like both.
+            var showingSteps by remember { mutableStateOf(false) }
+
+            Text(
+                text = stringResource(R.string.sign_in_optional),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            OutlinedButton(
+                onClick = { showingSteps = true },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(Icons.Filled.AccountCircle, contentDescription = null)
+                Text(stringResource(R.string.sign_in_how_to))
+            }
+
+            if (showingSteps) {
+                AlertDialog(
+                    onDismissRequest = { showingSteps = false },
+                    title = { Text(stringResource(R.string.setup_sign_in_title)) },
+                    text = { Text(stringResource(R.string.setup_sign_in_steps)) },
+                    confirmButton = {
+                        TextButton(onClick = { showingSteps = false }) {
+                            Text(stringResource(R.string.action_got_it))
+                        }
+                    },
                 )
             }
         }
