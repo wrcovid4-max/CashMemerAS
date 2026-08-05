@@ -56,6 +56,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cashmemer.R
 import com.cashmemer.core.data.CashMemerRepository
 import com.cashmemer.core.model.Member
+import com.cashmemer.ui.components.DangerIconButton
 import com.cashmemer.ui.components.SectionCard
 import com.cashmemer.ui.components.SectionTitle
 import kotlinx.coroutines.flow.SharingStarted
@@ -163,13 +164,11 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                         IconButton(onClick = { editing = member }) {
                             Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.action_edit))
                         }
-                        IconButton(onClick = { viewModel.delete(member) }) {
-                            Icon(
-                                Icons.Filled.Delete,
-                                contentDescription = stringResource(R.string.delete_member),
-                                tint = MaterialTheme.colorScheme.error,
-                            )
-                        }
+                        DangerIconButton(
+                            icon = Icons.Filled.Delete,
+                            contentDescription = stringResource(R.string.delete_member),
+                            onClick = { viewModel.delete(member) },
+                        )
                     }
                 }
             }

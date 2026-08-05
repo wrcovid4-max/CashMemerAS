@@ -396,6 +396,37 @@ fun IconAction(
 }
 
 /**
+ * A destructive icon on its own, without a label — the filled dark red box for
+ * rows that only have room for the symbol.
+ */
+@Composable
+fun DangerIconButton(
+    icon: ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier,
+        shape = Dimens.fieldCorner,
+        color = DangerButton,
+    ) {
+        Box(
+            modifier = Modifier.size(40.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                tint = MaterialTheme.colorScheme.onError,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    }
+}
+
+/**
  * The app's search field. The stock outlined field with a magnifier stuck on
  * the front looked like an afterthought; this is a pill with the icon inside
  * it and a clear button that appears once there is something to clear.

@@ -45,6 +45,7 @@ import com.cashmemer.R
 import com.cashmemer.core.data.CashMemerRepository
 import com.cashmemer.core.model.Product
 import com.cashmemer.core.util.Format
+import com.cashmemer.ui.components.DangerIconButton
 import com.cashmemer.ui.components.SectionCard
 import com.cashmemer.ui.components.SectionTitle
 import kotlinx.coroutines.flow.SharingStarted
@@ -263,13 +264,11 @@ private fun ProductRow(
                 IconButton(onClick = onEdit) {
                     Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.action_edit))
                 }
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Filled.Delete,
-                        contentDescription = stringResource(R.string.action_delete),
-                        tint = MaterialTheme.colorScheme.error,
-                    )
-                }
+                DangerIconButton(
+                    icon = Icons.Filled.Delete,
+                    contentDescription = stringResource(R.string.action_delete),
+                    onClick = onDelete,
+                )
             }
         }
     }

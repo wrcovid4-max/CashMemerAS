@@ -40,6 +40,7 @@ import com.cashmemer.R
 import com.cashmemer.core.data.CashMemerRepository
 import com.cashmemer.core.model.Product
 import com.cashmemer.core.util.Format
+import com.cashmemer.ui.components.DangerIconButton
 import com.cashmemer.ui.components.SectionCard
 import com.cashmemer.ui.components.SectionTitle
 import kotlinx.coroutines.flow.SharingStarted
@@ -117,13 +118,11 @@ fun PriceListScreen(viewModel: PriceListViewModel = viewModel()) {
                             tint = MaterialTheme.colorScheme.primary,
                         )
                     }
-                    IconButton(onClick = { viewModel.remove(product) }) {
-                        Icon(
-                            Icons.Filled.Delete,
-                            contentDescription = stringResource(R.string.remove),
-                            tint = MaterialTheme.colorScheme.error,
-                        )
-                    }
+                    DangerIconButton(
+                        icon = Icons.Filled.Delete,
+                        contentDescription = stringResource(R.string.remove),
+                        onClick = { viewModel.remove(product) },
+                    )
                 }
             }
         }
