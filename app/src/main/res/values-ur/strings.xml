@@ -44,7 +44,7 @@
 
     <!-- New receipt: scanner card -->
     <string name="scanner_title">او سی آر رسید اسکینر (اے آئی جیمنی)</string>
-    <string name="scanner_body">کسی بھی کاغذی رسید کی تصویر لیں یا گیلری سے منتخب کریں، جیمنی اے آئی خود تمام خانے بھر دے گا!</string>
+    <string name="scanner_body">کاغذی رسید کی تصویر لیں یا گیلری سے منتخب کریں، ایپ پورا فارم خود بھر دے گی۔</string>
     <string name="scan_receipt">رسید اسکین</string>
     <string name="import_image">تصویر درآمد</string>
     <string name="bulk_scan">بلک اسکین</string>
@@ -122,9 +122,10 @@
     <string name="price">قیمت</string>
 
     <!-- History -->
-    <string name="backup_json">بیک اپ JSON</string>
-    <string name="restore_json">بحال JSON</string>
+    <string name="backup_json">نقل محفوظ کریں</string>
+    <string name="restore_json">بحال کریں</string>
     <string name="search_receipts">عنوان، مقام یا گاہک سے تلاش کریں…</string>
+    <string name="week_spend_summary">اس ہفتے %1$s · %2$d رسیدیں</string>
     <string name="weekly_ai_summary">ہفتہ وار اے آئی خلاصہ</string>
     <string name="business_insights">کاروباری بصیرت</string>
     <string name="total_spend">کل خرچ</string>
@@ -284,16 +285,16 @@
     <string name="setup_sign_in_title">گوگل سائن اِن چالو کرنا</string>
     <string name="setup_sign_in_steps">یہ ایک بار کی ترتیب ہے جو کمپیوٹر پر کی جاتی ہے، فون پر نہیں۔\n\n۱۔ گوگل کلاؤڈ کنسول میں جائیں اور \"Web application\" قسم کا OAuth client ID بنائیں۔\n\n۲۔ وہ client ID کاپی کریں۔ یہ .apps.googleusercontent.com پر ختم ہوتا ہے۔\n\n۳۔ اینڈرائیڈ اسٹوڈیو میں local.properties نامی فائل کھولیں۔\n\n۴۔ اپنی ID کے ساتھ یہ سطر شامل کریں:\nGOOGLE_WEB_CLIENT_ID=your_id_here\n\n۵۔ Gradle سنک کر کے ایپ دوبارہ چلائیں۔\n\nمکمل تفصیل README.md میں \"Sign in with Google\" کے تحت ہے۔</string>
     <string name="action_got_it">سمجھ گیا</string>
-    <string name="sign_in_prompt">گوگل سے سائن ان کریں تاکہ رسید پر بنانے والے کا نام آئے۔</string>
-    <string name="cloud_sync_connected">کلاؤڈ سنک منسلک ہے</string>
+    <string name="sign_in_prompt">گوگل سے سائن اِن کریں تاکہ آپ کی جاری کردہ رسیدوں پر آپ کا نام آئے اور وہ کلاؤڈ پر محفوظ ہوں۔</string>
+    <string name="cloud_sync_connected">کلاؤڈ بیک اپ چالو ہے</string>
     <string name="sync">سنک</string>
     <string name="restore">بحال کریں</string>
-    <string name="restore_warning">بحالی اس فون کا سارا ڈیٹا کلاؤڈ کاپی سے بدل دے گی۔ اسے نئے آلے پر استعمال کریں، ملانے کے لیے نہیں۔</string>
-    <string name="cloud_sync_off">کلاؤڈ سنک بند ہے — چالو کرنے کے لیے ایپ ماڈیول میں google-services.json شامل کریں۔ نیچے دیے روزانہ فولڈر بیک اپ بدستور چلتے رہیں گے۔</string>
+    <string name="restore_warning">بحالی اس فون کا سارا ڈیٹا کلاؤڈ والی نقل سے بدل دیتی ہے۔ اسے نئے فون پر استعمال کریں، ملانے کے لیے نہیں۔</string>
+    <string name="cloud_sync_off">اس بلڈ میں کلاؤڈ بیک اپ ترتیب نہیں دیا گیا۔ نیچے والا روزانہ فولڈر بیک اپ پھر بھی کام کرتا ہے۔</string>
     <string name="connected_devices">منسلک آلات</string>
-    <string name="connected_devices_body">ادائیگی ٹرمینلز اور اسکینرز کا انتظام</string>
+    <string name="connected_devices_body">کارڈ ریڈر، رسید پرنٹر اور بارکوڈ اسکینر۔</string>
     <string name="appearance_settings">ظاہری ترتیبات</string>
-    <string name="appearance_body">اپنی پسند کے مطابق تھیم کی شکل و صورت بدلیں</string>
+    <string name="appearance_body">روشن، تاریک، یا فون کے مطابق۔</string>
     <string name="theme_system">سسٹم</string>
     <string name="theme_light">روشن</string>
     <string name="theme_dark">تاریک</string>
@@ -311,13 +312,13 @@
     <string name="mass_print_body">رسید بنتے ہی خودکار پرنٹ، ای میل/ایس ایم ایس اور دستخط محفوظ کریں</string>
     <string name="app_lock">ایپ لاک</string>
     <string name="require_secure_lock">محفوظ لاک لازمی کریں</string>
-    <string name="app_lock_body">ایپ کھولنے اور پس منظر سے واپس آنے پر محفوظ لاک (پن، پاس ورڈ، پیٹرن، فنگر پرنٹ یا فیس اَن لاک) لازمی کریں</string>
+    <string name="app_lock_body">ایپ کھلنے سے پہلے آپ کا فنگر پرنٹ، چہرہ یا فون کا پن مانگے — اور ہر بار واپس آنے پر بھی۔</string>
     <string name="custom_passcode_lock">اپنا پاس کوڈ لاک</string>
-    <string name="custom_passcode_body">محفوظ متبادل کے طور پر چار ہندسوں کا پاس کوڈ مقرر کریں۔</string>
+    <string name="custom_passcode_body">اپنا ۴ ہندسوں کا کوڈ، اُس وقت کے لیے جب فنگر پرنٹ کام نہ کرے۔</string>
     <string name="enter_new_passcode">نیا پاس کوڈ درج کریں</string>
     <string name="confirm_new_passcode">نئے پاس کوڈ کی تصدیق کریں</string>
     <string name="automatic_backup">خودکار بیک اپ</string>
-    <string name="automatic_backup_body">آپ کے منتخب کردہ فولڈر میں روزانہ تاریخ والا JSON بیک اپ لکھتا ہے۔ ایسا فولڈر چنیں جو کلاؤڈ سے سنک ہو، تاکہ فون گم ہونے پر بھی ریکارڈ محفوظ رہے۔</string>
+    <string name="automatic_backup_body">روزانہ ایک بار سب کچھ آپ کے منتخب کردہ فولڈر میں محفوظ کرتا ہے۔ ایسا فولڈر چنیں جو گوگل ڈرائیو سے سنک ہو، تاکہ فون گم ہونے پر بھی ریکارڈ محفوظ رہے۔</string>
     <string name="choose_backup_folder">بیک اپ فولڈر منتخب کریں</string>
     <string name="change_backup_folder">بیک اپ فولڈر تبدیل کریں</string>
     <string name="daily_automatic_backup">روزانہ خودکار بیک اپ</string>
@@ -326,7 +327,7 @@
     <string name="last_backup_failed">آخری بیک اپ ناکام: %1$s</string>
     <string name="no_backup_yet">ابھی کوئی بیک اپ نہیں</string>
     <string name="backup_recovery">بیک اپ اور بحالی</string>
-    <string name="backup_recovery_body">مقامی طور پر محفوظ تمام رسیدیں برآمد کریں یا پرانے ریکارڈ فوراً بحال کریں۔</string>
+    <string name="backup_recovery_body">سب کچھ ایک فائل میں محفوظ کریں، یا فائل سے واپس لائیں۔</string>
     <string name="export_json">JSON برآمد کریں</string>
     <string name="backup_payload">بیک اپ ڈیٹا</string>
     <string name="msg_passcode_mismatch">پاس کوڈ چار ہندسوں کا اور یکساں ہونا چاہیے</string>
@@ -444,4 +445,10 @@
     <string name="maps_troubleshoot_title">اگر نقشہ خالی ہو</string>
     <string name="maps_troubleshoot_body">صرف کلید کافی نہیں۔ گوگل کلاؤڈ کنسول میں تینوں چیزیں دیکھیں:\n\n۱۔ پروجیکٹ کے لیے \"Maps SDK for Android\" چالو ہو۔ یہ Geocoding API سے الگ ہے۔\n\n۲۔ پروجیکٹ پر بلنگ ترتیب دی گئی ہو۔ اس کے بغیر گوگل نقشہ نہیں بناتا، مفت حد میں بھی نہیں۔\n\n۳۔ اگر کلید محدود ہے تو اس ایپ کا پیکیج نام اور سائننگ سرٹیفکیٹ اجازت کی فہرست میں ہوں۔\n\nپتہ تلاش کر کے تصدیق کرنا ہر صورت کام کرتا ہے۔</string>
 
+    <string name="save_a_copy">نقل محفوظ کریں</string>
+    <string name="restore_a_copy">نقل سے بحال کریں</string>
+    <string name="restore_warning_plain">یہ اس فون کا سارا موجودہ ڈیٹا فائل والے ڈیٹا سے بدل دے گا۔ جو رسیدیں، پروڈکٹس اور گاہک اُس فائل میں نہیں، وہ ختم ہو جائیں گے۔ شک ہو تو پہلے ایک نقل محفوظ کر لیں۔</string>
+    <string name="add_photo">تصویر شامل کریں</string>
+    <string name="change_photo">تصویر بدلیں</string>
+    <string name="remove_photo">تصویر ہٹائیں</string>
 </resources>

@@ -1,6 +1,11 @@
 package com.cashmemer.ui.members
 
 import android.app.Application
+import android.content.Context
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +25,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -36,10 +42,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -52,6 +62,53 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.File
+
+/** The member's picture, or a person outline when there isn't one. */
+@Composable
+private fun MemberAvatar(photoUri: String?, size: Dp) {
+    Box(
+        modifier = Modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceVariant),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (photoUri == null) {
+            Icon(
+                Icons.Filled.Person,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        } else {
+            AsyncImage(
+                model = photoUri,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(size),
+            )
+        }
+    }
+}
+
+/**
+ * Copies a picked image into the app's files directory and returns the new
+ * location.
+ *
+ * Storing the gallery uri directly looks like it works and then quietly breaks:
+ * the read permission is granted to this process only, so after a reboot every
+ * member photo would vanish.
+ */
+private fun copyMemberPhoto(context: Context, source: Uri): String? = runCatching {
+    val dir = File(context.filesDir, "members").apply { mkdirs() }
+    val target = File(dir, "member-${System.currentTimeMillis()}.jpg")
+
+    context.contentResolver.openInputStream(source)?.use { input ->
+        target.outputStream().use { output -> input.copyTo(output) }
+    } ?: error("Could not read that image")
+
+    Uri.fromFile(target).toString()
+}.getOrNull()
 
 class MembersViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -88,19 +145,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(56.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(
-                                Icons.Filled.Person,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
-                        }
+                        MemberAvatar(photoUri = member.photoUri, size = 56.dp)
 
                         Column(
                             modifier = Modifier
@@ -156,12 +201,58 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
         var phone by remember(member.id) { mutableStateOf(member.phone) }
         var email by remember(member.id) { mutableStateOf(member.email) }
         var address by remember(member.id) { mutableStateOf(member.address) }
+        var photoUri by remember(member.id) { mutableStateOf(member.photoUri) }
+
+        // The picture is copied into the app's own storage rather than stored
+        // as a gallery uri, because that grant does not survive a reboot — the
+        // photo would come back as a grey circle the next morning.
+        val context = LocalContext.current
+        val pickPhoto = rememberLauncherForActivityResult(
+            ActivityResultContracts.PickVisualMedia(),
+        ) { picked ->
+            picked?.let { photoUri = copyMemberPhoto(context, it) ?: photoUri }
+        }
 
         AlertDialog(
             onDismissRequest = { editing = null },
             title = { Text(stringResource(if (member.id == 0L) R.string.add_member else R.string.edit_member)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        MemberAvatar(photoUri = photoUri, size = 64.dp)
+                        Column(modifier = Modifier.padding(start = 12.dp)) {
+                            TextButton(
+                                onClick = {
+                                    pickPhoto.launch(
+                                        PickVisualMediaRequest(
+                                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                                        )
+                                    )
+                                }
+                            ) {
+                                Icon(Icons.Filled.PhotoCamera, contentDescription = null)
+                                Text(
+                                    text = stringResource(
+                                        if (photoUri == null) R.string.add_photo
+                                        else R.string.change_photo
+                                    ),
+                                    modifier = Modifier.padding(start = 6.dp),
+                                )
+                            }
+                            if (photoUri != null) {
+                                TextButton(onClick = { photoUri = null }) {
+                                    Text(
+                                        text = stringResource(R.string.remove_photo),
+                                        color = MaterialTheme.colorScheme.error,
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
@@ -198,6 +289,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                                 phone = phone.trim(),
                                 email = email.trim(),
                                 address = address.trim(),
+                                photoUri = photoUri,
                             )
                         )
                         editing = null

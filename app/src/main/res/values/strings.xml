@@ -44,7 +44,7 @@
 
     <!-- New receipt: scanner card -->
     <string name="scanner_title">OCR Receipt Scanner (AI Gemini)</string>
-    <string name="scanner_body">Take a picture of any paper receipt or pick one from your gallery, and Gemini AI will parse and auto-populate all forms!</string>
+    <string name="scanner_body">Photograph a paper receipt, or pick one from your gallery, and the app fills in the whole form for you.</string>
     <string name="scan_receipt">Scan Receipt</string>
     <string name="import_image">Import Image</string>
     <string name="bulk_scan">Bulk Scan</string>
@@ -122,9 +122,10 @@
     <string name="price">Price</string>
 
     <!-- History -->
-    <string name="backup_json">Backup JSON</string>
-    <string name="restore_json">Restore JSON</string>
+    <string name="backup_json">Save a copy</string>
+    <string name="restore_json">Restore</string>
     <string name="search_receipts">Search by title, location, customer…</string>
+    <string name="week_spend_summary">%1$s this week · %2$d receipt(s)</string>
     <string name="weekly_ai_summary">Weekly AI Summary</string>
     <string name="business_insights">Business Insights</string>
     <string name="total_spend">Total Spend</string>
@@ -284,16 +285,16 @@
     <string name="setup_sign_in_title">Turning on Google sign-in</string>
     <string name="setup_sign_in_steps">This is a one-time setup done on the computer, not on the phone.\n\n1. Go to the Google Cloud Console and create an OAuth client ID of type \"Web application\".\n\n2. Copy the client ID. It ends in .apps.googleusercontent.com\n\n3. In Android Studio, open the file called local.properties\n\n4. Add this line, with your own ID:\nGOOGLE_WEB_CLIENT_ID=your_id_here\n\n5. Sync Gradle and run the app again.\n\nThe full walkthrough is in README.md under \"Sign in with Google\".</string>
     <string name="action_got_it">Got it</string>
-    <string name="sign_in_prompt">Sign in with Google to tag receipts with who created them.</string>
-    <string name="cloud_sync_connected">Cloud sync connected</string>
+    <string name="sign_in_prompt">Sign in with Google to put your name on the receipts you issue, and to back them up to the cloud.</string>
+    <string name="cloud_sync_connected">Cloud backup is on</string>
     <string name="sync">Sync</string>
     <string name="restore">Restore</string>
-    <string name="restore_warning">Restore replaces everything on this phone with the cloud copy. Use it on a new device, not to merge.</string>
-    <string name="cloud_sync_off">Cloud sync is off — add google-services.json to the app module to switch it on. Your daily folder backups below still run.</string>
+    <string name="restore_warning">Restoring replaces everything on this phone with the cloud copy. Use it on a new phone, not to merge two.</string>
+    <string name="cloud_sync_off">Cloud backup is not set up on this build. The daily folder backup below still works.</string>
     <string name="connected_devices">Connected Devices</string>
-    <string name="connected_devices_body">Manage payment terminals and scanners</string>
+    <string name="connected_devices_body">Card readers, receipt printers and barcode scanners.</string>
     <string name="appearance_settings">Appearance settings</string>
-    <string name="appearance_body">Customize theme look &amp; feel representing your style</string>
+    <string name="appearance_body">Light, dark, or follow the phone.</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
@@ -311,13 +312,13 @@
     <string name="mass_print_body">Automatically print, send email/SMS, and save signature upon generation</string>
     <string name="app_lock">App Lock</string>
     <string name="require_secure_lock">Require secure lock</string>
-    <string name="app_lock_body">Require secure lock (PIN, Password, Pattern, Fingerprint or Face Unlock) on startup and returning from background to access the app</string>
+    <string name="app_lock_body">Ask for your fingerprint, face, or the phone's PIN before the app opens — and again each time you come back to it.</string>
     <string name="custom_passcode_lock">Custom Passcode Lock</string>
-    <string name="custom_passcode_body">Set up a custom 4-digit passcode as a secure fallback.</string>
+    <string name="custom_passcode_body">A 4-digit code of your own, for when the fingerprint reader will not play along.</string>
     <string name="enter_new_passcode">Enter New Passcode</string>
     <string name="confirm_new_passcode">Confirm New Passcode</string>
     <string name="automatic_backup">Automatic Backup</string>
-    <string name="automatic_backup_body">Writes a dated JSON snapshot every day into a folder you choose. Pick a folder that syncs to the cloud and your records survive losing this phone.</string>
+    <string name="automatic_backup_body">Saves a copy of everything into a folder you choose, once a day. Choose a folder that syncs to Google Drive and your records survive losing this phone.</string>
     <string name="choose_backup_folder">Choose backup folder</string>
     <string name="change_backup_folder">Change backup folder</string>
     <string name="daily_automatic_backup">Daily automatic backup</string>
@@ -326,7 +327,7 @@
     <string name="last_backup_failed">Last backup failed: %1$s</string>
     <string name="no_backup_yet">No backup taken yet</string>
     <string name="backup_recovery">Backup &amp; Recovery</string>
-    <string name="backup_recovery_body">Export all locally stored receipt rows or restore previous records instantly.</string>
+    <string name="backup_recovery_body">Save everything to a file you keep, or bring it all back from one.</string>
     <string name="export_json">Export JSON</string>
     <string name="backup_payload">Backup payload</string>
     <string name="msg_passcode_mismatch">Passcodes must match and be 4 digits</string>
@@ -444,4 +445,10 @@
     <string name="maps_troubleshoot_title">If the map is blank</string>
     <string name="maps_troubleshoot_body">A key on its own is not enough. In the Google Cloud Console, check all three:\n\n1. \"Maps SDK for Android\" is switched on for the project. This is a different one from the Geocoding API.\n\n2. Billing is set up on the project. Google will not draw map tiles without it, even on the free tier.\n\n3. If the key is restricted, this app\'s package name and signing certificate are on the allowed list.\n\nSearching for an address and confirming it works either way.</string>
 
+    <string name="save_a_copy">Save a copy</string>
+    <string name="restore_a_copy">Restore from a copy</string>
+    <string name="restore_warning_plain">This replaces everything currently on this phone with what is in the file. Receipts, products and customers not in that file will be gone. Save a copy first if you are unsure.</string>
+    <string name="add_photo">Add photo</string>
+    <string name="change_photo">Change photo</string>
+    <string name="remove_photo">Remove photo</string>
 </resources>

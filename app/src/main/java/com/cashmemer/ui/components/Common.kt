@@ -2,6 +2,7 @@ package com.cashmemer.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +18,9 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -39,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -50,6 +55,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cashmemer.R
+import com.cashmemer.core.ui.theme.DangerButton
 import com.cashmemer.core.ui.theme.Dimens
 import com.cashmemer.ui.Destination
 
@@ -334,6 +340,125 @@ private fun RowScope.ButtonContent(text: String, icon: ImageVector?) {
         style = MaterialTheme.typography.labelMedium,
         modifier = Modifier.weight(1f, fill = false),
     )
+}
+
+/**
+ * A bordered icon action with its label underneath.
+ *
+ * A bare `IconButton` in a row gives no sense of where one target ends and the
+ * next begins, which is what made the History row read as a cramped smear of
+ * symbols. The outline is doing real work: it says "this is a button, and it is
+ * this big".
+ */
+@Composable
+fun IconAction(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    /** Destructive actions get a filled dark red box rather than an outline. */
+    danger: Boolean = false,
+) {
+    val tint = if (danger) MaterialTheme.colorScheme.onError
+    else MaterialTheme.colorScheme.primary
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Surface(
+            onClick = onClick,
+            shape = Dimens.fieldCorner,
+            color = if (danger) DangerButton else MaterialTheme.colorScheme.surface,
+            border = if (danger) null
+            else BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        ) {
+            Box(
+                modifier = Modifier.size(Dimens.touchTarget),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = label,
+                    tint = tint,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+        }
+        FitText(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = if (danger) MaterialTheme.colorScheme.error
+            else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+    }
+}
+
+/**
+ * The app's search field. The stock outlined field with a magnifier stuck on
+ * the front looked like an afterthought; this is a pill with the icon inside
+ * it and a clear button that appears once there is something to clear.
+ */
+@Composable
+fun SearchField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = Dimens.pillCorner,
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Search,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp),
+            )
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                    color = MaterialTheme.colorScheme.onSurface,
+                ),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 10.dp, vertical = 14.dp),
+                decorationBox = { inner ->
+                    if (value.isEmpty()) {
+                        Text(
+                            text = placeholder,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    inner()
+                },
+            )
+            if (value.isNotEmpty()) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = stringResource(R.string.action_clear),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable { onValueChange("") },
+                )
+            }
+        }
+    }
 }
 
 /** Placeholder shown when a list has nothing in it yet. */

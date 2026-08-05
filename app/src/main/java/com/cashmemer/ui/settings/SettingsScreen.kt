@@ -107,9 +107,29 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    /** Copies the whole database out as JSON — the offline backup path. */
-    fun exportJson(onReady: (String) -> Unit) = launch {
-        onReady(repository.exportJson())
+    /** Writes the whole database to the file the shopkeeper picked. */
+    fun exportTo(uri: Uri) = launch {
+        val app = getApplication<Application>()
+        runCatching {
+            val json = repository.exportJson()
+            app.contentResolver.openOutputStream(uri)?.use { it.write(json.toByteArray()) }
+                ?: error(str(R.string.msg_file_write_failed))
+        }
+            .onSuccess { _message.value = str(R.string.msg_backup_saved) }
+            .onFailure { _message.value = it.message ?: str(R.string.msg_backup_failed) }
+    }
+
+    /** Replaces everything local with a previously saved copy. */
+    fun importFrom(uri: Uri) = launch {
+        val app = getApplication<Application>()
+        runCatching {
+            app.contentResolver.openInputStream(uri)?.use {
+                it.readBytes().decodeToString()
+            } ?: error(str(R.string.msg_file_read_failed))
+        }
+            .mapCatching { json -> repository.importJson(json).getOrThrow() }
+            .onSuccess { _message.value = str(R.string.msg_restored_records, it) }
+            .onFailure { _message.value = it.message ?: str(R.string.msg_restore_failed) }
     }
 
     /**
@@ -201,11 +221,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             .onFailure { _message.value = it.message ?: str(R.string.msg_backup_failed) }
     }
 
-    fun importJson(json: String) = launch {
-        repository.importJson(json)
-            .onSuccess { _message.value = str(R.string.msg_restored_records, it) }
-            .onFailure { _message.value = it.message ?: str(R.string.msg_restore_failed) }
-    }
 
     fun consumeMessage() {
         _message.value = null
@@ -614,9 +629,25 @@ private fun AutoBackupCard(
     }
 }
 
+/**
+ * Save a copy / restore a copy.
+ *
+ * This used to hand the shopkeeper a text box full of raw JSON and ask them to
+ * copy it somewhere — which is a developer's debug tool wearing a feature's
+ * clothes. It is two buttons and the system file picker now; the format has not
+ * changed, it is simply no longer on screen.
+ */
 @Composable
 private fun BackupCard(viewModel: SettingsViewModel) {
-    var payload by remember { mutableStateOf("") }
+    val saveFile = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json"),
+    ) { uri -> uri?.let(viewModel::exportTo) }
+
+    val openFile = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri -> uri?.let(viewModel::importFrom) }
+
+    var confirmingRestore by remember { mutableStateOf(false) }
 
     SectionCard {
         RowTitle(Icons.Filled.CloudUpload, stringResource(R.string.backup_recovery))
@@ -626,31 +657,50 @@ private fun BackupCard(viewModel: SettingsViewModel) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(
-                onClick = { viewModel.exportJson { payload = it } },
-                modifier = Modifier.weight(1f),
-            ) {
-                Icon(Icons.Filled.Download, contentDescription = null)
-                Text(stringResource(R.string.export_json))
-            }
-            OutlinedButton(
-                onClick = { viewModel.importJson(payload) },
-                enabled = payload.isNotBlank(),
-                modifier = Modifier.weight(1f),
-            ) {
-                Icon(Icons.Filled.Restore, contentDescription = null)
-                Text(stringResource(R.string.restore_json))
-            }
+        Button(
+            onClick = {
+                saveFile.launch(BackupWriter.fileNameFor(System.currentTimeMillis()))
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Icon(Icons.Filled.Download, contentDescription = null)
+            Text(
+                text = stringResource(R.string.save_a_copy),
+                modifier = Modifier.padding(start = 8.dp),
+            )
         }
 
-        OutlinedTextField(
-            value = payload,
-            onValueChange = { payload = it },
-            label = { Text(stringResource(R.string.backup_payload)) },
-            minLines = 4,
-            maxLines = 10,
+        OutlinedButton(
+            onClick = { confirmingRestore = true },
             modifier = Modifier.fillMaxWidth(),
+        ) {
+            Icon(Icons.Filled.Restore, contentDescription = null)
+            Text(
+                text = stringResource(R.string.restore_a_copy),
+                modifier = Modifier.padding(start = 8.dp),
+            )
+        }
+    }
+
+    // Restoring replaces everything. That is worth one tap of confirmation.
+    if (confirmingRestore) {
+        AlertDialog(
+            onDismissRequest = { confirmingRestore = false },
+            title = { Text(stringResource(R.string.restore_a_copy)) },
+            text = { Text(stringResource(R.string.restore_warning_plain)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmingRestore = false
+                        openFile.launch(arrayOf("application/json", "text/plain"))
+                    }
+                ) { Text(stringResource(R.string.action_continue)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmingRestore = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            },
         )
     }
 }

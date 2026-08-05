@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Checkbox
@@ -39,7 +38,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -54,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cashmemer.backup.BackupWriter
@@ -64,6 +63,8 @@ import com.cashmemer.core.model.Receipt
 import com.cashmemer.core.util.Format
 import com.cashmemer.print.ReceiptOutput
 import com.cashmemer.ui.localized
+import com.cashmemer.ui.components.IconAction
+import com.cashmemer.ui.components.SearchField
 import com.cashmemer.ui.components.SectionCard
 import com.cashmemer.ui.receipts.ReceiptEditBus
 import com.cashmemer.ui.viewer.openReceiptViewer
@@ -124,13 +125,10 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
         }
 
         item {
-            OutlinedTextField(
+            SearchField(
                 value = query,
                 onValueChange = viewModel::setQuery,
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                placeholder = { Text(stringResource(R.string.search_receipts)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+                placeholder = stringResource(R.string.search_receipts),
             )
         }
 
@@ -185,28 +183,41 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                         checked = selected.size == receipts.size && receipts.isNotEmpty(),
                         onCheckedChange = { viewModel.selectAll(receipts.map { it.id }) },
                     )
-                    Text(stringResource(R.string.action_select_all), modifier = Modifier.weight(1f))
-                    IconButton(
+                    Text(
+                        text = stringResource(R.string.action_select_all),
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    IconAction(
+                        icon = Icons.Filled.Print,
+                        label = stringResource(R.string.action_print),
                         onClick = {
                             viewModel.renderPdf(selected, forPrinting = true) { file ->
-                                ReceiptOutput.print(context, file, "Cash Memer receipts")
+                                ReceiptOutput.print(
+                                    context,
+                                    file,
+                                    context.getString(R.string.app_name),
+                                )
                             }
-                        }
-                    ) { Icon(Icons.Filled.Print, contentDescription = "Print selected") }
-                    IconButton(
+                        },
+                    )
+                    IconAction(
+                        icon = Icons.Filled.Share,
+                        label = stringResource(R.string.action_share),
                         onClick = {
                             viewModel.renderPdf(selected) { file ->
                                 ReceiptOutput.share(context, file)
                             }
-                        }
-                    ) { Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.share_selected)) }
-                    IconButton(onClick = viewModel::deleteSelected) {
-                        Icon(
-                            Icons.Filled.Delete,
-                            contentDescription = stringResource(R.string.delete_selected),
-                            tint = MaterialTheme.colorScheme.error,
-                        )
-                    }
+                        },
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                    IconAction(
+                        icon = Icons.Filled.Delete,
+                        label = stringResource(R.string.action_delete),
+                        onClick = viewModel::deleteSelected,
+                        modifier = Modifier.padding(start = 8.dp),
+                        danger = true,
+                    )
                 }
             }
         }
@@ -320,11 +331,15 @@ private fun WeeklySummaryCard(
     summary: WeeklySummary,
     onGenerateInsight: () -> Unit,
 ) {
-    var open by remember { mutableStateOf(true) }
+    // Closed on arrival. Six tiles and a paragraph of AI text pushed the actual
+    // receipts below the fold every time History was opened.
+    var open by remember { mutableStateOf(false) }
 
     SectionCard {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { open = !open },
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
@@ -337,20 +352,34 @@ private fun WeeklySummaryCard(
                     .weight(1f)
                     .padding(start = 12.dp)
             ) {
-                Text(stringResource(R.string.weekly_ai_summary), style = MaterialTheme.typography.titleLarge)
                 Text(
-                    stringResource(R.string.business_insights),
+                    text = stringResource(R.string.weekly_ai_summary),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    text = if (open) {
+                        stringResource(R.string.business_insights)
+                    } else {
+                        // Closed, the card still earns its space by showing the
+                        // one number most worth glancing at.
+                        stringResource(
+                            R.string.week_spend_summary,
+                            Format.amountWithCurrency(summary.totalSpend, summary.currencyCode),
+                            summary.transactions,
+                        )
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            IconButton(onClick = { open = !open }) {
-                Icon(
-                    imageVector = if (open) Icons.Filled.ExpandLess
-                    else Icons.Filled.ExpandMore,
-                    contentDescription = null,
-                )
-            }
+            Icon(
+                imageVector = if (open) Icons.Filled.ExpandLess
+                else Icons.Filled.ExpandMore,
+                contentDescription = stringResource(
+                    if (open) R.string.hide_details else R.string.show_details
+                ),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
 
         AnimatedVisibility(visible = open) {
@@ -436,6 +465,10 @@ private fun HistoryRow(
     onDelete: () -> Unit,
 ) {
     SectionCard {
+        // Two lines, not one. Sharing a single row with the amount, the pin and
+        // the chevron left the shop name about eighty points of width, which is
+        // why "Testing" came out as "Testin / g". The name now owns its line
+        // and the money sits under it, where there is room for both.
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -443,31 +476,15 @@ private fun HistoryRow(
             Checkbox(checked = checked, onCheckedChange = { onCheckedChange() })
 
             // Tapping the row opens the memo, the way it always did.
-            Column(
+            Text(
+                text = receipt.placeName.ifBlank { stringResource(R.string.untitled) },
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .weight(1f)
-                    .clickable(onClick = onOpen),
-            ) {
-                Text(
-                    text = receipt.placeName.ifBlank { stringResource(R.string.untitled) },
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Text(
-                    text = receipt.customerName.ifBlank { stringResource(R.string.walk_in_customer) },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = Format.timestamp(receipt.createdAt),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-
-            Text(
-                text = Format.amountWithCurrency(receipt.total, receipt.currencyCode),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
+                    .clickable(onClick = onOpen)
+                    .padding(vertical = 4.dp),
             )
 
             IconButton(onClick = onPin) {
@@ -482,9 +499,42 @@ private fun HistoryRow(
                 Icon(
                     imageVector = if (expanded) Icons.Filled.ExpandLess
                     else Icons.Filled.ExpandMore,
-                    contentDescription = null,
+                    contentDescription = stringResource(
+                        if (expanded) R.string.hide_details else R.string.show_details
+                    ),
                 )
             }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onOpen),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = receipt.customerName.ifBlank {
+                        stringResource(R.string.walk_in_customer)
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = Format.timestamp(receipt.createdAt),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline,
+                    maxLines = 1,
+                )
+            }
+            Text(
+                text = Format.amountWithCurrency(receipt.total, receipt.currencyCode),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
+            )
         }
 
         AnimatedVisibility(visible = expanded) {
@@ -554,19 +604,47 @@ private fun HistoryRow(
                 }
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    RowAction(Icons.Filled.Visibility, stringResource(R.string.open_receipt), onOpen)
-                    RowAction(Icons.Filled.Share, stringResource(R.string.action_share), onShare)
-                    RowAction(Icons.Filled.Print, stringResource(R.string.action_print), onPrint)
-                    RowAction(Icons.Filled.ContentCopy, stringResource(R.string.action_duplicate), onDuplicate)
-                    RowAction(Icons.Filled.Edit, stringResource(R.string.action_edit), onEdit)
-                    RowAction(
+                    IconAction(
+                        Icons.Filled.Visibility,
+                        stringResource(R.string.open_receipt),
+                        onOpen,
+                        Modifier.weight(1f),
+                    )
+                    IconAction(
+                        Icons.Filled.Share,
+                        stringResource(R.string.action_share),
+                        onShare,
+                        Modifier.weight(1f),
+                    )
+                    IconAction(
+                        Icons.Filled.Print,
+                        stringResource(R.string.action_print),
+                        onPrint,
+                        Modifier.weight(1f),
+                    )
+                    IconAction(
+                        Icons.Filled.ContentCopy,
+                        stringResource(R.string.action_duplicate),
+                        onDuplicate,
+                        Modifier.weight(1f),
+                    )
+                    IconAction(
+                        Icons.Filled.Edit,
+                        stringResource(R.string.action_edit),
+                        onEdit,
+                        Modifier.weight(1f),
+                    )
+                    IconAction(
                         Icons.Filled.Delete,
                         stringResource(R.string.action_delete),
                         onDelete,
-                        tint = MaterialTheme.colorScheme.error,
+                        Modifier.weight(1f),
+                        danger = true,
                     )
                 }
             }
@@ -574,20 +652,3 @@ private fun HistoryRow(
     }
 }
 
-@Composable
-private fun RowAction(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    label: String,
-    onClick: () -> Unit,
-    tint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary,
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(horizontal = 2.dp),
-    ) {
-        IconButton(onClick = onClick) {
-            Icon(icon, contentDescription = label, tint = tint)
-        }
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = tint)
-    }
-}

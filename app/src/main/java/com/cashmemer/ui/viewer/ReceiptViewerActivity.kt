@@ -11,7 +11,10 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +55,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +69,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -78,6 +83,7 @@ import com.cashmemer.core.model.AnnotationKind
 import com.cashmemer.core.model.ReceiptAnnotation
 import com.cashmemer.core.ui.theme.CashMemerTheme
 import com.cashmemer.print.ReceiptOutput
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 /** What a tap on the page does. */
@@ -383,16 +389,56 @@ private fun PageCanvas(
 
     val textColour = MaterialTheme.colorScheme.error
     val highlight = MaterialTheme.colorScheme.tertiary
+    val scope = rememberCoroutineScope()
+
+    // A receipt page is much taller than the screen, so vertical movement is
+    // the whole interaction. Dragging with no fling meant swiping a dozen times
+    // to reach the total; this carries the page on after the finger leaves and
+    // eases to a stop against the edges.
+    val flingSpec = rememberSplineBasedDecay<Float>()
+
+    fun limits(): ClosedFloatingPointRange<Float> {
+        val frame = frameFor(container, image.width, image.height, zoom, Offset.Zero)
+        val slack = (frame.height - container.height).coerceAtLeast(0f)
+        return -slack..0f
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .onSizeChanged { container = it }
-            .pointerInput(Unit) {
+            .pointerInput(state.pageIndex) {
                 detectTransformGestures { _, pan, gestureZoom, _ ->
                     zoom = (zoom * gestureZoom).coerceIn(1f, 6f)
-                    offset += pan
+                    val range = limits()
+                    offset = Offset(
+                        x = offset.x + pan.x,
+                        y = (offset.y + pan.y).coerceIn(range.start, range.endInclusive),
+                    )
                 }
+            }
+            .pointerInput(state.pageIndex) {
+                // Vertical fling, tracked separately from the transform gesture
+                // so a two-finger zoom never launches the page across the screen.
+                val tracker = VelocityTracker()
+                detectVerticalDragGestures(
+                    onDragStart = { tracker.resetTracking() },
+                    onVerticalDrag = { change, _ ->
+                        tracker.addPosition(change.uptimeMillis, change.position)
+                    },
+                    onDragEnd = {
+                        val velocity = tracker.calculateVelocity().y
+                        val range = limits()
+                        if (range.start == 0f) return@detectVerticalDragGestures
+                        scope.launch {
+                            Animatable(offset.y).animateDecay(velocity, flingSpec) {
+                                offset = offset.copy(
+                                    y = value.coerceIn(range.start, range.endInclusive),
+                                )
+                            }
+                        }
+                    },
+                )
             }
             .pointerInput(tool, container, zoom, offset) {
                 detectTapGestures { tap ->
