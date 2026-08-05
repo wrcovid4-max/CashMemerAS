@@ -312,7 +312,7 @@
     <string name="mass_print_body">Automatically print, send email/SMS, and save signature upon generation</string>
     <string name="app_lock">App Lock</string>
     <string name="require_secure_lock">Require secure lock</string>
-    <string name="app_lock_body">Ask for your fingerprint, face, or the phone's PIN before the app opens — and again each time you come back to it.</string>
+    <string name="app_lock_body">Ask for your fingerprint, face, or the phone\'s PIN before the app opens — and again each time you come back to it.</string>
     <string name="custom_passcode_lock">Custom Passcode Lock</string>
     <string name="custom_passcode_body">A 4-digit code of your own, for when the fingerprint reader will not play along.</string>
     <string name="enter_new_passcode">Enter New Passcode</string>
