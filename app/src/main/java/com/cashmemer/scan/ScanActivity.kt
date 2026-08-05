@@ -7,6 +7,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -21,15 +23,20 @@ import androidx.camera.core.Preview
 import androidx.camera.core.UseCase
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Camera
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,12 +46,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.concurrent.futures.await
@@ -81,10 +91,13 @@ class ScanActivity : ComponentActivity() {
                         setResult(Activity.RESULT_OK, Intent().setData(uri))
                         finish()
                     },
-                    onBarcode = { value ->
+                    onBarcodes = { codes ->
                         setResult(
                             Activity.RESULT_OK,
-                            Intent().putExtra(EXTRA_BARCODE, value),
+                            Intent().putStringArrayListExtra(
+                                EXTRA_BARCODES,
+                                ArrayList(codes),
+                            ),
                         )
                         finish()
                     },
@@ -96,7 +109,7 @@ class ScanActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_MODE = "scan_mode"
-        const val EXTRA_BARCODE = "barcode"
+        const val EXTRA_BARCODES = "barcodes"
     }
 }
 
@@ -104,7 +117,7 @@ class ScanActivity : ComponentActivity() {
 private fun ScanScreen(
     mode: ScanMode,
     onCaptured: (Uri) -> Unit,
-    onBarcode: (String) -> Unit,
+    onBarcodes: (List<String>) -> Unit,
     onCancel: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -150,8 +163,11 @@ private fun ScanScreen(
 
     val imageCapture = remember { ImageCapture.Builder().build() }
     val executor = remember { Executors.newSingleThreadExecutor() }
-    // Guards against the analyser firing twice before the activity finishes.
-    var barcodeHandled by remember { mutableStateOf(false) }
+
+    // Every code accepted this session. Repeats are kept on purpose: scanning
+    // the same pack of crisps three times means quantity three.
+    val scanned = remember { mutableStateListOf<String>() }
+    val haptics = remember { Haptics(context) }
 
     DisposableEffect(Unit) {
         onDispose { executor.shutdown() }
@@ -175,11 +191,12 @@ private fun ScanScreen(
             } else {
                 arrayOf(
                     preview,
+                    // The camera stays bound for the whole session. Closing it
+                    // after one code meant reopening it by hand for every item,
+                    // which is not scanning, it is typing with extra steps.
                     buildBarcodeAnalysis(executor) { value ->
-                        if (!barcodeHandled) {
-                            barcodeHandled = true
-                            onBarcode(value)
-                        }
+                        scanned += value
+                        haptics.tick()
                     },
                 )
             }
@@ -223,16 +240,73 @@ private fun ScanScreen(
                     Icon(Icons.Filled.Camera, contentDescription = null)
                     Text(stringResource(R.string.capture))
                 }
-            } else {
-                Text(
-                    text = stringResource(R.string.point_at_barcode),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                )
-            }
 
-            Button(onClick = onCancel, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.action_cancel))
+                Button(onClick = onCancel, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            } else {
+                ScanTally(scanned = scanned, onUndo = { scanned.removeLastOrNull() })
+
+                Button(
+                    onClick = { onBarcodes(scanned.toList()) },
+                    enabled = scanned.isNotEmpty(),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Filled.Check, contentDescription = null)
+                    Text(stringResource(R.string.done_adding, scanned.size))
+                }
+
+                OutlinedButton(onClick = onCancel, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * The running tally over the viewfinder.
+ *
+ * Without it there is no way to tell a scan that registered from one that did
+ * not, and the only recovery is to start the whole basket again.
+ */
+@Composable
+private fun ScanTally(scanned: SnapshotStateList<String>, onUndo: () -> Unit) {
+    Surface(
+        color = Color.Black.copy(alpha = 0.65f),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = if (scanned.isEmpty()) {
+                    stringResource(R.string.point_at_barcode)
+                } else {
+                    stringResource(R.string.scanned_so_far, scanned.size)
+                },
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White,
+            )
+
+            if (scanned.isNotEmpty()) {
+                // Grouped, so three of the same thing reads as one line ×3 —
+                // the same shape it will take on the receipt.
+                val counts = scanned.groupingBy { it }.eachCount()
+                counts.entries.takeLast(4).forEach { (code, count) ->
+                    Text(
+                        text = "$code  ×$count",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White.copy(alpha = 0.85f),
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                }
+
+                OutlinedButton(
+                    onClick = onUndo,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                ) { Text(stringResource(R.string.undo_last_scan)) }
             }
         }
     }
@@ -245,6 +319,14 @@ private fun buildBarcodeAnalysis(
     onBarcode: (String) -> Unit,
 ): ImageAnalysis {
     val scanner = BarcodeScanning.getClient()
+
+    // The analyser sees the same barcode in every frame while it is in shot —
+    // perhaps thirty times a second. Without a quiet period, holding one packet
+    // steady would add it dozens of times. Two seconds is long enough to move
+    // the next item into frame and short enough to scan a second identical
+    // packet deliberately.
+    var lastCode: String? = null
+    var lastAt = 0L
 
     return ImageAnalysis.Builder()
         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -264,11 +346,33 @@ private fun buildBarcodeAnalysis(
 
                 scanner.process(image)
                     .addOnSuccessListener { barcodes ->
-                        barcodes.firstNotNullOfOrNull { it.rawValue }?.let(onBarcode)
+                        val value = barcodes.firstNotNullOfOrNull { it.rawValue }
+                            ?: return@addOnSuccessListener
+                        val now = System.currentTimeMillis()
+                        if (value == lastCode && now - lastAt < REPEAT_QUIET_MILLIS) {
+                            return@addOnSuccessListener
+                        }
+                        lastCode = value
+                        lastAt = now
+                        onBarcode(value)
                     }
                     .addOnCompleteListener { proxy.close() }
             }
         }
+}
+
+/** How long the same code is ignored for after being counted. */
+private const val REPEAT_QUIET_MILLIS = 2_000L
+
+/** A short buzz on each accepted scan, so eyes can stay on the goods. */
+private class Haptics(context: Context) {
+
+    private val vibrator = ContextCompat.getSystemService(context, Vibrator::class.java)
+
+    fun tick() {
+        val effect = VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE)
+        runCatching { vibrator?.vibrate(effect) }
+    }
 }
 
 private fun captureTo(
@@ -314,17 +418,21 @@ class CaptureReceiptContract : ActivityResultContract<Unit, Uri?>() {
         if (resultCode == Activity.RESULT_OK) intent?.data else null
 }
 
-/** Launches the camera in barcode mode and returns the first code read. */
-class ScanBarcodeContract : ActivityResultContract<Unit, String?>() {
+/**
+ * Launches the camera in barcode mode and returns every code scanned before
+ * Done was tapped. Repeats are meaningful — three of the same code is three of
+ * that item.
+ */
+class ScanBarcodeContract : ActivityResultContract<Unit, List<String>>() {
 
     override fun createIntent(context: Context, input: Unit): Intent =
         Intent(context, ScanActivity::class.java)
             .putExtra(ScanActivity.EXTRA_MODE, ScanMode.SCAN_BARCODE.name)
 
-    override fun parseResult(resultCode: Int, intent: Intent?): String? =
+    override fun parseResult(resultCode: Int, intent: Intent?): List<String> =
         if (resultCode == Activity.RESULT_OK) {
-            intent?.getStringExtra(ScanActivity.EXTRA_BARCODE)
+            intent?.getStringArrayListExtra(ScanActivity.EXTRA_BARCODES).orEmpty()
         } else {
-            null
+            emptyList()
         }
 }

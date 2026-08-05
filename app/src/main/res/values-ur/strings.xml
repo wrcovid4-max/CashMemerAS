@@ -69,6 +69,7 @@
 
     <!-- New receipt: items and totals -->
     <string name="add_purchased_items">خریدی گئی اشیاء شامل کریں</string>
+    <string name="choose_product">پروڈکٹ منتخب کریں</string>
     <string name="product_name">پروڈکٹ کا نام</string>
     <string name="qty">مقدار</string>
     <string name="price_total">قیمت (کل)</string>
@@ -94,7 +95,7 @@
     <!-- New receipt: messages -->
     <string name="msg_need_store_and_item">دکان کا نام اور کم از کم ایک شے شامل کریں</string>
     <string name="msg_receipt_generated">رسید نمبر %1$d تیار ہو گئی</string>
-    <string name="msg_added_item">شامل ہوا — %1$s ×۱</string>
+    <string name="msg_added_item">شامل ہوا — %1$s ×%2$s</string>
     <string name="msg_barcode_unknown">بارکوڈ %1$s آپ کی انوینٹری میں نہیں ہے</string>
     <string name="msg_scanned_items">%1$d اشیاء اسکین ہوئیں</string>
     <string name="msg_scan_failed">اسکین ناکام</string>
@@ -398,6 +399,11 @@
 
     <!-- Camera / map -->
     <string name="capture">تصویر لیں</string>
+    <string name="scanned_so_far">%1$d اسکین ہوئے</string>
+    <string name="done_adding">%1$d اشیاء شامل کریں</string>
+    <string name="undo_last_scan">آخری اسکین واپس کریں</string>
+    <string name="msg_added_scanned">اسکینر سے %1$d اشیاء شامل ہوئیں</string>
+    <string name="msg_some_unknown">%1$d کوڈ آپ کی انوینٹری میں نہیں تھے</string>
     <string name="point_at_barcode">کیمرہ بارکوڈ کی طرف کریں</string>
     <string name="camera_permission_needed">اسکین کے لیے کیمرے کی اجازت درکار ہے</string>
     <string name="waiting_for_camera">کیمرے کی اجازت کا انتظار…</string>

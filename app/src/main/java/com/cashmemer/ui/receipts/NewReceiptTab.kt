@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Image
@@ -91,8 +93,8 @@ fun NewReceiptTab(
     val captureReceipt = rememberLauncherForActivityResult(CaptureReceiptContract()) { uri ->
         uri?.let(viewModel::scanReceiptFrom)
     }
-    val scanBarcode = rememberLauncherForActivityResult(ScanBarcodeContract()) { code ->
-        code?.let(viewModel::addByBarcode)
+    val scanBarcode = rememberLauncherForActivityResult(ScanBarcodeContract()) { codes ->
+        viewModel.addByBarcodes(codes)
     }
     val pickImage = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia(),
@@ -186,60 +188,62 @@ fun NewReceiptTab(
                     modifier = Modifier.fillMaxWidth(),
                 )
 
+                // The two location buttons used to live inside this field's
+                // trailing icon, which left barely forty points of visible text
+                // — you could not read the address you were typing. They are
+                // their own row now, and the field gets its full width.
                 OutlinedTextField(
                     value = state.locationAddress,
                     onValueChange = viewModel::setLocationAddress,
                     label = { Text(stringResource(R.string.location_address)) },
-                    trailingIcon = {
-                        if (state.locatingAddress) {
+                    minLines = 2,
+                    trailingIcon = if (state.locatingAddress) {
+                        {
                             CircularProgressIndicator(
                                 modifier = Modifier
                                     .padding(12.dp)
                                     .size(20.dp),
                                 strokeWidth = 2.dp,
                             )
-                        } else {
-                            Row {
-                                IconButton(
-                                    onClick = {
-                                        if (LocationResolver.hasPermission(context)) {
-                                            viewModel.useCurrentLocation()
-                                        } else {
-                                            locationPermission.launch(
-                                                arrayOf(
-                                                    Manifest.permission.ACCESS_FINE_LOCATION,
-                                                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                                                )
-                                            )
-                                        }
-                                    }
-                                ) {
-                                    Icon(
-                                        Icons.Filled.MyLocation,
-                                        contentDescription = "Use current location",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                    )
-                                }
-                                IconButton(
-                                    onClick = {
-                                        pickOnMap.launch(
-                                            state.latitude?.let { lat ->
-                                                state.longitude?.let { lng -> lat to lng }
-                                            }
-                                        )
-                                    }
-                                ) {
-                                    Icon(
-                                        Icons.Filled.Map,
-                                        contentDescription = "Pick on map",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                    )
-                                }
-                            }
                         }
+                    } else {
+                        null
                     },
                     modifier = Modifier.fillMaxWidth(),
                 )
+
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SecondaryButton(
+                        text = stringResource(R.string.use_current_location),
+                        icon = Icons.Filled.MyLocation,
+                        enabled = !state.locatingAddress,
+                        onClick = {
+                            if (LocationResolver.hasPermission(context)) {
+                                viewModel.useCurrentLocation()
+                            } else {
+                                locationPermission.launch(
+                                    arrayOf(
+                                        Manifest.permission.ACCESS_FINE_LOCATION,
+                                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                                    )
+                                )
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                    SecondaryButton(
+                        text = stringResource(R.string.pick_on_map),
+                        icon = Icons.Filled.Map,
+                        onClick = {
+                            pickOnMap.launch(
+                                state.latitude?.let { lat ->
+                                    state.longitude?.let { lng -> lat to lng }
+                                }
+                            )
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
 
                 MemberPicker(
                     members = members,
@@ -664,37 +668,64 @@ private fun ProductNameField(
     onValueChange: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val filtered = remember(value, suggestions) {
-        if (value.isBlank()) suggestions
+    // Tapping the arrow browses everything; typing narrows it. Without the
+    // distinction the list was invisible until you had already guessed part of
+    // a name, which is no use for picking a product you cannot spell.
+    var browsingAll by remember { mutableStateOf(false) }
+
+    val filtered = remember(value, suggestions, browsingAll) {
+        if (browsingAll || value.isBlank()) suggestions
         else suggestions.filter { it.contains(value, ignoreCase = true) }
     }
+    val open = expanded && filtered.isNotEmpty()
 
     ExposedDropdownMenuBox(
-        expanded = expanded && filtered.isNotEmpty(),
+        expanded = open,
         onExpandedChange = { expanded = it },
     ) {
         OutlinedTextField(
             value = value,
             onValueChange = {
                 onValueChange(it)
+                browsingAll = false
                 expanded = true
             },
             label = { Text(stringResource(R.string.product_name)) },
             singleLine = true,
+            trailingIcon = {
+                IconButton(
+                    onClick = {
+                        browsingAll = true
+                        expanded = !expanded
+                    },
+                    enabled = suggestions.isNotEmpty(),
+                ) {
+                    Icon(
+                        imageVector = if (open) Icons.Filled.ArrowDropUp
+                        else Icons.Filled.ArrowDropDown,
+                        contentDescription = stringResource(R.string.choose_product),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor(),
         )
         ExposedDropdownMenu(
-            expanded = expanded && filtered.isNotEmpty(),
-            onDismissRequest = { expanded = false },
+            expanded = open,
+            onDismissRequest = {
+                expanded = false
+                browsingAll = false
+            },
         ) {
-            filtered.take(8).forEach { suggestion ->
+            filtered.take(20).forEach { suggestion ->
                 DropdownMenuItem(
                     text = { Text(suggestion) },
                     onClick = {
                         onValueChange(suggestion)
                         expanded = false
+                        browsingAll = false
                     },
                 )
             }

@@ -9,11 +9,13 @@ import com.cashmemer.core.data.ThemeMode
 
 private val LightColors = lightColorScheme(
     primary = BrandGreen,
-    onPrimary = androidx.compose.ui.graphics.Color.White,
+    // Near-black, not white. White text on neon green fails contrast badly and
+    // reads as a smudge; dark text on a bright fill is what makes neon legible.
+    onPrimary = OnBrandGreenContainer,
     primaryContainer = BrandGreenContainer,
     onPrimaryContainer = OnBrandGreenContainer,
     secondary = BrandGreenLight,
-    onSecondary = androidx.compose.ui.graphics.Color.White,
+    onSecondary = OnBrandGreenContainer,
     secondaryContainer = BrandGreenContainer,
     onSecondaryContainer = OnBrandGreenContainer,
     background = PaperBackground,

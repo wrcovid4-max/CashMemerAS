@@ -17,6 +17,7 @@ import com.cashmemer.core.model.Product
 import com.cashmemer.core.model.Receipt
 import com.cashmemer.core.model.ReceiptCategory
 import com.cashmemer.core.model.ReceiptItem
+import com.cashmemer.core.util.Format
 import com.cashmemer.core.network.GeminiOcrClient
 import com.cashmemer.devices.TerminalManager
 import com.cashmemer.location.LocationResolver
@@ -80,6 +81,28 @@ data class ReceiptFormState(
     val total: Double get() = (subtotal - discount).coerceAtLeast(0.0) + taxAmount
     val changeAmount: Double get() = (cashGiven - total).coerceAtLeast(0.0)
     val canGenerate: Boolean get() = placeName.isNotBlank() && items.isNotEmpty()
+
+    /**
+     * Whether anything has been entered that would hurt to lose.
+     *
+     * The draft used to be thrown away unless a store name or an item existed,
+     * which meant fetching a GPS address or taking a signature and then
+     * switching apps silently wiped both — they were, by that test, "nothing".
+     */
+    val hasContent: Boolean
+        get() = placeName.isNotBlank() ||
+            items.isNotEmpty() ||
+            locationAddress.isNotBlank() ||
+            customerName.isNotBlank() ||
+            customerPhone.isNotBlank() ||
+            customerEmail.isNotBlank() ||
+            selectedMember != null ||
+            signatureBase64 != null ||
+            discount > 0 ||
+            taxPercent > 0 ||
+            cashGiven > 0 ||
+            notesPage2.isNotBlank() ||
+            notesPage1 != DEFAULT_NOTE_1
 }
 
 class ReceiptFormViewModel(application: Application) : AndroidViewModel(application) {
@@ -166,7 +189,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                 .debounce(DRAFT_DEBOUNCE_MILLIS)
                 .distinctUntilChangedBy { it.draftFingerprint() }
                 .collect { current ->
-                    if (current.placeName.isBlank() && current.items.isEmpty()) {
+                    if (!current.hasContent) {
                         DraftStore.clear(getApplication<Application>())
                         return@collect
                     }
@@ -181,6 +204,9 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         editingId, placeName, locationAddress, customerName, customerPhone,
         customerEmail, currencyCode, category, paymentType, items, discount,
         taxPercent, cashGiven, notesPage1, notesPage2, latitude, longitude,
+        // Without this a signature drawn on an otherwise unchanged form never
+        // triggers a write, so it is lost the moment the process is trimmed.
+        signatureBase64?.length ?: 0,
     ).joinToString("|")
 
     fun setPlaceName(value: String) = _state.update { it.copy(placeName = value) }
@@ -252,9 +278,48 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    /**
+     * Adds a line, merging into an existing one for the same product at the
+     * same price.
+     *
+     * Scanning a pack of crisps three times is one line reading ×3, not three
+     * lines reading ×1 — that is what a till does, and it is what makes
+     * continuous scanning usable. A different price for the same name stays a
+     * separate line, since that is a genuinely different sale.
+     */
     fun addItem(item: ReceiptItem) {
         if (item.productName.isBlank()) return
-        _state.update { it.copy(items = it.items + item) }
+
+        _state.update { current ->
+            val index = current.items.indexOfFirst {
+                it.productName.equals(item.productName.trim(), ignoreCase = true) &&
+                    it.unitPrice == item.unitPrice
+            }
+
+            if (index < 0) {
+                current.copy(items = current.items + item.copy(productName = item.productName.trim()))
+            } else {
+                current.copy(
+                    items = current.items.mapIndexed { i, existing ->
+                        if (i == index) existing.copy(qty = existing.qty + item.qty)
+                        else existing
+                    }
+                )
+            }
+        }
+    }
+
+    /** Sets an exact quantity on a line, for the stepper on the item row. */
+    fun setItemQty(index: Int, qty: Double) = _state.update { current ->
+        if (qty <= 0) {
+            current.copy(items = current.items.filterIndexed { i, _ -> i != index })
+        } else {
+            current.copy(
+                items = current.items.mapIndexed { i, item ->
+                    if (i == index) item.copy(qty = qty) else item
+                }
+            )
+        }
     }
 
     fun removeItem(index: Int) = _state.update {
@@ -288,7 +353,55 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                     unitPrice = product.price,
                 )
             )
-            _toasts.emit(str(R.string.msg_added_item, product.name))
+
+            // Report the running total, not "×1" — with continuous scanning the
+            // useful feedback is "that's the third one", not "one was added".
+            val running = _state.value.items
+                .firstOrNull { it.productName.equals(product.name.trim(), ignoreCase = true) }
+                ?.qty ?: 1.0
+            _toasts.emit(str(R.string.msg_added_item, product.name, Format.amount(running)))
+        }
+    }
+
+    /**
+     * Adds a whole scanning session at once.
+     *
+     * Repeats in [barcodes] are quantity, and [addItem] folds them into one
+     * line each. Unknown codes do not stop the rest going on the receipt — the
+     * first one raises the "add this product" prompt and the rest are counted
+     * in a single message, rather than throwing a dialog per miss.
+     */
+    fun addByBarcodes(barcodes: List<String>) {
+        if (barcodes.isEmpty()) return
+
+        viewModelScope.launch {
+            var added = 0
+            val unknown = mutableListOf<String>()
+
+            barcodes.forEach { barcode ->
+                val product = repository.productByBarcode(barcode)
+                if (product == null) {
+                    unknown += barcode
+                } else {
+                    addItem(
+                        ReceiptItem(
+                            productName = product.name,
+                            qty = 1.0,
+                            unitPrice = product.price,
+                        )
+                    )
+                    added++
+                }
+            }
+
+            if (added > 0) _toasts.emit(str(R.string.msg_added_scanned, added))
+
+            unknown.firstOrNull()?.let { first ->
+                _state.update { it.copy(unknownBarcode = first) }
+                if (unknown.size > 1) {
+                    _toasts.emit(str(R.string.msg_some_unknown, unknown.size))
+                }
+            }
         }
     }
 
