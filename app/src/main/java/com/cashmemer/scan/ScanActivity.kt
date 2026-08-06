@@ -292,7 +292,7 @@ private fun ScanTally(scanned: SnapshotStateList<String>, onUndo: () -> Unit) {
                 // Grouped, so three of the same thing reads as one line ×3 —
                 // the same shape it will take on the receipt.
                 val counts = scanned.groupingBy { it }.eachCount()
-                counts.entries.takeLast(4).forEach { (code, count) ->
+                counts.entries.toList().takeLast(4).forEach { (code, count) ->
                     Text(
                         text = "$code  ×$count",
                         style = MaterialTheme.typography.bodyMedium,
