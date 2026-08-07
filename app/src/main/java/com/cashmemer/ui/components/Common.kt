@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -299,6 +300,9 @@ fun PrimaryButton(
         enabled = enabled,
         modifier = modifier.height(Dimens.touchTarget),
         shape = Dimens.fieldCorner,
+        // Material's default 24dp side padding leaves a half-width button almost
+        // no room for its label; a tighter pad is most of what stops the clip.
+        contentPadding = ButtonContentPadding,
     ) { ButtonContent(text, icon) }
 }
 
@@ -316,6 +320,7 @@ fun SecondaryButton(
         enabled = enabled,
         modifier = modifier.height(Dimens.touchTarget),
         shape = Dimens.fieldCorner,
+        contentPadding = ButtonContentPadding,
         colors = if (danger) {
             ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colorScheme.error,
@@ -326,18 +331,21 @@ fun SecondaryButton(
     ) { ButtonContent(text, icon) }
 }
 
+private val ButtonContentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+
 @Composable
 private fun RowScope.ButtonContent(text: String, icon: ImageVector?) {
     if (icon != null) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(Dimens.iconGap))
     }
-    // Half-width buttons hold labels like "Barcode Scan" that were wrapping to
-    // two lines and blowing up the row, then being cut to "Barcode …" when that
-    // was stopped. Shrinking the label is the only version that reads.
+    // Half-width buttons hold labels like "Barcode Scan" and "Current location"
+    // that wrap or clip. The label takes the space that is left and shrinks down
+    // to fit it — further than before, so a two-word label always lands.
     FitText(
         text = text,
         style = MaterialTheme.typography.labelMedium,
+        smallestScale = 0.5f,
         modifier = Modifier.weight(1f, fill = false),
     )
 }
