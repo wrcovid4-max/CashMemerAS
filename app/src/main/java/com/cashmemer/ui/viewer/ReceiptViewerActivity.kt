@@ -13,8 +13,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.rememberSplineBasedDecay
-import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.Arrangement
@@ -448,28 +450,71 @@ private fun PageCanvas(
             .fillMaxSize()
             .onSizeChanged { container = it }
             .pointerInput(page) {
-                detectTransformGestures { _, pan, gestureZoom, _ ->
-                    zoom = (zoom * gestureZoom).coerceIn(1f, 6f)
-                    val range = limits()
-                    offset = Offset(
-                        x = offset.x + pan.x,
-                        y = (offset.y + pan.y).coerceIn(range.start, range.endInclusive),
-                    )
-                }
-            }
-            .pointerInput(page) {
-                // Vertical fling, tracked separately from the transform gesture
-                // so a two-finger zoom never launches the page across the screen.
+                // One gesture loop, because the crux is what gets *consumed*.
+                // The old code used detectTransformGestures, which swallows
+                // single-finger horizontal drags — so the pager underneath never
+                // saw a swipe and the pages would not turn. Here a horizontal
+                // drag at rest zoom is deliberately left unconsumed so it bubbles
+                // up to the pager, while vertical drags (scroll) and pinches
+                // (zoom) are consumed as before.
                 val tracker = VelocityTracker()
-                detectVerticalDragGestures(
-                    onDragStart = { tracker.resetTracking() },
-                    onVerticalDrag = { change, _ ->
-                        tracker.addPosition(change.uptimeMillis, change.position)
-                    },
-                    onDragEnd = {
-                        val velocity = tracker.calculateVelocity().y
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = false)
+                    tracker.resetTracking()
+
+                    do {
+                        val event = awaitPointerEvent()
+                        val pressed = event.changes.filter { it.pressed }
+                        if (pressed.isEmpty()) break
+
+                        val pan = event.calculatePan()
+                        val zoomChange = event.calculateZoom()
                         val range = limits()
-                        if (range.start == 0f) return@detectVerticalDragGestures
+
+                        if (pressed.size >= 2) {
+                            // Pinch: zoom, and pan within the zoomed page.
+                            zoom = (zoom * zoomChange).coerceIn(1f, 6f)
+                            offset = Offset(
+                                x = offset.x + pan.x,
+                                y = (offset.y + pan.y)
+                                    .coerceIn(range.start, range.endInclusive),
+                            )
+                            pressed.forEach { it.consume() }
+                        } else {
+                            val change = pressed.first()
+                            if (zoom > 1f) {
+                                // Zoomed in: the finger pans the page in both axes.
+                                offset = Offset(
+                                    x = offset.x + pan.x,
+                                    y = (offset.y + pan.y)
+                                        .coerceIn(range.start, range.endInclusive),
+                                )
+                                change.consume()
+                                tracker.addPosition(change.uptimeMillis, change.position)
+                            } else {
+                                // At rest zoom, only vertical is ours; a mostly
+                                // horizontal drag is left for the pager to turn
+                                // the page with.
+                                val newY = (offset.y + pan.y)
+                                    .coerceIn(range.start, range.endInclusive)
+                                if (kotlin.math.abs(pan.y) > kotlin.math.abs(pan.x) &&
+                                    newY != offset.y
+                                ) {
+                                    offset = offset.copy(y = newY)
+                                    change.consume()
+                                    tracker.addPosition(
+                                        change.uptimeMillis,
+                                        change.position,
+                                    )
+                                }
+                            }
+                        }
+                    } while (true)
+
+                    // Carry a vertical flick on after the finger lifts.
+                    val velocity = tracker.calculateVelocity().y
+                    val range = limits()
+                    if (range.start != 0f && kotlin.math.abs(velocity) > 1f) {
                         scope.launch {
                             Animatable(offset.y).animateDecay(velocity, flingSpec) {
                                 offset = offset.copy(
@@ -477,8 +522,8 @@ private fun PageCanvas(
                                 )
                             }
                         }
-                    },
-                )
+                    }
+                }
             }
             .pointerInput(tool, container, zoom, offset) {
                 detectTapGestures { tap ->
