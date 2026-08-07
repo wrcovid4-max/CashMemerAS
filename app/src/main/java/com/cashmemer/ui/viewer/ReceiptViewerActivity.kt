@@ -777,7 +777,12 @@ private fun ViewerBottomBar(
     }
 }
 
-/** One cell in the tool track. Selected cells raise a coloured pill. */
+/**
+ * One cell in the tool track. Icon only — the active tool raises a coloured
+ * pill, which is the whole signal, so the labels underneath were just noise.
+ * The name still rides along as the icon's content description for screen
+ * readers and long-press tooltips.
+ */
 @Composable
 private fun ToolSegment(
     icon: ImageVector,
@@ -787,29 +792,20 @@ private fun ToolSegment(
     selectedColour: Color = MaterialTheme.colorScheme.primary,
     onClick: () -> Unit,
 ) {
-    val label = stringResource(labelRes)
-    Column(
+    Box(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
             .background(if (selected) selectedColour else Color.Transparent)
-            .padding(horizontal = 14.dp, vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        contentAlignment = Alignment.Center,
     ) {
-        val content = if (selected) Color.White
-        else MaterialTheme.colorScheme.onSurfaceVariant
         Icon(
             imageVector = icon,
-            contentDescription = label,
-            tint = content,
-            modifier = Modifier.size(22.dp),
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = content,
-            maxLines = 1,
+            contentDescription = stringResource(labelRes),
+            tint = if (selected) Color.White
+            else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(24.dp),
         )
     }
 }
