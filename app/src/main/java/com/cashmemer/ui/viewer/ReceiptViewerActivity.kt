@@ -23,16 +23,22 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -45,7 +51,6 @@ import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -92,6 +97,10 @@ import kotlin.math.roundToInt
 
 /** What a tap on the page does. */
 private enum class ViewerTool { PAN, TEXT, CHECK, CROSS }
+
+/** The stamp colours, shared by the toolbar and the marks on the page. */
+private val MarkGreen = Color(0xFF1B7F37)
+private val MarkRed = Color(0xFFC02727)
 
 /**
  * The in-app memo viewer: the real receipt, zoomable, searchable, and markable
@@ -252,17 +261,14 @@ private fun ReceiptViewerScreen(
                 }
             }
 
-            ToolBar(
+            ViewerBottomBar(
                 tool = tool,
                 onToolChange = { tool = it },
                 onUndo = viewModel::undo,
                 onClear = viewModel::clearPage,
-            )
-
-            PageBar(
                 pageCount = state.pages.size,
                 pageIndex = state.pageIndex,
-                onSelect = viewModel::showPage,
+                onSelectPage = viewModel::showPage,
             )
         }
     }
@@ -636,14 +642,14 @@ private fun DrawScope.drawMark(
     when (mark.kind) {
         AnnotationKind.CHECK -> {
             drawLine(
-                color = Color(0xFF1B7F37),
+                color = MarkGreen,
                 start = Offset(x - size, y),
                 end = Offset(x - size / 3f, y + size * 0.7f),
                 strokeWidth = strokeWidth,
                 cap = StrokeCap.Round,
             )
             drawLine(
-                color = Color(0xFF1B7F37),
+                color = MarkGreen,
                 start = Offset(x - size / 3f, y + size * 0.7f),
                 end = Offset(x + size, y - size),
                 strokeWidth = strokeWidth,
@@ -652,14 +658,14 @@ private fun DrawScope.drawMark(
         }
         AnnotationKind.CROSS -> {
             drawLine(
-                color = Color(0xFFC02727),
+                color = MarkRed,
                 start = Offset(x - size, y - size),
                 end = Offset(x + size, y + size),
                 strokeWidth = strokeWidth,
                 cap = StrokeCap.Round,
             )
             drawLine(
-                color = Color(0xFFC02727),
+                color = MarkRed,
                 start = Offset(x + size, y - size),
                 end = Offset(x - size, y + size),
                 strokeWidth = strokeWidth,
@@ -682,91 +688,216 @@ private fun DrawScope.drawMark(
     }
 }
 
+/**
+ * The whole bottom control surface: the marking tools, undo/clear, and page
+ * navigation, on one raised sheet.
+ *
+ * Rebuilt to read like a real editor's toolbar — the four tools sit in a single
+ * segmented track that slides a pill under the active one, the destructive Clear
+ * is set apart on the right, and the pages are their own segmented control. The
+ * point is that the controls look deliberate rather than like loose buttons
+ * dropped on a black strip.
+ */
 @Composable
-private fun ToolBar(
+private fun ViewerBottomBar(
     tool: ViewerTool,
     onToolChange: (ViewerTool) -> Unit,
     onUndo: () -> Unit,
     onClear: () -> Unit,
+    pageCount: Int,
+    pageIndex: Int,
+    onSelectPage: (Int) -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 10.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 12.dp,
+        tonalElevation = 3.dp,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        ToolButton(Icons.Filled.OpenWith, R.string.tool_pan, tool == ViewerTool.PAN) {
-            onToolChange(ViewerTool.PAN)
-        }
-        ToolButton(Icons.Filled.TextFields, R.string.tool_text, tool == ViewerTool.TEXT) {
-            onToolChange(ViewerTool.TEXT)
-        }
-        ToolButton(Icons.Filled.Check, R.string.tool_tick, tool == ViewerTool.CHECK) {
-            onToolChange(ViewerTool.CHECK)
-        }
-        ToolButton(Icons.Filled.Close, R.string.tool_cross, tool == ViewerTool.CROSS) {
-            onToolChange(ViewerTool.CROSS)
-        }
+        Column(
+            modifier = Modifier
+                .navigationBarsPadding()
+                .padding(horizontal = 12.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // The four tools as one segmented track.
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                ) {
+                    Row(modifier = Modifier.padding(4.dp)) {
+                        ToolSegment(
+                            Icons.Filled.OpenWith, R.string.tool_pan,
+                            tool == ViewerTool.PAN,
+                        ) { onToolChange(ViewerTool.PAN) }
+                        ToolSegment(
+                            Icons.Filled.TextFields, R.string.tool_text,
+                            tool == ViewerTool.TEXT,
+                        ) { onToolChange(ViewerTool.TEXT) }
+                        ToolSegment(
+                            Icons.Filled.Check, R.string.tool_tick,
+                            tool == ViewerTool.CHECK,
+                            selectedColour = MarkGreen,
+                        ) { onToolChange(ViewerTool.CHECK) }
+                        ToolSegment(
+                            Icons.Filled.Close, R.string.tool_cross,
+                            tool == ViewerTool.CROSS,
+                            selectedColour = MarkRed,
+                        ) { onToolChange(ViewerTool.CROSS) }
+                    }
+                }
 
-        Box(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.weight(1f))
 
-        IconButton(onClick = onUndo) {
-            Icon(Icons.Filled.Undo, contentDescription = stringResource(R.string.action_undo))
+                RoundIconButton(
+                    icon = Icons.Filled.Undo,
+                    label = stringResource(R.string.action_undo),
+                    onClick = onUndo,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                RoundIconButton(
+                    icon = Icons.Filled.Delete,
+                    label = stringResource(R.string.action_clear),
+                    onClick = onClear,
+                    danger = true,
+                )
+            }
+
+            if (pageCount > 1) {
+                PageSelector(
+                    pageCount = pageCount,
+                    pageIndex = pageIndex,
+                    onSelect = onSelectPage,
+                )
+            }
         }
-        TextButton(onClick = onClear) { Text(stringResource(R.string.action_clear)) }
     }
 }
 
+/** One cell in the tool track. Selected cells raise a coloured pill. */
 @Composable
-private fun ToolButton(
+private fun ToolSegment(
     icon: ImageVector,
     labelRes: Int,
     selected: Boolean,
+    modifier: Modifier = Modifier,
+    selectedColour: Color = MaterialTheme.colorScheme.primary,
     onClick: () -> Unit,
 ) {
     val label = stringResource(labelRes)
-    Box(
-        modifier = Modifier
-            .size(46.dp)
-            .background(
-                color = if (selected) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.surfaceVariant
-                },
-                shape = RoundedCornerShape(12.dp),
-            )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .background(if (selected) selectedColour else Color.Transparent)
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
+        val content = if (selected) Color.White
+        else MaterialTheme.colorScheme.onSurfaceVariant
         Icon(
             imageVector = icon,
             contentDescription = label,
-            tint = if (selected) {
-                MaterialTheme.colorScheme.onPrimary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
+            tint = content,
+            modifier = Modifier.size(22.dp),
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = content,
+            maxLines = 1,
         )
     }
 }
 
+/** A soft round icon button — Undo, and the red Clear. */
 @Composable
-private fun PageBar(pageCount: Int, pageIndex: Int, onSelect: (Int) -> Unit) {
-    if (pageCount <= 1) return
+private fun RoundIconButton(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    danger: Boolean = false,
+) {
+    Surface(
+        onClick = onClick,
+        shape = CircleShape,
+        color = if (danger) MarkRed.copy(alpha = 0.12f)
+        else MaterialTheme.colorScheme.surfaceVariant,
+    ) {
+        Box(
+            modifier = Modifier.size(44.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = if (danger) MarkRed else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    }
+}
+
+/** Page 1 / Page 2 as a segmented control with arrows on either side. */
+@Composable
+private fun PageSelector(pageCount: Int, pageIndex: Int, onSelect: (Int) -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        repeat(pageCount) { index ->
-            FilterChip(
-                selected = index == pageIndex,
-                onClick = { onSelect(index) },
-                label = { Text(stringResource(R.string.page_number, index + 1)) },
+        IconButton(
+            onClick = { onSelect(pageIndex - 1) },
+            enabled = pageIndex > 0,
+        ) {
+            Icon(
+                Icons.Filled.ChevronLeft,
+                contentDescription = stringResource(R.string.previous_match),
+            )
+        }
+
+        Surface(
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(14.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant,
+        ) {
+            Row(modifier = Modifier.padding(4.dp)) {
+                repeat(pageCount) { index ->
+                    val selected = index == pageIndex
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable { onSelect(index) }
+                            .background(
+                                if (selected) MaterialTheme.colorScheme.primary
+                                else Color.Transparent
+                            )
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.page_number, index + 1),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = if (selected) Color.White
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                        )
+                    }
+                }
+            }
+        }
+
+        IconButton(
+            onClick = { onSelect(pageIndex + 1) },
+            enabled = pageIndex < pageCount - 1,
+        ) {
+            Icon(
+                Icons.Filled.ChevronRight,
+                contentDescription = stringResource(R.string.next_match),
             )
         }
     }
