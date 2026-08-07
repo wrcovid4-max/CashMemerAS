@@ -81,6 +81,15 @@ import com.cashmemer.ui.components.SectionTitle
 /** Cap on how many photos one bulk scan will send to the parser. */
 private const val MAX_BULK_SCAN = 10
 
+/**
+ * Parses a number the shopkeeper typed, tolerating the grouping commas a phone
+ * keyboard or a paste can introduce. "1,000.00" was coming back null from a bare
+ * toDoubleOrNull and defaulting to zero — which is how a Rs 1,000 item landed on
+ * the receipt as Rs 0.00.
+ */
+private fun String.toAmount(): Double? =
+    trim().replace(",", "").takeIf { it.isNotEmpty() }?.toDoubleOrNull()
+
 @Composable
 fun NewReceiptTab(
     settings: AppSettings,
@@ -435,7 +444,7 @@ private fun UnknownBarcodeDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = { onSave(name, price.toDoubleOrNull() ?: 0.0) },
+                onClick = { onSave(name, price.toAmount() ?: 0.0) },
                 enabled = name.isNotBlank(),
             ) { Text(stringResource(R.string.save_and_add)) }
         },
@@ -653,11 +662,15 @@ private fun AddItemCard(
 
         Button(
             onClick = {
+                val quantity = (qty.toAmount() ?: 1.0).takeIf { it > 0 } ?: 1.0
+                // The field is labelled "Price (Total)", so split it back to a
+                // unit price — the row and the receipt both store per-unit.
+                val lineTotal = price.toAmount() ?: 0.0
                 onAdd(
                     ReceiptItem(
                         productName = name.trim(),
-                        qty = qty.toDoubleOrNull() ?: 1.0,
-                        unitPrice = price.toDoubleOrNull() ?: 0.0,
+                        qty = quantity,
+                        unitPrice = lineTotal / quantity,
                     )
                 )
                 name = ""
@@ -790,7 +803,7 @@ private fun TotalsCard(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedTextField(
                 value = if (state.discount == 0.0) "" else state.discount.toString(),
-                onValueChange = { onDiscountChange(it.toDoubleOrNull() ?: 0.0) },
+                onValueChange = { onDiscountChange(it.toAmount() ?: 0.0) },
                 label = { Text(stringResource(R.string.discount)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -798,7 +811,7 @@ private fun TotalsCard(
             )
             OutlinedTextField(
                 value = if (state.taxPercent == 0.0) "" else state.taxPercent.toString(),
-                onValueChange = { onTaxChange(it.toDoubleOrNull() ?: 0.0) },
+                onValueChange = { onTaxChange(it.toAmount() ?: 0.0) },
                 label = { Text(stringResource(R.string.tax_percent)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -813,7 +826,7 @@ private fun TotalsCard(
 
         OutlinedTextField(
             value = if (state.cashGiven == 0.0) "" else state.cashGiven.toString(),
-            onValueChange = { onCashGivenChange(it.toDoubleOrNull() ?: 0.0) },
+            onValueChange = { onCashGivenChange(it.toAmount() ?: 0.0) },
             label = { Text(stringResource(R.string.cash_given)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
