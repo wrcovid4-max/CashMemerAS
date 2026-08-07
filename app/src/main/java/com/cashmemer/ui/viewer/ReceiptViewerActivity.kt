@@ -15,6 +15,8 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -123,7 +125,7 @@ private fun ReceiptViewerScreen(
 
     var tool by remember { mutableStateOf(ViewerTool.PAN) }
     var searching by remember { mutableStateOf(false) }
-    var pendingText by remember { mutableStateOf<Offset?>(null) }
+    var pendingText by remember { mutableStateOf<PendingText?>(null) }
 
     LaunchedEffect(receiptId) { viewModel.load(receiptId) }
 
@@ -183,36 +185,68 @@ private fun ReceiptViewerScreen(
             ) {
                 when {
                     state.loading -> CircularProgressIndicator()
-                    state.page == null -> Text(
+                    state.pages.isEmpty() -> Text(
                         text = stringResource(R.string.viewer_unavailable),
                         style = MaterialTheme.typography.bodyMedium,
                     )
-                    else -> PageCanvas(
-                        state = state,
-                        tool = tool,
-                        onPlace = { fraction ->
-                            when (tool) {
-                                ViewerTool.PAN -> Unit
-                                ViewerTool.TEXT -> pendingText = fraction
-                                ViewerTool.CHECK -> viewModel.addAnnotation(
-                                    ReceiptAnnotation(
-                                        page = state.pageNumber,
-                                        x = fraction.x,
-                                        y = fraction.y,
-                                        kind = AnnotationKind.CHECK,
-                                    )
-                                )
-                                ViewerTool.CROSS -> viewModel.addAnnotation(
-                                    ReceiptAnnotation(
-                                        page = state.pageNumber,
-                                        x = fraction.x,
-                                        y = fraction.y,
-                                        kind = AnnotationKind.CROSS,
-                                    )
-                                )
+                    else -> {
+                        val pagerState = rememberPagerState(
+                            initialPage = state.pageIndex,
+                            pageCount = { state.pages.size },
+                        )
+
+                        // Swiping the pager and tapping a page chip are the two
+                        // ways to change page; each keeps the other in step, and
+                        // a search hit that lives on the other page turns to it.
+                        LaunchedEffect(pagerState.currentPage) {
+                            viewModel.showPage(pagerState.currentPage)
+                        }
+                        LaunchedEffect(state.pageIndex) {
+                            if (state.pageIndex != pagerState.currentPage) {
+                                pagerState.animateScrollToPage(state.pageIndex)
                             }
-                        },
-                    )
+                        }
+
+                        HorizontalPager(
+                            state = pagerState,
+                            // Only the Pan tool owns horizontal drags; while a
+                            // marking tool is active the pager stays put so a
+                            // stamp near the edge is not read as a page turn.
+                            userScrollEnabled = tool == ViewerTool.PAN,
+                            modifier = Modifier.fillMaxSize(),
+                        ) { index ->
+                            val viewerPage = state.pages[index]
+                            PageCanvas(
+                                state = state,
+                                page = viewerPage,
+                                tool = tool,
+                                onPlace = { fraction ->
+                                    val pageNumber = viewerPage.layout.page
+                                    when (tool) {
+                                        ViewerTool.PAN -> Unit
+                                        ViewerTool.TEXT -> pendingText =
+                                            PendingText(pageNumber, fraction)
+                                        ViewerTool.CHECK -> viewModel.addAnnotation(
+                                            ReceiptAnnotation(
+                                                page = pageNumber,
+                                                x = fraction.x,
+                                                y = fraction.y,
+                                                kind = AnnotationKind.CHECK,
+                                            )
+                                        )
+                                        ViewerTool.CROSS -> viewModel.addAnnotation(
+                                            ReceiptAnnotation(
+                                                page = pageNumber,
+                                                x = fraction.x,
+                                                y = fraction.y,
+                                                kind = AnnotationKind.CROSS,
+                                            )
+                                        )
+                                    }
+                                },
+                            )
+                        }
+                    }
                 }
             }
 
@@ -231,15 +265,15 @@ private fun ReceiptViewerScreen(
         }
     }
 
-    pendingText?.let { at ->
+    pendingText?.let { pending ->
         TextMarkDialog(
             onDismiss = { pendingText = null },
             onConfirm = { typed ->
                 viewModel.addAnnotation(
                     ReceiptAnnotation(
-                        page = state.pageNumber,
-                        x = at.x,
-                        y = at.y,
+                        page = pending.page,
+                        x = pending.at.x,
+                        y = pending.at.y,
                         kind = AnnotationKind.TEXT,
                         text = typed,
                     )
@@ -249,6 +283,9 @@ private fun ReceiptViewerScreen(
         )
     }
 }
+
+/** A tap waiting for its text, and the page it landed on. */
+private data class PendingText(val page: Int, val at: Offset)
 
 @Composable
 private fun ViewerTopBar(
@@ -377,15 +414,18 @@ private fun SearchBar(
 @Composable
 private fun PageCanvas(
     state: ViewerState,
+    page: ViewerPage,
     tool: ViewerTool,
     onPlace: (Offset) -> Unit,
 ) {
-    val page = state.page ?: return
+    val pageNumber = page.layout.page
     val image = remember(page) { page.bitmap.asImageBitmap() }
 
+    // Keyed on this page, not the selected index, so each page in the pager
+    // keeps its own zoom and scroll position.
     var container by remember { mutableStateOf(IntSize.Zero) }
-    var zoom by remember(state.pageIndex) { mutableStateOf(1f) }
-    var offset by remember(state.pageIndex) { mutableStateOf(Offset.Zero) }
+    var zoom by remember(page) { mutableStateOf(1f) }
+    var offset by remember(page) { mutableStateOf(Offset.Zero) }
 
     val textColour = MaterialTheme.colorScheme.error
     val highlight = MaterialTheme.colorScheme.tertiary
@@ -407,7 +447,7 @@ private fun PageCanvas(
         modifier = Modifier
             .fillMaxSize()
             .onSizeChanged { container = it }
-            .pointerInput(state.pageIndex) {
+            .pointerInput(page) {
                 detectTransformGestures { _, pan, gestureZoom, _ ->
                     zoom = (zoom * gestureZoom).coerceIn(1f, 6f)
                     val range = limits()
@@ -417,7 +457,7 @@ private fun PageCanvas(
                     )
                 }
             }
-            .pointerInput(state.pageIndex) {
+            .pointerInput(page) {
                 // Vertical fling, tracked separately from the transform gesture
                 // so a two-finger zoom never launches the page across the screen.
                 val tracker = VelocityTracker()
@@ -465,7 +505,7 @@ private fun PageCanvas(
             // Indexed over the whole list, not the visible page, so "3 of 7"
             // and the darker box always mean the same hit.
             state.hits.forEachIndexed { index, hit ->
-                if (hit.page != state.pageNumber) return@forEachIndexed
+                if (hit.page != pageNumber) return@forEachIndexed
                 drawRect(
                     color = highlight.copy(
                         alpha = if (index == state.hitIndex) 0.45f else 0.20f,
@@ -482,7 +522,7 @@ private fun PageCanvas(
             }
 
             state.annotations
-                .filter { it.page == state.pageNumber }
+                .filter { it.page == pageNumber }
                 .forEach { mark ->
                     drawMark(
                         mark = mark,

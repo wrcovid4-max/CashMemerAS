@@ -55,7 +55,7 @@
     <string name="draft_saved">Draft saved: %1$s</string>
     <string name="place_store_name">Place / Store Name</string>
     <string name="location_address">Location Address (GPS)</string>
-    <string name="use_current_location">Use current location</string>
+    <string name="use_current_location">Current location</string>
     <string name="pick_on_map">Pick on map</string>
     <string name="select_member">Select Member</string>
     <string name="none">None</string>

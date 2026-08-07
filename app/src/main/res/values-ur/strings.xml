@@ -55,7 +55,7 @@
     <string name="draft_saved">مسودہ محفوظ: %1$s</string>
     <string name="place_store_name">جگہ / دکان کا نام</string>
     <string name="location_address">مقام کا پتہ (جی پی ایس)</string>
-    <string name="use_current_location">موجودہ مقام استعمال کریں</string>
+    <string name="use_current_location">میرا مقام</string>
     <string name="pick_on_map">نقشے پر منتخب کریں</string>
     <string name="select_member">ممبر منتخب کریں</string>
     <string name="none">کوئی نہیں</string>

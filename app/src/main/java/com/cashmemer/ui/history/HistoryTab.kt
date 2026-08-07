@@ -65,6 +65,7 @@ import com.cashmemer.print.ReceiptOutput
 import com.cashmemer.ui.localized
 import com.cashmemer.ui.components.IconAction
 import com.cashmemer.ui.components.SearchField
+import com.cashmemer.ui.components.SecondaryButton
 import com.cashmemer.ui.components.SectionCard
 import com.cashmemer.ui.receipts.ReceiptEditBus
 import com.cashmemer.ui.viewer.openReceiptViewer
@@ -101,26 +102,26 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                OutlinedButton(
+                // SecondaryButton keeps the label on one line and shrinks it to
+                // fit — the plain buttons wrapped "Save a copy" onto two lines.
+                SecondaryButton(
+                    text = stringResource(R.string.backup_json),
+                    icon = Icons.Filled.CloudDownload,
                     onClick = {
                         backupPicker.launch(
                             BackupWriter.fileNameFor(System.currentTimeMillis())
                         )
                     },
                     modifier = Modifier.weight(1f),
-                ) {
-                    Icon(Icons.Filled.CloudDownload, contentDescription = null)
-                    Text(stringResource(R.string.backup_json))
-                }
-                OutlinedButton(
+                )
+                SecondaryButton(
+                    text = stringResource(R.string.restore_json),
+                    icon = Icons.Filled.CloudUpload,
                     onClick = {
                         restorePicker.launch(arrayOf("application/json", "text/plain"))
                     },
                     modifier = Modifier.weight(1f),
-                ) {
-                    Icon(Icons.Filled.CloudUpload, contentDescription = null)
-                    Text(stringResource(R.string.restore_json))
-                }
+                )
             }
         }
 

@@ -167,15 +167,22 @@ fun NewReceiptTab(
             SectionCard {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    SectionTitle(stringResource(R.string.receipt_details))
+                    // The title takes only what it needs; the draft stamp gets
+                    // the rest and stays on one line instead of wrapping to
+                    // "Draft saved: 11:32 / PM" over the heading.
+                    SectionTitle(
+                        text = stringResource(R.string.receipt_details),
+                        modifier = Modifier.weight(1f),
+                    )
                     state.draftSavedAt?.let {
                         Text(
                             text = stringResource(R.string.draft_saved, Format.time(it)),
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
                         )
                     }
                 }
@@ -559,6 +566,9 @@ private fun CategoryPicker(
             value = selected.localized(),
             onValueChange = {},
             readOnly = true,
+            // Without singleLine, a narrow half-width field wrapped "Shopping"
+            // to "Shoppin / g". One line, and the field shows it whole.
+            singleLine = true,
             label = { Text(stringResource(R.string.category)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
