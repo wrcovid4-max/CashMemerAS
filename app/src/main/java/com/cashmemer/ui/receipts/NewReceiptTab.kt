@@ -870,33 +870,34 @@ private fun TotalsCard(
     onCashGivenChange: (Double) -> Unit,
 ) {
     SectionCard {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedTextField(
-                value = if (state.discount == 0.0) "" else state.discount.toString(),
-                onValueChange = { onDiscountChange(it.toAmount() ?: 0.0) },
-                label = { Text(stringResource(R.string.discount)) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                // A small Rs / % switch inside the field flips how the number is
-                // read — a flat amount, or a percentage of the subtotal.
-                trailingIcon = {
-                    DiscountModeToggle(
-                        isPercent = state.discountIsPercent,
-                        currencyCode = state.currencyCode,
-                        onChange = onDiscountModeChange,
-                    )
-                },
-                modifier = Modifier.weight(1f),
-            )
-            OutlinedTextField(
-                value = if (state.taxPercent == 0.0) "" else state.taxPercent.toString(),
-                onValueChange = { onTaxChange(it.toAmount() ?: 0.0) },
-                label = { Text(stringResource(R.string.tax_percent)) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.weight(1f),
-            )
-        }
+        // Full width rather than side-by-side: the Rs / % switch needs room in
+        // the discount field, and at half width the "Discount" label was
+        // wrapping onto three lines.
+        OutlinedTextField(
+            value = if (state.discount == 0.0) "" else state.discount.toString(),
+            onValueChange = { onDiscountChange(it.toAmount() ?: 0.0) },
+            label = { Text(stringResource(R.string.discount)) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            // A small Rs / % switch inside the field flips how the number is
+            // read — a flat amount, or a percentage of the subtotal.
+            trailingIcon = {
+                DiscountModeToggle(
+                    isPercent = state.discountIsPercent,
+                    currencyCode = state.currencyCode,
+                    onChange = onDiscountModeChange,
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        OutlinedTextField(
+            value = if (state.taxPercent == 0.0) "" else state.taxPercent.toString(),
+            onValueChange = { onTaxChange(it.toAmount() ?: 0.0) },
+            label = { Text(stringResource(R.string.tax_percent)) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            modifier = Modifier.fillMaxWidth(),
+        )
 
         TotalRow(stringResource(R.string.subtotal), state.subtotal, state.currencyCode)
         TotalRow(stringResource(R.string.discount), -state.discountAmount, state.currencyCode)
