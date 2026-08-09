@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,6 +35,7 @@ import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -502,6 +505,7 @@ private fun AccountCard(
                         modifier = Modifier.weight(1f),
                     ) {
                         Icon(Icons.Filled.CloudUpload, contentDescription = null)
+                        Spacer(Modifier.width(ButtonDefaults.IconSpacing))
                         Text(stringResource(R.string.sync))
                     }
                     OutlinedButton(
@@ -510,6 +514,7 @@ private fun AccountCard(
                         modifier = Modifier.weight(1f),
                     ) {
                         Icon(Icons.Filled.CloudDownload, contentDescription = null)
+                        Spacer(Modifier.width(ButtonDefaults.IconSpacing))
                         Text(stringResource(R.string.restore))
                     }
                 }
@@ -527,6 +532,7 @@ private fun AccountCard(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(Icons.Filled.History, contentDescription = null)
+                    Spacer(Modifier.width(ButtonDefaults.IconSpacing))
                     Text(stringResource(R.string.import_old_receipts))
                 }
                 Text(
@@ -548,6 +554,7 @@ private fun AccountCard(
 
             OutlinedButton(onClick = onSignOut, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
+                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
                 Text(stringResource(R.string.sign_out))
             }
         } else if (GoogleAuth.isConfigured) {
@@ -558,6 +565,7 @@ private fun AccountCard(
             )
             Button(onClick = onSignIn, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Filled.AccountCircle, contentDescription = null)
+                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
                 Text(stringResource(R.string.sign_in_google))
             }
         } else {
@@ -576,6 +584,7 @@ private fun AccountCard(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Icon(Icons.Filled.AccountCircle, contentDescription = null)
+                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
                 Text(stringResource(R.string.sign_in_how_to))
             }
 
@@ -621,6 +630,7 @@ private fun AutoBackupCard(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Icon(Icons.Filled.FolderOpen, contentDescription = null)
+            Spacer(Modifier.width(ButtonDefaults.IconSpacing))
             Text(
                 text = if (settings.backupFolderUri == null) stringResource(R.string.choose_backup_folder)
                 else stringResource(R.string.change_backup_folder),
@@ -647,6 +657,7 @@ private fun AutoBackupCard(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Icon(Icons.Filled.Save, contentDescription = null)
+            Spacer(Modifier.width(ButtonDefaults.IconSpacing))
             Text(stringResource(R.string.back_up_now))
         }
 
@@ -701,6 +712,7 @@ private fun BackupCard(viewModel: SettingsViewModel) {
             modifier = Modifier.fillMaxWidth(),
         ) {
             Icon(Icons.Filled.Download, contentDescription = null)
+            Spacer(Modifier.width(ButtonDefaults.IconSpacing))
             Text(
                 text = stringResource(R.string.save_a_copy),
                 modifier = Modifier.padding(start = 8.dp),
@@ -712,6 +724,7 @@ private fun BackupCard(viewModel: SettingsViewModel) {
             modifier = Modifier.fillMaxWidth(),
         ) {
             Icon(Icons.Filled.Restore, contentDescription = null)
+            Spacer(Modifier.width(ButtonDefaults.IconSpacing))
             Text(
                 text = stringResource(R.string.restore_a_copy),
                 modifier = Modifier.padding(start = 8.dp),
