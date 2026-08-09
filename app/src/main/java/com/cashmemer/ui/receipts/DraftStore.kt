@@ -37,6 +37,7 @@ object DraftStore {
             .put("paymentType", state.paymentType.name)
             .put("items", ReceiptItemCodec.encode(state.items))
             .put("discount", state.discount)
+            .put("discountIsPercent", state.discountIsPercent)
             .put("taxPercent", state.taxPercent)
             .put("cashGiven", state.cashGiven)
             .put("notesPage1", state.notesPage1)
@@ -70,6 +71,7 @@ object DraftStore {
                 paymentType = PaymentType.from(o.optString("paymentType")),
                 items = ReceiptItemCodec.decode(o.optString("items")),
                 discount = o.optDouble("discount", 0.0),
+                discountIsPercent = o.optBoolean("discountIsPercent", false),
                 taxPercent = o.optDouble("taxPercent", 0.0),
                 cashGiven = o.optDouble("cashGiven", 0.0),
                 latitude = if (o.has("latitude")) o.optDouble("latitude") else null,

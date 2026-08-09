@@ -5,6 +5,9 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +21,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Image
@@ -288,11 +290,9 @@ fun NewReceiptTab(
             SectionCard {
                 Text(stringResource(R.string.select_currency_category), style = MaterialTheme.typography.titleMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedTextField(
-                        value = state.currencyCode,
-                        onValueChange = { viewModel.setCurrency(it.uppercase()) },
-                        label = { Text(stringResource(R.string.currency)) },
-                        singleLine = true,
+                    CurrencyPicker(
+                        selected = state.currencyCode,
+                        onSelect = viewModel::setCurrency,
                         modifier = Modifier.weight(1f),
                     )
                     CategoryPicker(
@@ -330,6 +330,7 @@ fun NewReceiptTab(
             TotalsCard(
                 state = state,
                 onDiscountChange = viewModel::setDiscount,
+                onDiscountModeChange = viewModel::setDiscountIsPercent,
                 onTaxChange = viewModel::setTaxPercent,
                 onCashGivenChange = viewModel::setCashGiven,
             )
@@ -540,6 +541,99 @@ private fun MemberPicker(
                     text = { Text("${member.name} · ${member.phone}") },
                     onClick = {
                         onSelect(member)
+                        expanded = false
+                    },
+                )
+            }
+        }
+    }
+}
+
+/** The small Rs / % switch on the Discount field. */
+@Composable
+private fun DiscountModeToggle(
+    isPercent: Boolean,
+    currencyCode: String,
+    onChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier.padding(end = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        DiscountModeChip(
+            label = com.cashmemer.core.data.CurrencyNames.symbolOf(currencyCode),
+            selected = !isPercent,
+        ) { onChange(false) }
+        DiscountModeChip(label = "%", selected = isPercent) { onChange(true) }
+    }
+}
+
+@Composable
+private fun DiscountModeChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(width = 34.dp, height = 30.dp)
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+            .background(
+                if (selected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.surfaceVariant
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            maxLines = 1,
+            color = if (selected) MaterialTheme.colorScheme.onPrimary
+            else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/** The currencies offered in the receipt form's quick picker. */
+private val COMMON_CURRENCIES = listOf(
+    "PKR", "USD", "EUR", "GBP", "SAR", "AED", "INR",
+    "CNY", "IRR", "IRT", "TRY", "RUB", "JPY", "CAD", "AUD",
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CurrencyPicker(
+    selected: String,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    // Whatever is selected shows even if it is not in the common list.
+    val options = remember(selected) {
+        (listOf(selected) + COMMON_CURRENCIES).distinct()
+    }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier,
+    ) {
+        OutlinedTextField(
+            value = "$selected  ${com.cashmemer.core.data.CurrencyNames.symbolOf(selected)}",
+            onValueChange = {},
+            readOnly = true,
+            singleLine = true,
+            label = { Text(stringResource(R.string.currency)) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(),
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            options.forEach { code ->
+                DropdownMenuItem(
+                    text = {
+                        Text("$code  (${com.cashmemer.core.data.CurrencyNames.symbolOf(code)})")
+                    },
+                    onClick = {
+                        onSelect(code)
                         expanded = false
                     },
                 )
@@ -771,6 +865,7 @@ private fun LineItemRow(
 private fun TotalsCard(
     state: ReceiptFormState,
     onDiscountChange: (Double) -> Unit,
+    onDiscountModeChange: (Boolean) -> Unit,
     onTaxChange: (Double) -> Unit,
     onCashGivenChange: (Double) -> Unit,
 ) {
@@ -782,6 +877,15 @@ private fun TotalsCard(
                 label = { Text(stringResource(R.string.discount)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                // A small Rs / % switch inside the field flips how the number is
+                // read — a flat amount, or a percentage of the subtotal.
+                trailingIcon = {
+                    DiscountModeToggle(
+                        isPercent = state.discountIsPercent,
+                        currencyCode = state.currencyCode,
+                        onChange = onDiscountModeChange,
+                    )
+                },
                 modifier = Modifier.weight(1f),
             )
             OutlinedTextField(
@@ -795,7 +899,7 @@ private fun TotalsCard(
         }
 
         TotalRow(stringResource(R.string.subtotal), state.subtotal, state.currencyCode)
-        TotalRow(stringResource(R.string.discount), -state.discount, state.currencyCode)
+        TotalRow(stringResource(R.string.discount), -state.discountAmount, state.currencyCode)
         TotalRow(stringResource(R.string.tax), state.taxAmount, state.currencyCode)
         TotalRow(
             stringResource(R.string.grand_total),

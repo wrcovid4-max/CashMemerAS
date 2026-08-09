@@ -57,7 +57,10 @@ data class ReceiptFormState(
     val category: ReceiptCategory = ReceiptCategory.SHOPPING,
     val paymentType: PaymentType = PaymentType.CASH,
     val items: List<ReceiptItem> = emptyList(),
+    /** The number typed in the Discount field — an amount, or a percent. */
     val discount: Double = 0.0,
+    /** When true, [discount] is read as a percentage of the subtotal. */
+    val discountIsPercent: Boolean = false,
     val taxPercent: Double = 0.0,
     val cashGiven: Double = 0.0,
     val latitude: Double? = null,
@@ -77,8 +80,14 @@ data class ReceiptFormState(
     val draftSavedAt: Long? = null,
 ) {
     val subtotal: Double get() = items.sumOf { it.lineTotal }
-    val taxAmount: Double get() = (subtotal - discount).coerceAtLeast(0.0) * taxPercent / 100.0
-    val total: Double get() = (subtotal - discount).coerceAtLeast(0.0) + taxAmount
+
+    /** The discount in money, whether it was entered as an amount or a percent. */
+    val discountAmount: Double
+        get() = if (discountIsPercent) subtotal * (discount / 100.0) else discount
+
+    val taxAmount: Double
+        get() = (subtotal - discountAmount).coerceAtLeast(0.0) * taxPercent / 100.0
+    val total: Double get() = (subtotal - discountAmount).coerceAtLeast(0.0) + taxAmount
     val changeAmount: Double get() = (cashGiven - total).coerceAtLeast(0.0)
     val canGenerate: Boolean get() = placeName.isNotBlank() && items.isNotEmpty()
 
@@ -203,7 +212,8 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
     private fun ReceiptFormState.draftFingerprint(): String = listOf(
         editingId, placeName, locationAddress, customerName, customerPhone,
         customerEmail, currencyCode, category, paymentType, items, discount,
-        taxPercent, cashGiven, notesPage1, notesPage2, latitude, longitude,
+        discountIsPercent, taxPercent, cashGiven, notesPage1, notesPage2,
+        latitude, longitude,
         // Without this a signature drawn on an otherwise unchanged form never
         // triggers a write, so it is lost the moment the process is trimmed.
         signatureBase64?.length ?: 0,
@@ -218,6 +228,8 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
     fun setCategory(category: ReceiptCategory) = _state.update { it.copy(category = category) }
     fun setPaymentType(type: PaymentType) = _state.update { it.copy(paymentType = type) }
     fun setDiscount(value: Double) = _state.update { it.copy(discount = value) }
+    fun setDiscountIsPercent(percent: Boolean) =
+        _state.update { it.copy(discountIsPercent = percent) }
     fun setCashGiven(value: Double) = _state.update { it.copy(cashGiven = value) }
 
     /** Applies a point chosen on the map, address and coordinates together. */
@@ -534,7 +546,9 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                 category = current.category.name,
                 paymentType = current.paymentType.name,
                 subtotal = current.subtotal,
-                discount = current.discount,
+                // Stored resolved to money, so a % discount prints and totals
+                // the same as a fixed one and the receipt row stays simple.
+                discount = current.discountAmount,
                 taxPercent = current.taxPercent,
                 total = current.total,
                 cashGiven = current.cashGiven,
@@ -552,7 +566,10 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
             if (current.saveSignatureAsDefault && current.signatureBase64 != null) {
                 settingsStore.setDefaultSignature(current.signatureBase64)
             }
-            settingsStore.setDefaultCurrency(current.currencyCode)
+            // The currency picker is per-receipt, so generating a foreign-
+            // currency memo must not change the app's base — that was flipping
+            // the whole Dashboard and History to the last receipt's symbol.
+            // The base is set only from Settings now.
 
             // Keep the watch's "today" figure honest right after a sale.
             PhoneWearSyncManager.push(getApplication<Application>())

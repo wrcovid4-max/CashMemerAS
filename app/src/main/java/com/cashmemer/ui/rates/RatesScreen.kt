@@ -230,7 +230,7 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(rate.code, style = MaterialTheme.typography.titleMedium)
                         Text(
-                            rate.displayName,
+                            com.cashmemer.core.data.CurrencyNames.of(rate.code),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )

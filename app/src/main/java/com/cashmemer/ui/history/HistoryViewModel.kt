@@ -77,10 +77,14 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
 
     init {
         // The card always reflects the last seven days, independent of filters.
+        // Paired with the base currency so a foreign-currency sale doesn't
+        // re-symbol the whole summary.
         viewModelScope.launch {
-            repository.observeReceipts()
-                .map { it.lastSevenDays() }
-                .collect { week -> _summary.value = week.toSummary() }
+            combine(
+                repository.observeReceipts().map { it.lastSevenDays() },
+                settingsStore.settings,
+            ) { week, settings -> week.toSummary(settings.defaultCurrency) }
+                .collect { _summary.value = it }
         }
     }
 
@@ -89,8 +93,8 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
         return filter { it.createdAt >= cutoff }
     }
 
-    private fun List<Receipt>.toSummary(): WeeklySummary {
-        if (isEmpty()) return WeeklySummary()
+    private fun List<Receipt>.toSummary(baseCurrency: String): WeeklySummary {
+        if (isEmpty()) return WeeklySummary(currencyCode = baseCurrency)
 
         val spend = sumOf { it.total }
         return WeeklySummary(
@@ -105,7 +109,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
                 (r.subtotal - r.discount).coerceAtLeast(0.0) * r.taxPercent / 100.0
             },
             totalDiscount = sumOf { it.discount },
-            currencyCode = first().currencyCode,
+            currencyCode = baseCurrency,
         )
     }
 

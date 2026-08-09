@@ -122,7 +122,9 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         val live = products.filterNot { it.archived }
 
         val base = DashboardStats(
-            currencyCode = receipts.firstOrNull()?.currencyCode ?: settings.defaultCurrency,
+            // The app's stable base currency, not the latest receipt's — a
+            // single foreign-currency sale should not re-symbol the dashboard.
+            currencyCode = settings.defaultCurrency,
             productCount = live.size,
             lowStockCount = live.count { it.lowStock },
             averageProductCost = live
