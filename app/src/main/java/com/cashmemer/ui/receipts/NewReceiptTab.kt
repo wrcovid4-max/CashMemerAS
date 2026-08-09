@@ -205,7 +205,9 @@ fun NewReceiptTab(
                     value = state.locationAddress,
                     onValueChange = viewModel::setLocationAddress,
                     label = { Text(stringResource(R.string.location_address)) },
-                    minLines = 2,
+                    // Starts at the normal one-line height like the other fields
+                    // and only grows when a long address is actually entered —
+                    // the fixed two-line box read as oversized when empty.
                     trailingIcon = if (state.locatingAddress) {
                         {
                             CircularProgressIndicator(

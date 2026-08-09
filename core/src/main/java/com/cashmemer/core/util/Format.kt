@@ -9,8 +9,11 @@ import java.util.Locale
 
 object Format {
 
+    // Whole amounts read cleaner without a trailing ".00" — the shopkeeper found
+    // "Rs 1,000.00" more confusing than "Rs 1,000". Decimals still show when the
+    // amount actually has them (e.g. 10.5), just never as padding.
     private val money: NumberFormat = NumberFormat.getNumberInstance(Locale.US).apply {
-        minimumFractionDigits = 2
+        minimumFractionDigits = 0
         maximumFractionDigits = 2
     }
 
