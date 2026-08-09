@@ -21,7 +21,7 @@ object CurrencyNames {
     /** 1 Toman = 10 Rial. */
     const val RIAL_PER_TOMAN = 10.0
 
-    private val overrides = mapOf(
+    private val overridesEn = mapOf(
         "IRT" to "Iranian Toman",
         "IRR" to "Iranian Rial",
         "PKR" to "Pakistani Rupee",
@@ -41,13 +41,40 @@ object CurrencyNames {
         "XDR" to "Special Drawing Rights",
     )
 
+    /**
+     * Urdu names for the invented/special codes only. Every real ISO currency
+     * is named by Android's own ICU data in Urdu, so those need no table — this
+     * covers the ones ICU can't know about.
+     */
+    private val overridesUr = mapOf(
+        "IRT" to "ایرانی تومان",
+        "IRR" to "ایرانی ریال",
+    )
+
     /** Currencies with no single issuing country, so no flag makes sense. */
     private val flagless = setOf("XAF", "XOF", "XCD", "XDR", "XPF", "EUR")
 
-    fun of(code: String): String = overrides[code]
-        ?: runCatching { Currency.getInstance(code).getDisplayName(Locale.ENGLISH) }
-            .getOrNull()
-        ?: code
+    /**
+     * A currency's name in the app's current language.
+     *
+     * In Urdu, the name comes from Android's ICU table — which knows every ISO
+     * currency in Urdu — so the whole rates list translates without a
+     * hand-written map. English keeps the tidy custom names above. The special
+     * non-ISO codes (Toman) are covered explicitly in both.
+     */
+    fun of(code: String): String {
+        val locale = Locale.getDefault()
+        if (locale.language == "ur") {
+            overridesUr[code]?.let { return it }
+            return icuName(code, locale) ?: overridesEn[code] ?: code
+        }
+        return overridesEn[code]
+            ?: icuName(code, Locale.ENGLISH)
+            ?: code
+    }
+
+    private fun icuName(code: String, locale: Locale): String? =
+        runCatching { Currency.getInstance(code).getDisplayName(locale) }.getOrNull()
 
     fun flagOf(code: String): String {
         if (code == "EUR") return "🇪🇺"

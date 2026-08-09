@@ -42,10 +42,22 @@ fun CashMemerApp(settings: AppSettings) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
+    // Drive the toggle from the locale actually in effect, not from the saved
+    // setting. Those two used to be read from different places and drifted
+    // apart — the pill said Urdu while the screen stayed English. Reading the
+    // applied locale here means the highlight can never disagree with the
+    // content again.
+    val appliedTag = AppCompatDelegate.getApplicationLocales().toLanguageTags()
+    val currentLanguage = when {
+        appliedTag.startsWith("ur") -> "ur"
+        appliedTag.startsWith("en") -> "en"
+        else -> settings.language.ifBlank { "en" }
+    }
+
     Scaffold(
         topBar = {
             BrandHeader(
-                language = settings.language,
+                language = currentLanguage,
                 onLanguageChange = { tag ->
                     // Per-app language: AppCompat recreates the activity for us.
                     AppCompatDelegate.setApplicationLocales(

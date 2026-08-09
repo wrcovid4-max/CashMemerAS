@@ -618,8 +618,18 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    /**
+     * Clears the form for the next sale but keeps the signature — that is the
+     * shopkeeper's own mark, reused all day. Only the Clear button inside the
+     * signature box wipes it.
+     */
     fun clear() {
-        _state.value = ReceiptFormState(currencyCode = _state.value.currencyCode)
+        val current = _state.value
+        _state.value = ReceiptFormState(
+            currencyCode = current.currencyCode,
+            signatureBase64 = current.signatureBase64,
+            saveSignatureAsDefault = current.saveSignatureAsDefault,
+        )
     }
 
     private companion object {

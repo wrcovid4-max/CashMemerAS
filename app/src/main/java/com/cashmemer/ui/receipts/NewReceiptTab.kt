@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Image
@@ -683,14 +682,15 @@ private fun ProductNameField(
     onValueChange: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    // Tapping the arrow browses everything; typing narrows it. Without the
-    // distinction the list was invisible until you had already guessed part of
-    // a name, which is no use for picking a product you cannot spell.
-    var browsingAll by remember { mutableStateOf(false) }
 
-    val filtered = remember(value, suggestions, browsingAll) {
-        if (browsingAll || value.isBlank()) suggestions
-        else suggestions.filter { it.contains(value, ignoreCase = true) }
+    // Blank, or a value that already matches a product (i.e. one was picked),
+    // shows the whole list; a half-typed value narrows it. This is what lets the
+    // arrow open the full list without typing first — the old code kept the menu
+    // shut until a partial match existed.
+    val filtered = remember(value, suggestions) {
+        val q = value.trim()
+        if (q.isEmpty() || suggestions.any { it.equals(q, ignoreCase = true) }) suggestions
+        else suggestions.filter { it.contains(q, ignoreCase = true) }
     }
     val open = expanded && filtered.isNotEmpty()
 
@@ -702,37 +702,21 @@ private fun ProductNameField(
             value = value,
             onValueChange = {
                 onValueChange(it)
-                browsingAll = false
                 expanded = true
             },
             label = { Text(stringResource(R.string.product_name)) },
             singleLine = true,
-            trailingIcon = {
-                IconButton(
-                    onClick = {
-                        browsingAll = true
-                        expanded = !expanded
-                    },
-                    enabled = suggestions.isNotEmpty(),
-                ) {
-                    Icon(
-                        imageVector = if (open) Icons.Filled.ArrowDropUp
-                        else Icons.Filled.ArrowDropDown,
-                        contentDescription = stringResource(R.string.choose_product),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                }
-            },
+            // The framework's own trailing icon is wired into the anchor, so a
+            // tap on it opens the menu reliably — the hand-rolled IconButton did
+            // not, which is why the arrow "did nothing".
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = open) },
             modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor(),
         )
         ExposedDropdownMenu(
             expanded = open,
-            onDismissRequest = {
-                expanded = false
-                browsingAll = false
-            },
+            onDismissRequest = { expanded = false },
         ) {
             filtered.take(20).forEach { suggestion ->
                 DropdownMenuItem(
@@ -740,7 +724,6 @@ private fun ProductNameField(
                     onClick = {
                         onValueChange(suggestion)
                         expanded = false
-                        browsingAll = false
                     },
                 )
             }
