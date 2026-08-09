@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Print
@@ -33,6 +34,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -193,6 +195,23 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     /** Pulls the cloud copy down, replacing what is on this device. */
     fun syncDown() = runSync { FirebaseSync.pull(getApplication<Application>()) }
 
+    /** One-time pull of receipts made in the old Cash Memer app. */
+    fun importLegacy() = launch {
+        if (_syncing.value) return@launch
+        _syncing.value = true
+        FirebaseSync.importLegacy(getApplication<Application>())
+            .onSuccess { _message.value = str(R.string.msg_imported_old, it) }
+            .onFailure { error ->
+                _message.value = when (error) {
+                    is FirebaseSync.NotConfiguredException ->
+                        str(R.string.msg_no_google_services)
+                    is FirebaseSync.NotSignedInException -> str(R.string.msg_sign_in_first)
+                    else -> error.message ?: str(R.string.msg_sync_failed)
+                }
+            }
+        _syncing.value = false
+    }
+
     private fun runSync(block: suspend () -> Result<Int>) = launch {
         if (_syncing.value) return@launch
         _syncing.value = true
@@ -256,6 +275,7 @@ fun SettingsScreen(
                 onSignOut = { viewModel.signOut(context) },
                 onSyncUp = viewModel::syncUp,
                 onSyncDown = viewModel::syncDown,
+                onImportLegacy = viewModel::importLegacy,
             )
         }
 
@@ -453,6 +473,7 @@ private fun AccountCard(
     onSignOut: () -> Unit,
     onSyncUp: () -> Unit,
     onSyncDown: () -> Unit,
+    onImportLegacy: () -> Unit,
 ) {
     SectionCard {
         RowTitle(Icons.Filled.AccountCircle, stringResource(R.string.cloud_sync_backup))
@@ -495,6 +516,22 @@ private fun AccountCard(
                 Text(
                     text = stringResource(R.string.restore_warning),
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+                OutlinedButton(
+                    onClick = onImportLegacy,
+                    enabled = !syncing,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Filled.History, contentDescription = null)
+                    Text(stringResource(R.string.import_old_receipts))
+                }
+                Text(
+                    text = stringResource(R.string.import_old_receipts_hint),
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             } else {

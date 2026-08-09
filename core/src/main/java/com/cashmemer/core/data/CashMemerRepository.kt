@@ -55,6 +55,15 @@ class CashMemerRepository private constructor(context: Context) {
         newMembers.forEach { members.upsert(it) }
     }
 
+    /**
+     * Adds receipts brought in from the old app, keeping whatever is already
+     * here. Ids are dropped so Room assigns fresh ones and nothing collides
+     * with existing rows.
+     */
+    suspend fun importReceipts(newReceipts: List<Receipt>) {
+        newReceipts.forEach { receipts.insert(it.copy(id = 0)) }
+    }
+
     suspend fun receipt(id: Long): Receipt? = receipts.byId(id)
 
     suspend fun saveReceipt(receipt: Receipt): Long =
