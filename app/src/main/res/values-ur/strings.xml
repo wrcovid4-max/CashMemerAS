@@ -159,6 +159,10 @@
     <string name="msg_pdf_failed">پی ڈی ایف نہیں بن سکی</string>
     <!-- رسید ویوَر -->
     <string name="viewer_title">رسید نمبر %1$d</string>
+    <string name="tools_shown">مارک اپ اوزار</string>
+    <string name="view_only">صرف دیکھیں</string>
+    <string name="hide_tools">اوزار چھپائیں</string>
+    <string name="show_tools">اوزار دکھائیں</string>
     <string name="viewer_unavailable">یہ رسید کھولی نہیں جا سکی</string>
     <string name="open_receipt">کھولیں</string>
     <string name="search_in_receipt">رسید میں تلاش کریں</string>

@@ -174,26 +174,18 @@ fun NewReceiptTab(
 
         item {
             SectionCard {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    // The title takes only what it needs; the draft stamp gets
-                    // the rest and stays on one line instead of wrapping to
-                    // "Draft saved: 11:32 / PM" over the heading.
-                    SectionTitle(
-                        text = stringResource(R.string.receipt_details),
-                        modifier = Modifier.weight(1f),
+                // Heading first, then the draft stamp on its own line beneath.
+                // Side by side, the two collided in Urdu — the right-to-left
+                // heading and the stamp fought over the same corner. A line of
+                // its own reads cleanly in both languages.
+                SectionTitle(stringResource(R.string.receipt_details))
+                state.draftSavedAt?.let {
+                    Text(
+                        text = stringResource(R.string.draft_saved, Format.time(it)),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
                     )
-                    state.draftSavedAt?.let {
-                        Text(
-                            text = stringResource(R.string.draft_saved, Format.time(it)),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                        )
-                    }
                 }
 
                 OutlinedTextField(
@@ -819,10 +811,15 @@ private fun TotalsCard(
             )
         }
 
-        TotalRow("Subtotal", state.subtotal, state.currencyCode)
-        TotalRow("Discount", -state.discount, state.currencyCode)
-        TotalRow("Tax", state.taxAmount, state.currencyCode)
-        TotalRow("Grand Total", state.total, state.currencyCode, emphasised = true)
+        TotalRow(stringResource(R.string.subtotal), state.subtotal, state.currencyCode)
+        TotalRow(stringResource(R.string.discount), -state.discount, state.currencyCode)
+        TotalRow(stringResource(R.string.tax), state.taxAmount, state.currencyCode)
+        TotalRow(
+            stringResource(R.string.grand_total),
+            state.total,
+            state.currencyCode,
+            emphasised = true,
+        )
 
         OutlinedTextField(
             value = if (state.cashGiven == 0.0) "" else state.cashGiven.toString(),
@@ -833,7 +830,12 @@ private fun TotalsCard(
             modifier = Modifier.fillMaxWidth(),
         )
         if (state.cashGiven > 0) {
-            TotalRow("Change Amount", state.changeAmount, state.currencyCode, emphasised = true)
+            TotalRow(
+                stringResource(R.string.change_amount),
+                state.changeAmount,
+                state.currencyCode,
+                emphasised = true,
+            )
         }
     }
 }

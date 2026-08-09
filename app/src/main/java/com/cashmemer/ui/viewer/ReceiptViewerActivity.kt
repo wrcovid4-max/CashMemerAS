@@ -11,6 +11,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -138,6 +139,8 @@ private fun ReceiptViewerScreen(
     var tool by remember { mutableStateOf(ViewerTool.PAN) }
     var searching by remember { mutableStateOf(false) }
     var pendingText by remember { mutableStateOf<PendingText?>(null) }
+    // Whether the marking tools are shown. Off is a clean, read-only view.
+    var editing by remember { mutableStateOf(true) }
 
     LaunchedEffect(receiptId) { viewModel.load(receiptId) }
 
@@ -270,6 +273,13 @@ private fun ReceiptViewerScreen(
                 pageCount = state.pages.size,
                 pageIndex = state.pageIndex,
                 onSelectPage = viewModel::showPage,
+                editing = editing,
+                onToggleEditing = {
+                    editing = !editing
+                    // Leaving edit mode drops back to Pan so a stray tap on the
+                    // page can't stamp a mark while you are only reading.
+                    if (!editing) tool = ViewerTool.PAN
+                },
             )
         }
     }
@@ -708,6 +718,8 @@ private fun ViewerBottomBar(
     pageCount: Int,
     pageIndex: Int,
     onSelectPage: (Int) -> Unit,
+    editing: Boolean,
+    onToggleEditing: () -> Unit,
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -719,51 +731,80 @@ private fun ViewerBottomBar(
         Column(
             modifier = Modifier
                 .navigationBarsPadding()
-                .padding(horizontal = 12.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                // The four tools as one segmented track.
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                ) {
-                    Row(modifier = Modifier.padding(4.dp)) {
-                        ToolSegment(
-                            Icons.Filled.OpenWith, R.string.tool_pan,
-                            tool == ViewerTool.PAN,
-                        ) { onToolChange(ViewerTool.PAN) }
-                        ToolSegment(
-                            Icons.Filled.TextFields, R.string.tool_text,
-                            tool == ViewerTool.TEXT,
-                        ) { onToolChange(ViewerTool.TEXT) }
-                        ToolSegment(
-                            Icons.Filled.Check, R.string.tool_tick,
-                            tool == ViewerTool.CHECK,
-                            selectedColour = MarkGreen,
-                        ) { onToolChange(ViewerTool.CHECK) }
-                        ToolSegment(
-                            Icons.Filled.Close, R.string.tool_cross,
-                            tool == ViewerTool.CROSS,
-                            selectedColour = MarkRed,
-                        ) { onToolChange(ViewerTool.CROSS) }
+            // The handle row: a page label on the left, and the collapse toggle
+            // on the right. Collapsing hides the tools for a clean, read-only
+            // look — tap it again to mark the memo up.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onToggleEditing),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(
+                        if (editing) R.string.tools_shown else R.string.view_only
+                    ),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                Icon(
+                    imageVector = if (editing) Icons.Filled.KeyboardArrowDown
+                    else Icons.Filled.KeyboardArrowUp,
+                    contentDescription = stringResource(
+                        if (editing) R.string.hide_tools else R.string.show_tools
+                    ),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            // The tools only exist in edit mode.
+            AnimatedVisibility(visible = editing) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                    ) {
+                        Row(modifier = Modifier.padding(4.dp)) {
+                            ToolSegment(
+                                Icons.Filled.OpenWith, R.string.tool_pan,
+                                tool == ViewerTool.PAN,
+                            ) { onToolChange(ViewerTool.PAN) }
+                            ToolSegment(
+                                Icons.Filled.TextFields, R.string.tool_text,
+                                tool == ViewerTool.TEXT,
+                            ) { onToolChange(ViewerTool.TEXT) }
+                            ToolSegment(
+                                Icons.Filled.Check, R.string.tool_tick,
+                                tool == ViewerTool.CHECK,
+                                selectedColour = MarkGreen,
+                            ) { onToolChange(ViewerTool.CHECK) }
+                            ToolSegment(
+                                Icons.Filled.Close, R.string.tool_cross,
+                                tool == ViewerTool.CROSS,
+                                selectedColour = MarkRed,
+                            ) { onToolChange(ViewerTool.CROSS) }
+                        }
                     }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    RoundIconButton(
+                        icon = Icons.Filled.Undo,
+                        label = stringResource(R.string.action_undo),
+                        onClick = onUndo,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    RoundIconButton(
+                        icon = Icons.Filled.Delete,
+                        label = stringResource(R.string.action_clear),
+                        onClick = onClear,
+                        danger = true,
+                    )
                 }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                RoundIconButton(
-                    icon = Icons.Filled.Undo,
-                    label = stringResource(R.string.action_undo),
-                    onClick = onUndo,
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                RoundIconButton(
-                    icon = Icons.Filled.Delete,
-                    label = stringResource(R.string.action_clear),
-                    onClick = onClear,
-                    danger = true,
-                )
             }
 
             if (pageCount > 1) {

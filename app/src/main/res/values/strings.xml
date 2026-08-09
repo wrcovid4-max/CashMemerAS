@@ -159,6 +159,10 @@
     <string name="msg_pdf_failed">Could not build the PDF</string>
     <!-- Receipt viewer -->
     <string name="viewer_title">Receipt #%1$d</string>
+    <string name="tools_shown">Markup tools</string>
+    <string name="view_only">View only</string>
+    <string name="hide_tools">Hide tools</string>
+    <string name="show_tools">Show tools</string>
     <string name="viewer_unavailable">This receipt could not be opened</string>
     <string name="open_receipt">Open</string>
     <string name="search_in_receipt">Find in receipt</string>
