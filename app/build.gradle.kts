@@ -116,6 +116,9 @@ dependencies {
     // hence "cannot access class ListenableFuture". Real Guava supplies it.
     implementation(libs.guava)
 
+    // Data Layer link to the Wear OS companion (push today's takings to the watch)
+    implementation(libs.play.services.wearable)
+
     // GPS + map picker for the receipt's location field
     implementation(libs.play.services.location)
     implementation(libs.play.services.maps)
