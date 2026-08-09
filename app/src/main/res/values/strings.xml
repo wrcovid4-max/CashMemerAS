@@ -3,6 +3,7 @@
     <!-- Brand -->
     <string name="app_name">Cash Memer</string>
     <string name="app_tagline">Professional Receipt Organizer</string>
+    <string name="splash_copyright">© WR COVID YT 2026</string>
 
     <!-- Bottom navigation -->
     <string name="nav_receipts">Receipts</string>
