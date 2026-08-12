@@ -1,5 +1,7 @@
 package com.cashmemer.ui.pricelist
 
+import com.cashmemer.ui.components.BoldGlyph
+
 import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -92,7 +94,7 @@ fun PriceListScreen(viewModel: PriceListViewModel = viewModel()) {
                 onClick = { editing = Product(inPriceList = true) },
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Icon(Icons.Filled.Add, contentDescription = null)
+                BoldGlyph(Icons.Filled.Add, contentDescription = null)
                 Text(stringResource(R.string.add_new_product))
             }
         }
@@ -112,7 +114,7 @@ fun PriceListScreen(viewModel: PriceListViewModel = viewModel()) {
                         )
                     }
                     IconButton(onClick = { editing = product }) {
-                        Icon(
+                        BoldGlyph(
                             Icons.Filled.Edit,
                             contentDescription = stringResource(R.string.action_edit),
                             tint = MaterialTheme.colorScheme.primary,

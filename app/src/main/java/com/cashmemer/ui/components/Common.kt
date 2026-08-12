@@ -215,7 +215,7 @@ fun CashMemerBottomBar(
                 selected = selected,
                 onClick = { onSelect(destination) },
                 icon = {
-                    Icon(
+                    BoldGlyph(
                         imageVector = destination.icon,
                         contentDescription = stringResource(destination.labelRes),
                         modifier = Modifier.size(24.dp),
@@ -336,7 +336,7 @@ private val ButtonContentPadding = PaddingValues(horizontal = 12.dp, vertical = 
 @Composable
 private fun RowScope.ButtonContent(text: String, icon: ImageVector?) {
     if (icon != null) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp))
+        BoldGlyph(icon, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(Dimens.iconGap))
     }
     // Half-width buttons hold labels like "Barcode Scan" and "Current location"
@@ -385,7 +385,7 @@ fun IconAction(
                 modifier = Modifier.size(Dimens.touchTarget),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(
+                BoldGlyph(
                     imageVector = icon,
                     contentDescription = label,
                     tint = tint,
@@ -424,7 +424,7 @@ fun DangerIconButton(
             modifier = Modifier.size(40.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
+            BoldGlyph(
                 imageVector = icon,
                 contentDescription = contentDescription,
                 tint = MaterialTheme.colorScheme.onError,
@@ -456,7 +456,7 @@ fun SearchField(
             modifier = Modifier.padding(horizontal = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
+            BoldGlyph(
                 imageVector = Icons.Filled.Search,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -487,7 +487,7 @@ fun SearchField(
                 },
             )
             if (value.isNotEmpty()) {
-                Icon(
+                BoldGlyph(
                     imageVector = Icons.Filled.Close,
                     contentDescription = stringResource(R.string.action_clear),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -518,7 +518,7 @@ fun EmptyState(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Dimens.gapTight),
         ) {
-            Icon(
+            BoldGlyph(
                 imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.outline,

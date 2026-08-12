@@ -1,5 +1,7 @@
 package com.cashmemer.ui.history
 
+import com.cashmemer.ui.components.BoldGlyph
+
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -114,7 +116,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                     onClick = { pickingFrom = true },
                     modifier = Modifier.weight(1f),
                 ) {
-                    Icon(Icons.Filled.CalendarMonth, contentDescription = null)
+                    BoldGlyph(Icons.Filled.CalendarMonth, contentDescription = null)
                     Text(
                         text = if (range.from == 0L) stringResource(R.string.start_date)
                         else Format.date(range.from),
@@ -124,7 +126,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                     onClick = { pickingTo = true },
                     modifier = Modifier.weight(1f),
                 ) {
-                    Icon(Icons.Filled.CalendarMonth, contentDescription = null)
+                    BoldGlyph(Icons.Filled.CalendarMonth, contentDescription = null)
                     Text(
                         text = if (range.to == 0L) stringResource(R.string.end_date)
                         else Format.date(range.to),
@@ -219,7 +221,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                             .clickable { pinnedExpanded = !pinnedExpanded },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Icon(Icons.Filled.PushPin, contentDescription = null)
+                        BoldGlyph(Icons.Filled.PushPin, contentDescription = null)
                         Text(
                             text = stringResource(R.string.pinned_count, pinned.size),
                             modifier = Modifier
@@ -227,7 +229,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                                 .padding(start = 8.dp),
                             style = MaterialTheme.typography.titleMedium,
                         )
-                        Icon(
+                        BoldGlyph(
                             imageVector = if (pinnedExpanded) Icons.Filled.ExpandLess
                             else Icons.Filled.ExpandMore,
                             contentDescription = null,
@@ -340,7 +342,7 @@ private fun WeeklySummaryCard(
                 .clickable { open = !open },
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
+            BoldGlyph(
                 Icons.Filled.AutoAwesome,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
@@ -370,7 +372,7 @@ private fun WeeklySummaryCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Icon(
+            BoldGlyph(
                 imageVector = if (open) Icons.Filled.ExpandLess
                 else Icons.Filled.ExpandMore,
                 contentDescription = stringResource(
@@ -427,7 +429,7 @@ private fun WeeklySummaryCard(
                     onClick = onGenerateInsight,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Icon(Icons.Filled.AutoAwesome, contentDescription = null)
+                    BoldGlyph(Icons.Filled.AutoAwesome, contentDescription = null)
                     Text(stringResource(if (summary.insight == null) R.string.generate_insight else R.string.regenerate_insight))
                 }
             }
@@ -486,7 +488,7 @@ private fun HistoryRow(
             )
 
             IconButton(onClick = onPin) {
-                Icon(
+                BoldGlyph(
                     Icons.Filled.PushPin,
                     contentDescription = stringResource(R.string.pin_receipt),
                     tint = if (receipt.pinned) MaterialTheme.colorScheme.primary
@@ -494,7 +496,7 @@ private fun HistoryRow(
                 )
             }
             IconButton(onClick = onToggleExpanded) {
-                Icon(
+                BoldGlyph(
                     imageVector = if (expanded) Icons.Filled.ExpandLess
                     else Icons.Filled.ExpandMore,
                     contentDescription = stringResource(
@@ -557,7 +559,7 @@ private fun HistoryRow(
 
                 if (receipt.notesPage1.isNotBlank()) {
                     Row {
-                        Icon(
+                        BoldGlyph(
                             Icons.AutoMirrored.Filled.Notes,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -573,7 +575,7 @@ private fun HistoryRow(
 
                 if (receipt.locationAddress.isNotBlank()) {
                     Row {
-                        Icon(
+                        BoldGlyph(
                             Icons.Filled.Place,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,

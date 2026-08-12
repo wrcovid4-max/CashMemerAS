@@ -1,5 +1,7 @@
 package com.cashmemer.ui.devices
 
+import com.cashmemer.ui.components.BoldGlyph
+
 import android.app.Application
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
@@ -190,7 +192,7 @@ fun DevicesScreen(
                 ) {
                     SectionTitle(stringResource(R.string.manage_paired_devices))
                     OutlinedButton(onClick = viewModel::refresh) {
-                        Icon(Icons.Filled.Refresh, contentDescription = "Refresh")
+                        BoldGlyph(Icons.Filled.Refresh, contentDescription = "Refresh")
                     }
                 }
 
@@ -238,7 +240,7 @@ fun DevicesScreen(
                     onClick = { confirmForgetAll = true },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Icon(
+                    BoldGlyph(
                         Icons.Filled.DeleteSweep,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error,
@@ -249,14 +251,14 @@ fun DevicesScreen(
                     onClick = { showDiagnostics = true },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Icon(Icons.Filled.HealthAndSafety, contentDescription = null)
+                    BoldGlyph(Icons.Filled.HealthAndSafety, contentDescription = null)
                     Text(stringResource(R.string.run_diagnostics))
                 }
                 OutlinedButton(
                     onClick = { showLogs = true },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Icon(Icons.Filled.BugReport, contentDescription = null)
+                    BoldGlyph(Icons.Filled.BugReport, contentDescription = null)
                     Text(stringResource(R.string.view_logs, logs.size))
                 }
             }
@@ -272,7 +274,7 @@ fun DevicesScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     results.forEach { (label, ok) ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
+                            BoldGlyph(
                                 imageVector = if (ok) Icons.Filled.CheckCircle
                                 else Icons.Filled.Cancel,
                                 contentDescription = null,
@@ -373,7 +375,7 @@ private fun StatusBanner(
             if (state == ConnectionState.CONNECTING) {
                 CircularProgressIndicator(modifier = Modifier.padding(end = 12.dp))
             } else {
-                Icon(
+                BoldGlyph(
                     Icons.Filled.Bluetooth,
                     contentDescription = null,
                     tint = colour,
@@ -397,7 +399,7 @@ private fun DeviceToggleRow(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
+        BoldGlyph(
             icon,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,

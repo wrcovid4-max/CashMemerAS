@@ -1,5 +1,7 @@
 package com.cashmemer.ui.rates
 
+import com.cashmemer.ui.components.BoldGlyph
+
 import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -141,7 +143,7 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
                     CircularProgressIndicator(modifier = Modifier.padding(8.dp))
                 } else {
                     IconButton(onClick = viewModel::refresh) {
-                        Icon(
+                        BoldGlyph(
                             Icons.Filled.Refresh,
                             contentDescription = stringResource(R.string.action_refresh),
                             tint = MaterialTheme.colorScheme.primary,
