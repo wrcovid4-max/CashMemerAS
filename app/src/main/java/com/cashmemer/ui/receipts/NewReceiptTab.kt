@@ -304,10 +304,10 @@ fun NewReceiptTab(
                     )
                 }
 
-                Text(stringResource(R.string.payment_type), style = MaterialTheme.typography.titleMedium)
-                PaymentTypeGrid(
+                PaymentTypePicker(
                     selected = state.paymentType,
                     onSelect = viewModel::setPaymentType,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }
@@ -359,6 +359,7 @@ fun NewReceiptTab(
             SignatureCard(
                 signatureBase64 = state.signatureBase64,
                 saveAsDefault = state.saveSignatureAsDefault,
+                locked = settings.signatureLocked,
                 onSaveAsDefaultChange = viewModel::setSaveSignatureAsDefault,
                 onSignatureChanged = viewModel::setSignature,
             )
@@ -618,7 +619,7 @@ private fun CurrencyPicker(
         modifier = modifier,
     ) {
         OutlinedTextField(
-            value = "$selected  ${com.cashmemer.core.data.CurrencyNames.symbolOf(selected)}",
+            value = "$selected (${com.cashmemer.core.data.CurrencyNames.symbolOf(selected)})",
             onValueChange = {},
             readOnly = true,
             singleLine = true,
@@ -632,7 +633,7 @@ private fun CurrencyPicker(
             options.forEach { code ->
                 DropdownMenuItem(
                     text = {
-                        Text("$code  (${com.cashmemer.core.data.CurrencyNames.symbolOf(code)})")
+                        Text("$code (${com.cashmemer.core.data.CurrencyNames.symbolOf(code)})")
                     },
                     onClick = {
                         onSelect(code)
@@ -685,23 +686,41 @@ private fun CategoryPicker(
     }
 }
 
-@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PaymentTypeGrid(
+private fun PaymentTypePicker(
     selected: PaymentType,
     onSelect: (PaymentType) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier,
     ) {
-        PaymentType.entries.forEach { type ->
-            FilterChip(
-                selected = type == selected,
-                onClick = { onSelect(type) },
-                label = { Text(type.localized()) },
-            )
+        OutlinedTextField(
+            value = selected.localized(),
+            onValueChange = {},
+            readOnly = true,
+            singleLine = true,
+            label = { Text(stringResource(R.string.payment_type)) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(),
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            PaymentType.entries.forEach { type ->
+                DropdownMenuItem(
+                    text = { Text(type.localized()) },
+                    onClick = {
+                        onSelect(type)
+                        expanded = false
+                    },
+                )
+            }
         }
     }
 }
@@ -841,8 +860,11 @@ private fun LineItemRow(
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.productName, style = MaterialTheme.typography.titleMedium)
                 Text(
-                    text = "${Format.amount(item.qty)} × " +
+                    text = stringResource(
+                        R.string.item_qty_summary,
+                        Format.amount(item.qty),
                         Format.amountWithCurrency(item.unitPrice, currencyCode),
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -960,6 +982,7 @@ private fun TotalRow(
 private fun SignatureCard(
     signatureBase64: String?,
     saveAsDefault: Boolean,
+    locked: Boolean,
     onSaveAsDefaultChange: (Boolean) -> Unit,
     onSignatureChanged: (String?) -> Unit,
 ) {
@@ -970,7 +993,12 @@ private fun SignatureCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             SectionTitle(stringResource(R.string.digital_signature))
-            if (signatureBase64 != null) {
+            if (locked) {
+                AssistChip(
+                    onClick = {},
+                    label = { Text(stringResource(R.string.signature_locked)) },
+                )
+            } else if (signatureBase64 != null) {
                 AssistChip(
                     onClick = {},
                     label = { Text(stringResource(R.string.captured)) },
@@ -982,6 +1010,7 @@ private fun SignatureCard(
         SignaturePad(
             signatureBase64 = signatureBase64,
             onSignatureChanged = onSignatureChanged,
+            locked = locked,
         )
 
         Row(verticalAlignment = Alignment.CenterVertically) {

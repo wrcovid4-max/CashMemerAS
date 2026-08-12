@@ -98,8 +98,9 @@ object CurrencyNames {
         "EUR" -> "€"
         "GBP" -> "£"
         "INR" -> "₹"
-        "AED" -> "AED"
-        "SAR" -> "SAR"
+        // Gulf currencies read in Arabic on the memo, per the shopkeeper.
+        "AED" -> "درهم"
+        "SAR" -> "ريال"
         else -> runCatching { Currency.getInstance(code).symbol }.getOrDefault(code)
     }
 }

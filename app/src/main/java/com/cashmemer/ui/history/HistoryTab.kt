@@ -81,50 +81,15 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
     val error by viewModel.error.collectAsState()
     val context = LocalContext.current
 
-    val backupPicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/json"),
-    ) { uri -> uri?.let(viewModel::exportTo) }
-
-    val restorePicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
-    ) { uri -> uri?.let(viewModel::importFrom) }
-
     var pickingFrom by remember { mutableStateOf(false) }
     var pickingTo by remember { mutableStateOf(false) }
+    var pinnedExpanded by remember { mutableStateOf(true) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                // SecondaryButton keeps the label on one line and shrinks it to
-                // fit — the plain buttons wrapped "Save a copy" onto two lines.
-                SecondaryButton(
-                    text = stringResource(R.string.backup_json),
-                    icon = Icons.Filled.CloudDownload,
-                    onClick = {
-                        backupPicker.launch(
-                            BackupWriter.fileNameFor(System.currentTimeMillis())
-                        )
-                    },
-                    modifier = Modifier.weight(1f),
-                )
-                SecondaryButton(
-                    text = stringResource(R.string.restore_json),
-                    icon = Icons.Filled.CloudUpload,
-                    onClick = {
-                        restorePicker.launch(arrayOf("application/json", "text/plain"))
-                    },
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        }
-
         item {
             SearchField(
                 value = query,
@@ -240,7 +205,39 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
             }
         }
 
-        items(receipts, key = { it.id }) { receipt ->
+        val pinned = receipts.filter { it.pinned }
+        val others = receipts.filter { !it.pinned }
+
+        // A tappable header lets the shopkeeper fold the pinned receipts away so
+        // a long list of favourites doesn't bury the recent ones.
+        if (pinned.isNotEmpty()) {
+            item {
+                SectionCard {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { pinnedExpanded = !pinnedExpanded },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(Icons.Filled.PushPin, contentDescription = null)
+                        Text(
+                            text = stringResource(R.string.pinned_count, pinned.size),
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 8.dp),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Icon(
+                            imageVector = if (pinnedExpanded) Icons.Filled.ExpandLess
+                            else Icons.Filled.ExpandMore,
+                            contentDescription = null,
+                        )
+                    }
+                }
+            }
+        }
+
+        items(if (pinnedExpanded) receipts else others, key = { it.id }) { receipt ->
             HistoryRow(
                 receipt = receipt,
                 checked = receipt.id in selected,

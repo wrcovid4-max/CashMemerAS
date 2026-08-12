@@ -95,6 +95,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setThemeMode(mode: ThemeMode) = launch { store.setThemeMode(mode) }
     fun setAutoSend(value: Boolean) = launch { store.setAutoSend(value) }
     fun setSaveSignature(value: Boolean) = launch { store.setSaveSignature(value) }
+    fun setSignatureLocked(value: Boolean) = launch { store.setSignatureLocked(value) }
     fun setAutoPrint(value: Boolean) = launch { store.setAutoPrint(value) }
     fun setShowPage1(value: Boolean) = launch { store.setShowPage1(value) }
     fun setShowPage2(value: Boolean) = launch { store.setShowPage2(value) }
@@ -329,8 +330,8 @@ fun SettingsScreen(
         item {
             SectionCard {
                 RowTitle(Icons.Filled.Settings, stringResource(R.string.general_settings))
-                ToggleRow(stringResource(R.string.auto_send), settings.autoSend, viewModel::setAutoSend)
                 ToggleRow(stringResource(R.string.save_signature), settings.saveSignature, viewModel::setSaveSignature)
+                ToggleRow(stringResource(R.string.lock_signature), settings.signatureLocked, viewModel::setSignatureLocked)
             }
         }
 

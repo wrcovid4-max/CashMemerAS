@@ -56,6 +56,7 @@ fun SignaturePad(
     onSignatureChanged: (String?) -> Unit,
     modifier: Modifier = Modifier,
     strokeWidthPx: Float = 4f,
+    locked: Boolean = false,
 ) {
     // Decoded once per distinct signature, not on every frame.
     val existing = remember(signatureBase64) { decodeSignature(signatureBase64) }
@@ -81,9 +82,13 @@ fun SignaturePad(
                 // The pad lives inside a LazyColumn. Claim the gesture in the
                 // Initial pass so the list's vertical scroll never steals the
                 // stroke — without this, signing just scrolls the page.
-                .pointerInput(Unit) {
+                .pointerInput(locked) {
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
+                        // Locked pad: leave the touch unconsumed so the list can
+                        // still scroll, and never record a stroke — this is the
+                        // "stop accidental marks" switch from Settings.
+                        if (locked) return@awaitEachGesture
                         down.consume()
                         current = listOf(down.position)
 

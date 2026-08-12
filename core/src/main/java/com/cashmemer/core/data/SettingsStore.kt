@@ -22,6 +22,8 @@ data class AppSettings(
     val language: String = "en",
     val autoSend: Boolean = false,
     val saveSignature: Boolean = true,
+    /** When on, the signature pad ignores touches so it can't be marked by accident. */
+    val signatureLocked: Boolean = false,
     val defaultSignatureBase64: String? = null,
     val autoPrint: Boolean = false,
     val showPage1: Boolean = true,
@@ -60,6 +62,7 @@ class SettingsStore(private val context: Context) {
         val LANGUAGE = stringPreferencesKey("language")
         val AUTO_SEND = booleanPreferencesKey("auto_send")
         val SAVE_SIGNATURE = booleanPreferencesKey("save_signature")
+        val SIGNATURE_LOCKED = booleanPreferencesKey("signature_locked")
         val DEFAULT_SIGNATURE = stringPreferencesKey("default_signature")
         val AUTO_PRINT = booleanPreferencesKey("auto_print")
         val SHOW_PAGE_1 = booleanPreferencesKey("show_page_1")
@@ -129,6 +132,7 @@ class SettingsStore(private val context: Context) {
         language = this[Keys.LANGUAGE] ?: "en",
         autoSend = this[Keys.AUTO_SEND] ?: false,
         saveSignature = this[Keys.SAVE_SIGNATURE] ?: true,
+        signatureLocked = this[Keys.SIGNATURE_LOCKED] ?: false,
         defaultSignatureBase64 = this[Keys.DEFAULT_SIGNATURE],
         autoPrint = this[Keys.AUTO_PRINT] ?: false,
         showPage1 = this[Keys.SHOW_PAGE_1] ?: true,
@@ -159,6 +163,8 @@ class SettingsStore(private val context: Context) {
     suspend fun setThemeMode(mode: ThemeMode) = put(Keys.THEME, mode.name)
     suspend fun setLanguage(tag: String) = put(Keys.LANGUAGE, tag)
     suspend fun setAutoSend(value: Boolean) = put(Keys.AUTO_SEND, value)
+
+    suspend fun setSignatureLocked(value: Boolean) = put(Keys.SIGNATURE_LOCKED, value)
     suspend fun setSaveSignature(value: Boolean) = put(Keys.SAVE_SIGNATURE, value)
     suspend fun setAutoPrint(value: Boolean) = put(Keys.AUTO_PRINT, value)
     suspend fun setShowPage1(value: Boolean) = put(Keys.SHOW_PAGE_1, value)
