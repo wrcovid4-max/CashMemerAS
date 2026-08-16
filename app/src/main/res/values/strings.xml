@@ -93,6 +93,9 @@
     <string name="signature_locked">Locked</string>
     <string name="lock_signature">Lock signature pad</string>
     <string name="item_qty_summary">%1$s Qty  %2$s</string>
+    <string name="item_unit_price">1 %1$s = %2$s</string>
+    <string name="price_unit_title">Per-unit price</string>
+    <string name="price_unit_body">How one unit is labelled when a receipt shows the price of a single item.</string>
     <string name="pinned_count">Pinned (%1$d)</string>
     <string name="save_default_signature">Save as Default Signature</string>
     <string name="clear_and_redraw">Clear &amp; Redraw</string>

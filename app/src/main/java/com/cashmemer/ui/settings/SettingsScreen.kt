@@ -11,8 +11,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -66,6 +71,7 @@ import com.cashmemer.R
 import com.cashmemer.core.data.AppSettings
 import com.cashmemer.core.data.CashMemerRepository
 import com.cashmemer.core.data.MassPrintOption
+import com.cashmemer.core.data.PriceUnit
 import com.cashmemer.core.data.SettingsStore
 import com.cashmemer.core.data.ThemeMode
 import com.cashmemer.core.util.Format
@@ -100,6 +106,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setShowPage1(value: Boolean) = launch { store.setShowPage1(value) }
     fun setShowPage2(value: Boolean) = launch { store.setShowPage2(value) }
     fun setMassPrint(option: MassPrintOption) = launch { store.setMassPrint(option) }
+    fun setPriceUnit(unit: PriceUnit) = launch { store.setPriceUnit(unit) }
     fun setAppLock(value: Boolean) = launch { store.setAppLock(value) }
 
     fun setPasscode(passcode: String, confirm: String) {
@@ -370,6 +377,26 @@ fun SettingsScreen(
 
         item {
             SectionCard {
+                RowTitle(Icons.Filled.Settings, stringResource(R.string.price_unit_title))
+                Text(
+                    stringResource(R.string.price_unit_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    PriceUnit.entries.forEach { unit ->
+                        FilterChip(
+                            selected = settings.priceUnit == unit,
+                            onClick = { viewModel.setPriceUnit(unit) },
+                            label = { Text(unit.unitLabel) },
+                        )
+                    }
+                }
+            }
+        }
+
+        item {
+            SectionCard {
                 RowTitle(Icons.Filled.Lock, stringResource(R.string.app_lock))
                 ToggleRow(stringResource(R.string.require_secure_lock), settings.appLock, viewModel::setAppLock)
                 Text(
@@ -483,15 +510,30 @@ private fun AccountCard(
         RowTitle(Icons.Filled.AccountCircle, stringResource(R.string.cloud_sync_backup))
 
         if (settings.signedIn) {
-            Text(
-                text = settings.accountName ?: "Signed in",
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Text(
-                text = settings.accountEmail.orEmpty(),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (!settings.accountPhotoUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = settings.accountPhotoUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(CircleShape),
+                    )
+                    Spacer(Modifier.width(12.dp))
+                }
+                Column {
+                    Text(
+                        text = settings.accountName ?: "Signed in",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        text = settings.accountEmail.orEmpty(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
 
             if (cloudReady) {
                 Text(

@@ -49,6 +49,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
@@ -69,6 +70,9 @@ import com.cashmemer.ui.components.SecondaryButton
 import com.cashmemer.ui.components.SectionCard
 import com.cashmemer.ui.receipts.ReceiptEditBus
 import com.cashmemer.ui.viewer.openReceiptViewer
+
+/** Neon green used to mark a pinned memo. */
+private val PinnedGreen = Color(0xFF39FF14)
 
 @Composable
 fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
@@ -219,7 +223,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                             .clickable { pinnedExpanded = !pinnedExpanded },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Icon(Icons.Filled.PushPin, contentDescription = null)
+                        Icon(Icons.Filled.PushPin, contentDescription = null, tint = PinnedGreen)
                         Text(
                             text = stringResource(R.string.pinned_count, pinned.size),
                             modifier = Modifier
@@ -489,7 +493,7 @@ private fun HistoryRow(
                 Icon(
                     Icons.Filled.PushPin,
                     contentDescription = stringResource(R.string.pin_receipt),
-                    tint = if (receipt.pinned) MaterialTheme.colorScheme.primary
+                    tint = if (receipt.pinned) PinnedGreen
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }

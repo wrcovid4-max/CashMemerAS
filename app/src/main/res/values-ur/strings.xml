@@ -93,6 +93,9 @@
     <string name="signature_locked">لاک شدہ</string>
     <string name="lock_signature">دستخط کا خانہ لاک کریں</string>
     <string name="item_qty_summary">%1$s مقدار  %2$s</string>
+    <string name="item_unit_price">1 %1$s = %2$s</string>
+    <string name="price_unit_title">فی یونٹ قیمت</string>
+    <string name="price_unit_body">جب رسید کسی چیز کی فی عدد قیمت دکھائے تو ایک یونٹ کو کیا لکھا جائے۔</string>
     <string name="pinned_count">پن شدہ (%1$d)</string>
     <string name="save_default_signature">بطور طے شدہ دستخط محفوظ کریں</string>
     <string name="clear_and_redraw">صاف کر کے دوبارہ بنائیں</string>

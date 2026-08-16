@@ -9,8 +9,11 @@ import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import android.util.Base64
 import com.cashmemer.core.data.CurrencyNames
+import com.cashmemer.core.data.PriceUnit
 import com.cashmemer.core.data.ReceiptAnnotationCodec
 import com.cashmemer.core.data.ReceiptItemCodec
+import com.cashmemer.core.data.SettingsStore
+import kotlinx.coroutines.flow.first
 import com.cashmemer.core.model.AnnotationKind
 import com.cashmemer.core.model.PaymentType
 import com.cashmemer.core.model.Receipt
@@ -61,6 +64,9 @@ data class ReceiptPageLayout(
  * shopkeeper's own note and the issuing account.
  */
 object ReceiptPdfRenderer {
+
+    /** Unit label ("Qty"/"Kg"/…) for the per-unit price line, read per render. */
+    private var perUnitLabel: String = PriceUnit.PIECE.unitLabel
 
     const val PAGE_W = 600f
 
@@ -135,6 +141,8 @@ object ReceiptPdfRenderer {
         outputFile: File,
     ): Result<File> = withContext(Dispatchers.IO) {
         runCatching {
+            perUnitLabel = SettingsStore(context).settings.first().priceUnit.unitLabel
+
             val document = PdfDocument()
             var pageNumber = 1
 
@@ -279,7 +287,7 @@ object ReceiptPdfRenderer {
                 y,
             )
             y += ROW_TIGHT
-            sheet.write("@ $symbol${Format.amount(item.unitPrice)} each", L + 8f, y, subLinePaint)
+            sheet.write("1 $perUnitLabel = $symbol${Format.amount(item.unitPrice)}", L + 8f, y, subLinePaint)
             y += ROW
         }
 

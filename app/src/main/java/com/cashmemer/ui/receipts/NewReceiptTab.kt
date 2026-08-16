@@ -324,6 +324,7 @@ fun NewReceiptTab(
             LineItemRow(
                 item = item,
                 currencyCode = state.currencyCode,
+                unitLabel = settings.priceUnit.unitLabel,
                 onRemove = { viewModel.removeItem(index) },
             )
         }
@@ -850,6 +851,7 @@ private fun ProductNameField(
 private fun LineItemRow(
     item: ReceiptItem,
     currencyCode: String,
+    unitLabel: String,
     onRemove: () -> Unit,
 ) {
     SectionCard {
@@ -859,10 +861,12 @@ private fun LineItemRow(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.productName, style = MaterialTheme.typography.titleMedium)
+                // Always the cost of a single unit — never "2 Qty" — so the rate
+                // reads the same however many were bought.
                 Text(
                     text = stringResource(
-                        R.string.item_qty_summary,
-                        Format.amount(item.qty),
+                        R.string.item_unit_price,
+                        unitLabel,
                         Format.amountWithCurrency(item.unitPrice, currencyCode),
                     ),
                     style = MaterialTheme.typography.bodyMedium,

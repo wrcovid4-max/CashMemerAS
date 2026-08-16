@@ -16,6 +16,18 @@ enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
 enum class MassPrintOption { PAGE_1, PAGE_2, BOTH }
 
+/** How a single unit is labelled when showing the per-unit price on a memo. */
+enum class PriceUnit(val unitLabel: String) {
+    PIECE("Qty"),
+    KILOGRAM("Kg"),
+    GRAM("g"),
+    LITRE("L");
+
+    companion object {
+        fun from(raw: String?): PriceUnit = entries.firstOrNull { it.name == raw } ?: PIECE
+    }
+}
+
 /** Mirrors the Settings screen: appearance, general, print, and lock. */
 data class AppSettings(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
@@ -29,6 +41,7 @@ data class AppSettings(
     val showPage1: Boolean = true,
     val showPage2: Boolean = true,
     val massPrint: MassPrintOption = MassPrintOption.BOTH,
+    val priceUnit: PriceUnit = PriceUnit.PIECE,
     val appLock: Boolean = false,
     val passcode: String? = null,
     val defaultCurrency: String = "PKR",
@@ -68,6 +81,7 @@ class SettingsStore(private val context: Context) {
         val SHOW_PAGE_1 = booleanPreferencesKey("show_page_1")
         val SHOW_PAGE_2 = booleanPreferencesKey("show_page_2")
         val MASS_PRINT = stringPreferencesKey("mass_print")
+        val PRICE_UNIT = stringPreferencesKey("price_unit")
         val APP_LOCK = booleanPreferencesKey("app_lock")
         val PASSCODE = stringPreferencesKey("passcode")
         val DEFAULT_CURRENCY = stringPreferencesKey("default_currency")
@@ -138,6 +152,7 @@ class SettingsStore(private val context: Context) {
         showPage1 = this[Keys.SHOW_PAGE_1] ?: true,
         showPage2 = this[Keys.SHOW_PAGE_2] ?: true,
         massPrint = enumValueOrDefault(this[Keys.MASS_PRINT], MassPrintOption.BOTH),
+        priceUnit = PriceUnit.from(this[Keys.PRICE_UNIT]),
         appLock = this[Keys.APP_LOCK] ?: false,
         passcode = this[Keys.PASSCODE],
         defaultCurrency = this[Keys.DEFAULT_CURRENCY] ?: "PKR",
@@ -170,6 +185,8 @@ class SettingsStore(private val context: Context) {
     suspend fun setShowPage1(value: Boolean) = put(Keys.SHOW_PAGE_1, value)
     suspend fun setShowPage2(value: Boolean) = put(Keys.SHOW_PAGE_2, value)
     suspend fun setMassPrint(option: MassPrintOption) = put(Keys.MASS_PRINT, option.name)
+
+    suspend fun setPriceUnit(unit: PriceUnit) = put(Keys.PRICE_UNIT, unit.name)
     suspend fun setAppLock(value: Boolean) = put(Keys.APP_LOCK, value)
     suspend fun setDefaultCurrency(code: String) = put(Keys.DEFAULT_CURRENCY, code)
     suspend fun setAutoBackup(value: Boolean) = put(Keys.AUTO_BACKUP, value)
