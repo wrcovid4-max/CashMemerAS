@@ -1,7 +1,5 @@
 package com.cashmemer.ui.inventory
 
-import com.cashmemer.ui.components.BoldGlyph
-
 import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -120,7 +118,7 @@ fun InventoryScreen(viewModel: InventoryViewModel = viewModel()) {
             ) {
                 SectionTitle(stringResource(R.string.products))
                 Button(onClick = { editing = Product() }) {
-                    BoldGlyph(Icons.Filled.Add, contentDescription = null)
+                    Icon(Icons.Filled.Add, contentDescription = null)
                     Text(stringResource(R.string.add_new))
                 }
             }
@@ -130,7 +128,7 @@ fun InventoryScreen(viewModel: InventoryViewModel = viewModel()) {
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                leadingIcon = { BoldGlyph(Icons.Filled.Search, contentDescription = null) },
+                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 placeholder = { Text(stringResource(R.string.search_products)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -258,13 +256,13 @@ private fun ProductRow(
             )
             Row {
                 IconButton(onClick = onArchive) {
-                    BoldGlyph(Icons.Filled.Archive, contentDescription = stringResource(R.string.archive))
+                    Icon(Icons.Filled.Archive, contentDescription = stringResource(R.string.archive))
                 }
                 IconButton(onClick = onDuplicate) {
-                    BoldGlyph(Icons.Filled.ContentCopy, contentDescription = stringResource(R.string.action_duplicate))
+                    Icon(Icons.Filled.ContentCopy, contentDescription = stringResource(R.string.action_duplicate))
                 }
                 IconButton(onClick = onEdit) {
-                    BoldGlyph(Icons.Filled.Edit, contentDescription = stringResource(R.string.action_edit))
+                    Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.action_edit))
                 }
                 DangerIconButton(
                     icon = Icons.Filled.Delete,

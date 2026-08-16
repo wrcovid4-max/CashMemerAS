@@ -1,7 +1,5 @@
 package com.cashmemer.scan
 
-import com.cashmemer.ui.components.BoldGlyph
-
 import android.Manifest
 import android.app.Activity
 import android.content.Context
@@ -239,7 +237,7 @@ private fun ScanScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    BoldGlyph(Icons.Filled.Camera, contentDescription = null)
+                    Icon(Icons.Filled.Camera, contentDescription = null)
                     Text(stringResource(R.string.capture))
                 }
 
@@ -254,7 +252,7 @@ private fun ScanScreen(
                     enabled = scanned.isNotEmpty(),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    BoldGlyph(Icons.Filled.Check, contentDescription = null)
+                    Icon(Icons.Filled.Check, contentDescription = null)
                     Text(stringResource(R.string.done_adding, scanned.size))
                 }
 

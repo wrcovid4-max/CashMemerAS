@@ -1,7 +1,5 @@
 package com.cashmemer.lock
 
-import com.cashmemer.ui.components.BoldGlyph
-
 import android.content.Context
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -161,7 +159,7 @@ private fun LockScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            BoldGlyph(
+            Icon(
                 Icons.Filled.Lock,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
@@ -177,7 +175,7 @@ private fun LockScreen(
                     onClick = ::promptBiometric,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    BoldGlyph(Icons.Filled.Fingerprint, contentDescription = null)
+                    Icon(Icons.Filled.Fingerprint, contentDescription = null)
                     Text(stringResource(R.string.use_biometrics))
                 }
             }

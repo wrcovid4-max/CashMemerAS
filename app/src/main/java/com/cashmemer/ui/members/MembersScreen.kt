@@ -1,7 +1,5 @@
 package com.cashmemer.ui.members
 
-import com.cashmemer.ui.components.BoldGlyph
-
 import android.app.Application
 import android.content.Context
 import android.net.Uri
@@ -80,7 +78,7 @@ private fun MemberAvatar(photoUri: String?, size: Dp) {
         contentAlignment = Alignment.Center,
     ) {
         if (photoUri == null) {
-            BoldGlyph(
+            Icon(
                 Icons.Filled.Person,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
@@ -166,7 +164,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                         }
 
                         IconButton(onClick = { editing = member }) {
-                            BoldGlyph(Icons.Filled.Edit, contentDescription = stringResource(R.string.action_edit))
+                            Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.action_edit))
                         }
                         DangerIconButton(
                             icon = Icons.Filled.Delete,
@@ -195,7 +193,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
         ) {
-            BoldGlyph(Icons.Filled.Add, contentDescription = stringResource(R.string.add_member))
+            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_member))
         }
     }
 
@@ -242,7 +240,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                                     )
                                 }
                             ) {
-                                BoldGlyph(Icons.Filled.PhotoCamera, contentDescription = null)
+                                Icon(Icons.Filled.PhotoCamera, contentDescription = null)
                                 Text(
                                     text = stringResource(
                                         if (photoUri == null) R.string.add_photo

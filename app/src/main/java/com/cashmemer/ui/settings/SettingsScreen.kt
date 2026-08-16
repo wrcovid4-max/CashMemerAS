@@ -1,7 +1,5 @@
 package com.cashmemer.ui.settings
 
-import com.cashmemer.ui.components.BoldGlyph
-
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -403,7 +401,7 @@ fun SettingsScreen(
 @Composable
 private fun RowTitle(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        BoldGlyph(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         SectionTitle(title, modifier = Modifier.padding(start = 8.dp))
     }
 }
@@ -507,7 +505,7 @@ private fun AccountCard(
                         enabled = !syncing,
                         modifier = Modifier.weight(1f),
                     ) {
-                        BoldGlyph(Icons.Filled.CloudUpload, contentDescription = null)
+                        Icon(Icons.Filled.CloudUpload, contentDescription = null)
                         Spacer(Modifier.width(ButtonDefaults.IconSpacing))
                         Text(stringResource(R.string.sync))
                     }
@@ -516,7 +514,7 @@ private fun AccountCard(
                         enabled = !syncing,
                         modifier = Modifier.weight(1f),
                     ) {
-                        BoldGlyph(Icons.Filled.CloudDownload, contentDescription = null)
+                        Icon(Icons.Filled.CloudDownload, contentDescription = null)
                         Spacer(Modifier.width(ButtonDefaults.IconSpacing))
                         Text(stringResource(R.string.restore))
                     }
@@ -534,7 +532,7 @@ private fun AccountCard(
                     enabled = !syncing,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    BoldGlyph(Icons.Filled.History, contentDescription = null)
+                    Icon(Icons.Filled.History, contentDescription = null)
                     Spacer(Modifier.width(ButtonDefaults.IconSpacing))
                     Text(stringResource(R.string.import_old_receipts))
                 }
@@ -556,7 +554,7 @@ private fun AccountCard(
             }
 
             OutlinedButton(onClick = onSignOut, modifier = Modifier.fillMaxWidth()) {
-                BoldGlyph(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
+                Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
                 Spacer(Modifier.width(ButtonDefaults.IconSpacing))
                 Text(stringResource(R.string.sign_out))
             }
@@ -567,7 +565,7 @@ private fun AccountCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Button(onClick = onSignIn, modifier = Modifier.fillMaxWidth()) {
-                BoldGlyph(Icons.Filled.AccountCircle, contentDescription = null)
+                Icon(Icons.Filled.AccountCircle, contentDescription = null)
                 Spacer(Modifier.width(ButtonDefaults.IconSpacing))
                 Text(stringResource(R.string.sign_in_google))
             }
@@ -586,7 +584,7 @@ private fun AccountCard(
                 onClick = { showingSteps = true },
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                BoldGlyph(Icons.Filled.AccountCircle, contentDescription = null)
+                Icon(Icons.Filled.AccountCircle, contentDescription = null)
                 Spacer(Modifier.width(ButtonDefaults.IconSpacing))
                 Text(stringResource(R.string.sign_in_how_to))
             }
@@ -632,7 +630,7 @@ private fun AutoBackupCard(
             onClick = { folderPicker.launch(null) },
             modifier = Modifier.fillMaxWidth(),
         ) {
-            BoldGlyph(Icons.Filled.FolderOpen, contentDescription = null)
+            Icon(Icons.Filled.FolderOpen, contentDescription = null)
             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
             Text(
                 text = if (settings.backupFolderUri == null) stringResource(R.string.choose_backup_folder)
@@ -659,7 +657,7 @@ private fun AutoBackupCard(
             enabled = settings.backupFolderUri != null,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            BoldGlyph(Icons.Filled.Save, contentDescription = null)
+            Icon(Icons.Filled.Save, contentDescription = null)
             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
             Text(stringResource(R.string.back_up_now))
         }
@@ -714,7 +712,7 @@ private fun BackupCard(viewModel: SettingsViewModel) {
             },
             modifier = Modifier.fillMaxWidth(),
         ) {
-            BoldGlyph(Icons.Filled.Download, contentDescription = null)
+            Icon(Icons.Filled.Download, contentDescription = null)
             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
             Text(
                 text = stringResource(R.string.save_a_copy),
@@ -726,7 +724,7 @@ private fun BackupCard(viewModel: SettingsViewModel) {
             onClick = { confirmingRestore = true },
             modifier = Modifier.fillMaxWidth(),
         ) {
-            BoldGlyph(Icons.Filled.Restore, contentDescription = null)
+            Icon(Icons.Filled.Restore, contentDescription = null)
             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
             Text(
                 text = stringResource(R.string.restore_a_copy),

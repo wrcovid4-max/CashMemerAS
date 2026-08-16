@@ -1,7 +1,5 @@
 package com.cashmemer.location
 
-import com.cashmemer.ui.components.BoldGlyph
-
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -173,7 +171,7 @@ private fun MapPickerScreen(
             )
 
             // The pin is UI, not a map marker — it never moves.
-            BoldGlyph(
+            Icon(
                 imageVector = Icons.Filled.Place,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.error,
@@ -195,7 +193,7 @@ private fun MapPickerScreen(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onCancel) {
-                    BoldGlyph(Icons.Filled.Close, contentDescription = stringResource(R.string.action_cancel))
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_cancel))
                 }
                 OutlinedTextField(
                     value = query,
@@ -221,7 +219,7 @@ private fun MapPickerScreen(
                     if (searching) {
                         CircularProgressIndicator(modifier = Modifier.padding(4.dp))
                     } else {
-                        BoldGlyph(Icons.Filled.Search, contentDescription = stringResource(R.string.search))
+                        Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.search))
                     }
                 }
             }
@@ -241,7 +239,7 @@ private fun MapPickerScreen(
             ) {
                 Text(stringResource(R.string.selected_address), style = MaterialTheme.typography.labelLarge)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    BoldGlyph(
+                    Icon(
                         Icons.Filled.MyLocation,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
@@ -304,7 +302,7 @@ private fun MissingKeyNotice(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        BoldGlyph(
+        Icon(
             imageVector = Icons.Filled.Map,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,

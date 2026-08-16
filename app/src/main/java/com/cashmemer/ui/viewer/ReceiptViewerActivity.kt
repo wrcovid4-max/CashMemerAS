@@ -1,7 +1,5 @@
 package com.cashmemer.ui.viewer
 
-import com.cashmemer.ui.components.BoldGlyph
-
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -328,7 +326,7 @@ private fun ViewerTopBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(onClick = onBack) {
-            BoldGlyph(
+            Icon(
                 Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = stringResource(R.string.action_back),
                 tint = MaterialTheme.colorScheme.onPrimary,
@@ -343,14 +341,14 @@ private fun ViewerTopBar(
             maxLines = 1,
         )
         IconButton(onClick = onToggleSearch) {
-            BoldGlyph(
+            Icon(
                 if (searching) Icons.Filled.Close else Icons.Filled.Search,
                 contentDescription = stringResource(R.string.search_in_receipt),
                 tint = MaterialTheme.colorScheme.onPrimary,
             )
         }
         IconButton(onClick = onSave, enabled = saveEnabled) {
-            BoldGlyph(
+            Icon(
                 Icons.Filled.Save,
                 contentDescription = stringResource(R.string.action_save),
                 tint = if (saveEnabled) {
@@ -361,14 +359,14 @@ private fun ViewerTopBar(
             )
         }
         IconButton(onClick = onShare) {
-            BoldGlyph(
+            Icon(
                 Icons.Filled.Share,
                 contentDescription = stringResource(R.string.action_share),
                 tint = MaterialTheme.colorScheme.onPrimary,
             )
         }
         IconButton(onClick = onPrint) {
-            BoldGlyph(
+            Icon(
                 Icons.Filled.Print,
                 contentDescription = stringResource(R.string.action_print),
                 tint = MaterialTheme.colorScheme.onPrimary,
@@ -410,13 +408,13 @@ private fun SearchBar(
             maxLines = 1,
         )
         IconButton(onClick = onPrevious, enabled = hitCount > 0) {
-            BoldGlyph(
+            Icon(
                 Icons.Filled.KeyboardArrowUp,
                 contentDescription = stringResource(R.string.previous_match),
             )
         }
         IconButton(onClick = onNext, enabled = hitCount > 0) {
-            BoldGlyph(
+            Icon(
                 Icons.Filled.KeyboardArrowDown,
                 contentDescription = stringResource(R.string.next_match),
             )
@@ -753,7 +751,7 @@ private fun ViewerBottomBar(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),
                 )
-                BoldGlyph(
+                Icon(
                     imageVector = if (editing) Icons.Filled.KeyboardArrowDown
                     else Icons.Filled.KeyboardArrowUp,
                     contentDescription = stringResource(
@@ -843,7 +841,7 @@ private fun ToolSegment(
             .padding(horizontal = 16.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center,
     ) {
-        BoldGlyph(
+        Icon(
             imageVector = icon,
             contentDescription = stringResource(labelRes),
             tint = if (selected) Color.White
@@ -871,7 +869,7 @@ private fun RoundIconButton(
             modifier = Modifier.size(44.dp),
             contentAlignment = Alignment.Center,
         ) {
-            BoldGlyph(
+            Icon(
                 imageVector = icon,
                 contentDescription = label,
                 tint = if (danger) MarkRed else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -893,7 +891,7 @@ private fun PageSelector(pageCount: Int, pageIndex: Int, onSelect: (Int) -> Unit
             onClick = { onSelect(pageIndex - 1) },
             enabled = pageIndex > 0,
         ) {
-            BoldGlyph(
+            Icon(
                 Icons.Filled.ChevronLeft,
                 contentDescription = stringResource(R.string.previous_match),
             )
@@ -935,7 +933,7 @@ private fun PageSelector(pageCount: Int, pageIndex: Int, onSelect: (Int) -> Unit
             onClick = { onSelect(pageIndex + 1) },
             enabled = pageIndex < pageCount - 1,
         ) {
-            BoldGlyph(
+            Icon(
                 Icons.Filled.ChevronRight,
                 contentDescription = stringResource(R.string.next_match),
             )

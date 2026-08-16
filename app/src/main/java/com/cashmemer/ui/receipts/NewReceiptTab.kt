@@ -1,7 +1,5 @@
 package com.cashmemer.ui.receipts
 
-import com.cashmemer.ui.components.BoldGlyph
-
 import android.Manifest
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -385,7 +383,7 @@ fun NewReceiptTab(
                     enabled = state.canGenerate,
                     modifier = Modifier.weight(1f),
                 ) {
-                    BoldGlyph(Icons.Filled.Check, contentDescription = null)
+                    Icon(Icons.Filled.Check, contentDescription = null)
                     Text(stringResource(R.string.action_generate))
                 }
             }
@@ -527,7 +525,7 @@ private fun MemberPicker(
             value = selectedName ?: "Select Member",
             onValueChange = {},
             readOnly = true,
-            leadingIcon = { BoldGlyph(Icons.Filled.PersonSearch, contentDescription = null) },
+            leadingIcon = { Icon(Icons.Filled.PersonSearch, contentDescription = null) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
@@ -877,7 +875,7 @@ private fun LineItemRow(
                 color = MaterialTheme.colorScheme.primary,
             )
             IconButton(onClick = onRemove) {
-                BoldGlyph(
+                Icon(
                     Icons.Filled.Delete,
                     contentDescription = "Remove item",
                     tint = MaterialTheme.colorScheme.error,
@@ -1004,7 +1002,7 @@ private fun SignatureCard(
                 AssistChip(
                     onClick = {},
                     label = { Text(stringResource(R.string.captured)) },
-                    leadingIcon = { BoldGlyph(Icons.Filled.Check, contentDescription = null) },
+                    leadingIcon = { Icon(Icons.Filled.Check, contentDescription = null) },
                 )
             }
         }
@@ -1027,7 +1025,7 @@ private fun SignatureCard(
                 contentColor = MaterialTheme.colorScheme.error,
             ),
         ) {
-            BoldGlyph(Icons.Filled.Delete, contentDescription = null)
+            Icon(Icons.Filled.Delete, contentDescription = null)
             Text(stringResource(R.string.clear_and_redraw))
         }
     }
