@@ -21,9 +21,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.PersonSearch
@@ -459,10 +461,20 @@ private fun ScannerCard(
     onBarcodeScan: () -> Unit,
 ) {
     SectionCard(accent = true) {
-        Text(
-            text = stringResource(R.string.scanner_title),
-            style = MaterialTheme.typography.titleMedium,
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Icon(
+                Icons.Filled.AutoAwesome,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = stringResource(R.string.scanner_title),
+                style = MaterialTheme.typography.titleMedium,
+            )
+        }
         Text(
             text = stringResource(R.string.scanner_body),
             style = MaterialTheme.typography.bodySmall,
@@ -487,7 +499,7 @@ private fun ScannerCard(
         Row(horizontalArrangement = Arrangement.spacedBy(Dimens.gapTight)) {
             PrimaryButton(
                 text = stringResource(R.string.bulk_scan),
-                icon = Icons.Filled.Image,
+                icon = Icons.Filled.PhotoLibrary,
                 onClick = onBulkScan,
                 enabled = !scanning,
                 modifier = Modifier.weight(1f),
