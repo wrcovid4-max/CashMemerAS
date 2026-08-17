@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
@@ -220,7 +221,13 @@ fun NewReceiptTab(
                             )
                         }
                     } else {
-                        null
+                        {
+                            Icon(
+                                Icons.Filled.Place,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        }
                     },
                     modifier = Modifier.fillMaxWidth(),
                 )
