@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches DarkBackground (#11150C) so the window is already dark before
+         the splash renders — no white flash on launch. -->
+    <color name="window_background">#11150C</color>
+</resources>
