@@ -466,4 +466,13 @@
     <string name="add_photo">Add photo</string>
     <string name="change_photo">Change photo</string>
     <string name="remove_photo">Remove photo</string>
+    <string name="about_links">About &amp; Links</string>
+    <string name="link_website">Website</string>
+    <string name="link_web_app">Web app</string>
+    <string name="link_support">Support</string>
+    <string name="link_news">News</string>
+    <string name="link_download">Download</string>
+    <string name="link_privacy">Privacy Policy</string>
+    <string name="link_terms">Terms of Service</string>
+    <string name="link_trademarks">Trademarks</string>
 </resources>

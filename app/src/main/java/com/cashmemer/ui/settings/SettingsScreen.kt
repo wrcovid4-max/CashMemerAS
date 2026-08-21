@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -28,10 +29,18 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Devices
+import androidx.compose.material.icons.filled.Copyright
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Newspaper
+import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.filled.SupportAgent
+import androidx.compose.material.icons.filled.Web
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Restore
@@ -413,6 +422,8 @@ fun SettingsScreen(
 
         item { BackupCard(viewModel = viewModel) }
 
+        item { AboutCard() }
+
         message?.let { text ->
             item {
                 Text(
@@ -422,6 +433,52 @@ fun SettingsScreen(
                 )
             }
         }
+    }
+}
+
+private const val SITE = "https://wrcovid4-max.github.io/Cash-Meter"
+
+/** Links out to the Cash Memer website pages that make sense inside the app. */
+@Composable
+private fun AboutCard() {
+    SectionCard {
+        RowTitle(Icons.Filled.Info, stringResource(R.string.about_links))
+        LinkRow(Icons.Filled.Language, R.string.link_website, "$SITE/index.html")
+        LinkRow(Icons.Filled.Web, R.string.link_web_app, "$SITE/web-app.html")
+        LinkRow(Icons.Filled.SupportAgent, R.string.link_support, "$SITE/support.html")
+        LinkRow(Icons.Filled.Newspaper, R.string.link_news, "$SITE/news.html")
+        LinkRow(Icons.Filled.Download, R.string.link_download, "$SITE/download.html")
+        LinkRow(Icons.Filled.PrivacyTip, R.string.link_privacy, "$SITE/privacy.html")
+        LinkRow(Icons.Filled.Description, R.string.link_terms, "$SITE/terms.html")
+        LinkRow(Icons.Filled.Copyright, R.string.link_trademarks, "$SITE/trademarks.html")
+    }
+}
+
+@Composable
+private fun LinkRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    labelRes: Int,
+    url: String,
+) {
+    val context = LocalContext.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                runCatching {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                }
+            }
+            .padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.width(12.dp))
+        Text(
+            text = stringResource(labelRes),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f),
+        )
     }
 }
 

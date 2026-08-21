@@ -466,4 +466,13 @@
     <string name="add_photo">تصویر شامل کریں</string>
     <string name="change_photo">تصویر بدلیں</string>
     <string name="remove_photo">تصویر ہٹائیں</string>
+    <string name="about_links">تعارف اور لنکس</string>
+    <string name="link_website">ویب سائٹ</string>
+    <string name="link_web_app">ویب ایپ</string>
+    <string name="link_support">سپورٹ</string>
+    <string name="link_news">خبریں</string>
+    <string name="link_download">ڈاؤن لوڈ</string>
+    <string name="link_privacy">پرائیویسی پالیسی</string>
+    <string name="link_terms">سروس کی شرائط</string>
+    <string name="link_trademarks">ٹریڈ مارکس</string>
 </resources>
