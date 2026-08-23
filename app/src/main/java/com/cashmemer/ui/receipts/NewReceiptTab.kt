@@ -842,14 +842,14 @@ private fun ProductNameField(
             },
             label = { Text(stringResource(R.string.product_name)) },
             singleLine = true,
-            // The arrow uses a SECONDARY anchor: it toggles the list without
-            // giving the text field focus, so tapping it never raises the
-            // keyboard. Tapping the field itself (PRIMARY, editable) still does.
+            // The arrow is its own IconButton: its click toggles the list and
+            // never focuses the text field, so the keyboard stays down. Tapping
+            // the field itself (PRIMARY, editable) still raises the keyboard to
+            // type-and-filter.
             trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = open,
-                    modifier = Modifier.menuAnchor(MenuAnchorType.SecondaryEditable),
-                )
+                IconButton(onClick = { expanded = !expanded }) {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = open)
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
