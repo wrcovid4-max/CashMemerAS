@@ -42,6 +42,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -841,13 +842,18 @@ private fun ProductNameField(
             },
             label = { Text(stringResource(R.string.product_name)) },
             singleLine = true,
-            // The framework's own trailing icon is wired into the anchor, so a
-            // tap on it opens the menu reliably — the hand-rolled IconButton did
-            // not, which is why the arrow "did nothing".
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = open) },
+            // The arrow uses a SECONDARY anchor: it toggles the list without
+            // giving the text field focus, so tapping it never raises the
+            // keyboard. Tapping the field itself (PRIMARY, editable) still does.
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(
+                    expanded = open,
+                    modifier = Modifier.menuAnchor(MenuAnchorType.SecondaryEditable),
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .menuAnchor(),
+                .menuAnchor(MenuAnchorType.PrimaryEditable),
         )
         ExposedDropdownMenu(
             expanded = open,

@@ -284,6 +284,10 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                         value = address,
                         onValueChange = { address = it },
                         label = { Text(stringResource(R.string.address)) },
+                        // Single line: a growing multi-line address changed the
+                        // dialog height on every wrap, and AlertDialog re-centred
+                        // each time — that was the "jumping up and down".
+                        singleLine = true,
                     )
                 }
             },
