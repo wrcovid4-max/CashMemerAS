@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -51,6 +53,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -214,17 +217,30 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
             picked?.let { photoUri = copyMemberPhoto(context, it) ?: photoUri }
         }
 
-        AlertDialog(
-            onDismissRequest = { editing = null },
-            title = { Text(stringResource(if (member.id == 0L) R.string.add_member else R.string.edit_member)) },
-            text = {
-                // Scrollable, because with the keyboard up the dialog was
-                // taller than the space left and the Address field ended up
-                // floating loose over a half-hidden Email field.
+        Dialog(onDismissRequest = { editing = null }) {
+            Surface(
+                shape = MaterialTheme.shapes.extraLarge,
+                tonalElevation = 6.dp,
+            ) {
+                // Plain Dialog with a scrolling, ime-padded column instead of
+                // AlertDialog. AlertDialog re-centres itself whenever the keyboard
+                // insets change, which is what made the box jump up and down while
+                // typing. Here the content scrolls under the keyboard and the box
+                // stays put.
                 Column(
-                    modifier = Modifier.verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .verticalScroll(rememberScrollState())
+                        .imePadding(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
+                    Text(
+                        text = stringResource(
+                            if (member.id == 0L) R.string.add_member else R.string.edit_member
+                        ),
+                        style = MaterialTheme.typography.headlineSmall,
+                    )
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -265,6 +281,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                         onValueChange = { name = it },
                         label = { Text(stringResource(R.string.name)) },
                         singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
                     )
                     OutlinedTextField(
                         value = phone,
@@ -272,6 +289,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                         label = { Text(stringResource(R.string.phone)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                        modifier = Modifier.fillMaxWidth(),
                     )
                     OutlinedTextField(
                         value = email,
@@ -279,36 +297,41 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                         label = { Text(stringResource(R.string.email)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        modifier = Modifier.fillMaxWidth(),
                     )
                     OutlinedTextField(
                         value = address,
                         onValueChange = { address = it },
                         label = { Text(stringResource(R.string.address)) },
-                        // Single line: a growing multi-line address changed the
-                        // dialog height on every wrap, and AlertDialog re-centred
-                        // each time — that was the "jumping up and down".
                         singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
                     )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        TextButton(onClick = { editing = null }) {
+                            Text(stringResource(R.string.action_cancel))
+                        }
+                        TextButton(
+                            onClick = {
+                                viewModel.save(
+                                    member.copy(
+                                        name = name.trim(),
+                                        phone = phone.trim(),
+                                        email = email.trim(),
+                                        address = address.trim(),
+                                        photoUri = photoUri,
+                                    )
+                                )
+                                editing = null
+                            },
+                            enabled = name.isNotBlank(),
+                        ) { Text(stringResource(R.string.action_save)) }
+                    }
                 }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.save(
-                            member.copy(
-                                name = name.trim(),
-                                phone = phone.trim(),
-                                email = email.trim(),
-                                address = address.trim(),
-                                photoUri = photoUri,
-                            )
-                        )
-                        editing = null
-                    },
-                    enabled = name.isNotBlank(),
-                ) { Text(stringResource(R.string.action_save)) }
-            },
-            dismissButton = { TextButton(onClick = { editing = null }) { Text(stringResource(R.string.action_cancel)) } },
-        )
+            }
+        }
     }
 }

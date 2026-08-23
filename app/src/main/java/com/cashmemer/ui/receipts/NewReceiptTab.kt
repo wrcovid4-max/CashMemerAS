@@ -21,6 +21,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
@@ -38,6 +40,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -61,6 +64,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -828,12 +833,14 @@ private fun ProductNameField(
         if (q.isEmpty() || suggestions.any { it.equals(q, ignoreCase = true) }) suggestions
         else suggestions.filter { it.contains(q, ignoreCase = true) }
     }
-    val open = expanded && filtered.isNotEmpty()
+    val focusManager = LocalFocusManager.current
 
-    ExposedDropdownMenuBox(
-        expanded = open,
-        onExpandedChange = { expanded = it },
-    ) {
+    // A plain Box + non-focusable DropdownMenu instead of ExposedDropdownMenuBox:
+    // the exposed box focuses its text field whenever the menu opens, which is
+    // exactly what raised the keyboard on an arrow tap. Here the arrow drops
+    // focus and opens a menu that never takes focus, so only tapping the field
+    // text raises the keyboard.
+    Box(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = value,
             onValueChange = {
@@ -842,22 +849,24 @@ private fun ProductNameField(
             },
             label = { Text(stringResource(R.string.product_name)) },
             singleLine = true,
-            // The arrow is its own IconButton: its click toggles the list and
-            // never focuses the text field, so the keyboard stays down. Tapping
-            // the field itself (PRIMARY, editable) still raises the keyboard to
-            // type-and-filter.
             trailingIcon = {
-                IconButton(onClick = { expanded = !expanded }) {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = open)
+                IconButton(onClick = {
+                    focusManager.clearFocus()
+                    expanded = !expanded
+                }) {
+                    Icon(
+                        imageVector = if (expanded) Icons.Filled.ArrowDropUp
+                        else Icons.Filled.ArrowDropDown,
+                        contentDescription = null,
+                    )
                 }
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor(MenuAnchorType.PrimaryEditable),
+            modifier = Modifier.fillMaxWidth(),
         )
-        ExposedDropdownMenu(
-            expanded = open,
+        DropdownMenu(
+            expanded = expanded && filtered.isNotEmpty(),
             onDismissRequest = { expanded = false },
+            properties = PopupProperties(focusable = false),
         ) {
             filtered.take(20).forEach { suggestion ->
                 DropdownMenuItem(
@@ -865,6 +874,7 @@ private fun ProductNameField(
                     onClick = {
                         onValueChange(suggestion)
                         expanded = false
+                        focusManager.clearFocus()
                     },
                 )
             }
