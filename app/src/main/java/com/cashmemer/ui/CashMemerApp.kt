@@ -1,7 +1,8 @@
 package com.cashmemer.ui
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -104,11 +105,13 @@ private fun AppNavHost(
         NavHost(
             navController = navController,
             startDestination = Destination.Receipts.route,
-            // Tabs pop in instantly — no cross-fade between screens.
-            enterTransition = { EnterTransition.None },
-            exitTransition = { ExitTransition.None },
-            popEnterTransition = { EnterTransition.None },
-            popExitTransition = { ExitTransition.None },
+            // Tabs pop in instantly. snap() is a zero-duration transition — no
+            // fade — but unlike None it lets the framework swap the screens
+            // cleanly, so the outgoing tab doesn't linger on top for a frame.
+            enterTransition = { fadeIn(animationSpec = snap()) },
+            exitTransition = { fadeOut(animationSpec = snap()) },
+            popEnterTransition = { fadeIn(animationSpec = snap()) },
+            popExitTransition = { fadeOut(animationSpec = snap()) },
         ) {
             composable(Destination.Receipts.route) { ReceiptsHomeScreen(settings) }
             composable(Destination.Inventory.route) { InventoryScreen() }
