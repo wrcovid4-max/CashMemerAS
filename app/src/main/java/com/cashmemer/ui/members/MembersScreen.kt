@@ -54,6 +54,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -217,7 +218,13 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
             picked?.let { photoUri = copyMemberPhoto(context, it) ?: photoUri }
         }
 
-        Dialog(onDismissRequest = { editing = null }) {
+        Dialog(
+            onDismissRequest = { editing = null },
+            // decorFitsSystemWindows = false stops the dialog window from
+            // resizing/re-centring when the keyboard appears — that resize was
+            // the jump. The content handles the keyboard itself via imePadding.
+            properties = DialogProperties(decorFitsSystemWindows = false),
+        ) {
             Surface(
                 shape = MaterialTheme.shapes.extraLarge,
                 tonalElevation = 6.dp,

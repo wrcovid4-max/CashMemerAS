@@ -140,7 +140,8 @@ private fun ReceiptViewerScreen(
     var searching by remember { mutableStateOf(false) }
     var pendingText by remember { mutableStateOf<PendingText?>(null) }
     // Whether the marking tools are shown. Off is a clean, read-only view.
-    var editing by remember { mutableStateOf(true) }
+    // Start collapsed (view-only): the memo opens clean, tools appear on tap.
+    var editing by remember { mutableStateOf(false) }
 
     LaunchedEffect(receiptId) { viewModel.load(receiptId) }
 

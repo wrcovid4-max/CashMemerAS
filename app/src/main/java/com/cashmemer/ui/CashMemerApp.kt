@@ -1,5 +1,7 @@
 package com.cashmemer.ui
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -102,6 +104,11 @@ private fun AppNavHost(
         NavHost(
             navController = navController,
             startDestination = Destination.Receipts.route,
+            // Tabs pop in instantly — no cross-fade between screens.
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            popExitTransition = { ExitTransition.None },
         ) {
             composable(Destination.Receipts.route) { ReceiptsHomeScreen(settings) }
             composable(Destination.Inventory.route) { InventoryScreen() }

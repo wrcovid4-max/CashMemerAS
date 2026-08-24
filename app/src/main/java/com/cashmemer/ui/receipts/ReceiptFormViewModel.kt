@@ -586,7 +586,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
             saved?.let { _generated.emit(it) }
 
             _state.value = ReceiptFormState(
-                currencyCode = current.currencyCode,
+                currencyCode = "PKR",
                 signatureBase64 = if (current.saveSignatureAsDefault) {
                     current.signatureBase64
                 } else {
@@ -643,7 +643,8 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
     fun clear() {
         val current = _state.value
         _state.value = ReceiptFormState(
-            currencyCode = current.currencyCode,
+            // Back to the PKR default rather than carrying the last-used currency.
+            currencyCode = "PKR",
             signatureBase64 = current.signatureBase64,
             saveSignatureAsDefault = current.saveSignatureAsDefault,
         )
