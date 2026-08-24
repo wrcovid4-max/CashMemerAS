@@ -198,6 +198,7 @@ class CashMemerRepository private constructor(context: Context) {
                     .put("category", p.category)
                     .put("purchasePrice", p.purchasePrice)
                     .put("price", p.price)
+                    .put("taxPercent", p.taxPercent)
                     .put("stock", p.stock)
                     .put("unit", p.unit)
                     .put("archived", p.archived)
@@ -281,6 +282,7 @@ class CashMemerRepository private constructor(context: Context) {
                                 category = o.optString("category"),
                                 purchasePrice = o.optDouble("purchasePrice", 0.0),
                                 price = o.optDouble("price", 0.0),
+                                taxPercent = o.optDouble("taxPercent", 0.0),
                                 stock = o.optDouble("stock", 0.0),
                                 unit = o.optString("unit", "piece"),
                                 archived = o.optBoolean("archived", false),

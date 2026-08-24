@@ -286,6 +286,7 @@ private fun ProductEditorDialog(
     var category by remember { mutableStateOf(product.category) }
     var purchasePrice by remember { mutableStateOf(product.purchasePrice.toString()) }
     var price by remember { mutableStateOf(product.price.toString()) }
+    var taxPercent by remember { mutableStateOf(product.taxPercent.toString()) }
     var stock by remember { mutableStateOf(product.stock.toString()) }
     var unit by remember { mutableStateOf(product.unit) }
 
@@ -353,6 +354,13 @@ private fun ProductEditorDialog(
                         modifier = Modifier.weight(1f),
                     )
                 }
+                OutlinedTextField(
+                    value = taxPercent,
+                    onValueChange = { taxPercent = it },
+                    label = { Text(stringResource(R.string.tax_percent)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                )
             }
         },
         confirmButton = {
@@ -366,6 +374,7 @@ private fun ProductEditorDialog(
                             category = category.trim(),
                             purchasePrice = purchasePrice.toDoubleOrNull() ?: 0.0,
                             price = price.toDoubleOrNull() ?: 0.0,
+                            taxPercent = taxPercent.toDoubleOrNull() ?: 0.0,
                             stock = stock.toDoubleOrNull() ?: 0.0,
                             unit = unit.ifBlank { "piece" },
                         )

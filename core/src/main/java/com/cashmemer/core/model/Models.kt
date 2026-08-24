@@ -125,6 +125,8 @@ data class Product(
     val purchasePrice: Double = 0.0,
     /** What the customer pays. This is the price dropped into a receipt. */
     val price: Double = 0.0,
+    /** Tax rate for this product, as a percentage (e.g. 17 for 17%). */
+    val taxPercent: Double = 0.0,
     val stock: Double = 0.0,
     val unit: String = "piece",
     val archived: Boolean = false,
