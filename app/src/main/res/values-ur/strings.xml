@@ -97,6 +97,8 @@
     <string name="price_unit_title">فی یونٹ قیمت</string>
     <string name="price_unit_body">جب رسید کسی چیز کی فی عدد قیمت دکھائے تو ایک یونٹ کو کیا لکھا جائے۔</string>
     <string name="pinned_count">پن شدہ (%1$d)</string>
+    <string name="default_note_page1">صفحہ ۱ کا نوٹ</string>
+    <string name="default_note_page1_hint">ہر نئی رسید کے صفحہ ۱ کے نوٹ میں پہلے سے بھر دیا جاتا ہے۔</string>
     <string name="save_default_signature">بطور طے شدہ دستخط محفوظ کریں</string>
     <string name="clear_and_redraw">صاف کر کے دوبارہ بنائیں</string>
 

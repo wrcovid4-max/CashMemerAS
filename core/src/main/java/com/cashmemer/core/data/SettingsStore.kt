@@ -45,6 +45,8 @@ data class AppSettings(
     val appLock: Boolean = false,
     val passcode: String? = null,
     val defaultCurrency: String = "PKR",
+    /** Pre-filled Page 1 note on a new receipt. Editable in Settings. */
+    val defaultNotePage1: String = "Thank You for shopping !!!",
     /** SAF tree uri of the folder auto-backups are written into. */
     val backupFolderUri: String? = null,
     val autoBackup: Boolean = false,
@@ -85,6 +87,7 @@ class SettingsStore(private val context: Context) {
         val APP_LOCK = booleanPreferencesKey("app_lock")
         val PASSCODE = stringPreferencesKey("passcode")
         val DEFAULT_CURRENCY = stringPreferencesKey("default_currency")
+        val DEFAULT_NOTE_PAGE1 = stringPreferencesKey("default_note_page1")
         val BACKUP_FOLDER = stringPreferencesKey("backup_folder_uri")
         val AUTO_BACKUP = booleanPreferencesKey("auto_backup")
         val LAST_BACKUP_AT = longPreferencesKey("last_backup_at")
@@ -156,6 +159,7 @@ class SettingsStore(private val context: Context) {
         appLock = this[Keys.APP_LOCK] ?: false,
         passcode = this[Keys.PASSCODE],
         defaultCurrency = this[Keys.DEFAULT_CURRENCY] ?: "PKR",
+        defaultNotePage1 = this[Keys.DEFAULT_NOTE_PAGE1] ?: "Thank You for shopping !!!",
         backupFolderUri = this[Keys.BACKUP_FOLDER],
         autoBackup = this[Keys.AUTO_BACKUP] ?: false,
         lastBackupAt = this[Keys.LAST_BACKUP_AT] ?: 0L,
@@ -189,6 +193,8 @@ class SettingsStore(private val context: Context) {
     suspend fun setPriceUnit(unit: PriceUnit) = put(Keys.PRICE_UNIT, unit.name)
     suspend fun setAppLock(value: Boolean) = put(Keys.APP_LOCK, value)
     suspend fun setDefaultCurrency(code: String) = put(Keys.DEFAULT_CURRENCY, code)
+
+    suspend fun setDefaultNotePage1(value: String) = put(Keys.DEFAULT_NOTE_PAGE1, value)
     suspend fun setAutoBackup(value: Boolean) = put(Keys.AUTO_BACKUP, value)
 
     suspend fun setBackupFolder(uri: String?) {

@@ -97,6 +97,8 @@
     <string name="price_unit_title">Per-unit price</string>
     <string name="price_unit_body">How one unit is labelled when a receipt shows the price of a single item.</string>
     <string name="pinned_count">Pinned (%1$d)</string>
+    <string name="default_note_page1">Page 1 note</string>
+    <string name="default_note_page1_hint">Pre-filled on the Page 1 notes of every new receipt.</string>
     <string name="save_default_signature">Save as Default Signature</string>
     <string name="clear_and_redraw">Clear &amp; Redraw</string>
 

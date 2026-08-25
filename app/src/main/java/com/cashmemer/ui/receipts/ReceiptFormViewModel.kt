@@ -130,6 +130,9 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
     private val _state = MutableStateFlow(ReceiptFormState())
     val state: StateFlow<ReceiptFormState> = _state.asStateFlow()
 
+    /** Latest Settings value for the Page 1 note, used to pre-fill fresh forms. */
+    private var defaultNotePage1: String = DEFAULT_NOTE_1
+
     val members: StateFlow<List<Member>> = repository.observeMembers()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
@@ -171,12 +174,18 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         // Restore the saved default signature and currency, as the original app did.
         viewModelScope.launch {
             settingsStore.settings.collect { settings ->
+                defaultNotePage1 = settings.defaultNotePage1
                 _state.update { current ->
+                    val fresh = current.items.isEmpty() && current.placeName.isBlank()
                     current.copy(
-                        currencyCode = if (current.items.isEmpty() && current.placeName.isBlank()) {
-                            settings.defaultCurrency
+                        currencyCode = if (fresh) settings.defaultCurrency else current.currencyCode,
+                        // Fill the configured Page 1 note only while the form is
+                        // fresh and still carries the built-in default — never
+                        // overwrite a note the shopkeeper has already changed.
+                        notesPage1 = if (fresh && current.notesPage1 == DEFAULT_NOTE_1) {
+                            settings.defaultNotePage1
                         } else {
-                            current.currencyCode
+                            current.notesPage1
                         },
                         signatureBase64 = current.signatureBase64
                             ?: settings.defaultSignatureBase64,
@@ -587,6 +596,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
 
             _state.value = ReceiptFormState(
                 currencyCode = "PKR",
+                notesPage1 = defaultNotePage1,
                 signatureBase64 = if (current.saveSignatureAsDefault) {
                     current.signatureBase64
                 } else {
@@ -645,6 +655,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         _state.value = ReceiptFormState(
             // Back to the PKR default rather than carrying the last-used currency.
             currencyCode = "PKR",
+            notesPage1 = defaultNotePage1,
             signatureBase64 = current.signatureBase64,
             saveSignatureAsDefault = current.saveSignatureAsDefault,
         )

@@ -111,6 +111,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setAutoSend(value: Boolean) = launch { store.setAutoSend(value) }
     fun setSaveSignature(value: Boolean) = launch { store.setSaveSignature(value) }
     fun setSignatureLocked(value: Boolean) = launch { store.setSignatureLocked(value) }
+    fun setDefaultNotePage1(value: String) = launch { store.setDefaultNotePage1(value) }
     fun setAutoPrint(value: Boolean) = launch { store.setAutoPrint(value) }
     fun setShowPage1(value: Boolean) = launch { store.setShowPage1(value) }
     fun setShowPage2(value: Boolean) = launch { store.setShowPage2(value) }
@@ -348,6 +349,28 @@ fun SettingsScreen(
                 RowTitle(Icons.Filled.Settings, stringResource(R.string.general_settings))
                 ToggleRow(stringResource(R.string.save_signature), settings.saveSignature, viewModel::setSaveSignature)
                 ToggleRow(stringResource(R.string.lock_signature), settings.signatureLocked, viewModel::setSignatureLocked)
+            }
+        }
+
+        item {
+            SectionCard {
+                RowTitle(Icons.Filled.Description, stringResource(R.string.default_note_page1))
+                Text(
+                    stringResource(R.string.default_note_page1_hint),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                var note by remember(settings.defaultNotePage1) {
+                    mutableStateOf(settings.defaultNotePage1)
+                }
+                OutlinedTextField(
+                    value = note,
+                    onValueChange = {
+                        note = it
+                        viewModel.setDefaultNotePage1(it)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
 
