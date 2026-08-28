@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import com.cashmemer.R
 import com.cashmemer.core.ui.theme.DangerButton
 import com.cashmemer.core.ui.theme.Dimens
+import com.cashmemer.core.ui.theme.OnDangerButton
 import com.cashmemer.ui.Destination
 
 /**
@@ -367,7 +368,7 @@ fun IconAction(
     /** Destructive actions get a filled dark red box rather than an outline. */
     danger: Boolean = false,
 ) {
-    val tint = if (danger) MaterialTheme.colorScheme.onError
+    val tint = if (danger) OnDangerButton
     else MaterialTheme.colorScheme.primary
 
     Column(
@@ -427,7 +428,7 @@ fun DangerIconButton(
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
-                tint = MaterialTheme.colorScheme.onError,
+                tint = OnDangerButton,
                 modifier = Modifier.size(20.dp),
             )
         }
