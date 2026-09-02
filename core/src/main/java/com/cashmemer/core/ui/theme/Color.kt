@@ -29,6 +29,16 @@ val DangerContainer = Color(0xFFFBD8D6)
 val DangerLight = Color(0xFFFF6B60)
 /** Solid fill for a destructive button that should look dangerous, not outlined. */
 val DangerButton = Color(0xFF8E1710)
+/**
+ * Icon colour for anything sitting on [DangerButton]. Deliberately its own
+ * token rather than the theme's `onError` — `onError` is meant to pair with
+ * the theme's `error` colour, which changes between light and dark, while
+ * DangerButton is a fixed dark red in both. Material3's baseline dark
+ * `onError` is itself a dark maroon (~#601410); on top of DangerButton
+ * (#8E1710) that is a ~1.4:1 contrast, close to invisible. This off-white
+ * stays >9:1 against DangerButton in either theme.
+ */
+val OnDangerButton = Color(0xFFFBEAE8)
 
 // Dark scheme — same hue family, lifted for legibility on black.
 val DarkBackground = Color(0xFF11150C)

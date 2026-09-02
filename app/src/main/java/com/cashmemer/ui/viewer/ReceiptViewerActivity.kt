@@ -782,11 +782,13 @@ private fun ViewerBottomBar(
                                 Icons.Filled.Check, R.string.tool_tick,
                                 tool == ViewerTool.CHECK,
                                 selectedColour = MarkGreen,
+                                onSelectedColour = Color.White,
                             ) { onToolChange(ViewerTool.CHECK) }
                             ToolSegment(
                                 Icons.Filled.Close, R.string.tool_cross,
                                 tool == ViewerTool.CROSS,
                                 selectedColour = MarkRed,
+                                onSelectedColour = Color.White,
                             ) { onToolChange(ViewerTool.CROSS) }
                         }
                     }
@@ -832,6 +834,12 @@ private fun ToolSegment(
     selected: Boolean,
     modifier: Modifier = Modifier,
     selectedColour: Color = MaterialTheme.colorScheme.primary,
+    // Paired "on" colour for selectedColour. Defaults to onPrimary because the
+    // default selectedColour is primary — the app's neon green, which is bright
+    // enough (especially in dark mode, where DarkGreen is even more saturated)
+    // that a white icon on top nearly disappears. MarkGreen/MarkRed calls pass
+    // Color.White here since those fills are dark enough for white to read fine.
+    onSelectedColour: Color = MaterialTheme.colorScheme.onPrimary,
     onClick: () -> Unit,
 ) {
     Box(
@@ -845,7 +853,7 @@ private fun ToolSegment(
         Icon(
             imageVector = icon,
             contentDescription = stringResource(labelRes),
-            tint = if (selected) Color.White
+            tint = if (selected) onSelectedColour
             else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(24.dp),
         )
@@ -921,7 +929,11 @@ private fun PageSelector(pageCount: Int, pageIndex: Int, onSelect: (Int) -> Unit
                         Text(
                             text = stringResource(R.string.page_number, index + 1),
                             style = MaterialTheme.typography.labelLarge,
-                            color = if (selected) Color.White
+                            // Same fix as ToolSegment: this pill's fill is
+                            // colorScheme.primary (neon green), so the label
+                            // needs onPrimary, not a hardcoded white — white
+                            // nearly vanishes on the dark-mode neon green.
+                            color = if (selected) MaterialTheme.colorScheme.onPrimary
                             else MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                         )
