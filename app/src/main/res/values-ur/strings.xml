@@ -304,9 +304,6 @@
     <string name="sync">سنک</string>
     <string name="restore">بحال کریں</string>
     <string name="restore_warning">بحالی اس فون کا سارا ڈیٹا کلاؤڈ والی نقل سے بدل دیتی ہے۔ اسے نئے فون پر استعمال کریں، ملانے کے لیے نہیں۔</string>
-    <string name="import_old_receipts">پرانی رسیدیں درآمد کریں</string>
-    <string name="import_old_receipts_hint">جس اکاؤنٹ سے آپ سائن اِن ہیں، اُس کی پرانی Cash Memer ایپ والی رسیدیں لے کر آپ کی ہسٹری میں شامل کر دیتی ہے۔ ہر پرانے اکاؤنٹ کے لیے ایک بار چلائیں۔</string>
-    <string name="msg_imported_old">%1$d پرانی رسیدیں درآمد ہو گئیں</string>
     <string name="cloud_sync_off">اس بلڈ میں کلاؤڈ بیک اپ ترتیب نہیں دیا گیا۔ نیچے والا روزانہ فولڈر بیک اپ پھر بھی کام کرتا ہے۔</string>
     <string name="connected_devices">منسلک آلات</string>
     <string name="connected_devices_body">کارڈ ریڈر، رسید پرنٹر اور بارکوڈ اسکینر۔</string>

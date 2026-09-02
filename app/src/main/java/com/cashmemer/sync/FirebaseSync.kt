@@ -2,13 +2,9 @@ package com.cashmemer.sync
 
 import android.content.Context
 import com.cashmemer.core.data.CashMemerRepository
-import com.cashmemer.core.data.ReceiptItemCodec
 import com.cashmemer.core.model.Member
-import com.cashmemer.core.model.PaymentType
 import com.cashmemer.core.model.Product
 import com.cashmemer.core.model.Receipt
-import com.cashmemer.core.model.ReceiptCategory
-import com.cashmemer.core.model.ReceiptItem
 import com.google.android.gms.tasks.Task
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -112,29 +108,6 @@ object FirebaseSync {
 
             repository.replaceAll(receipts, products, members)
             receipts.size + products.size + members.size
-        }
-    }
-
-    /**
-     * One-time import of receipts saved by the *old* Cash Memer app, which
-     * stored them under `users/{uid}/cashMemos` in a different shape. Reads
-     * them for whichever account is signed in, converts each to the current
-     * format, and adds them to local history without touching what is already
-     * there. Run it once per old account.
-     */
-    suspend fun importLegacy(context: Context): Result<Int> = withContext(Dispatchers.IO) {
-        runCatching {
-            val uid = requireUid(context)
-            val repository = CashMemerRepository.get(context)
-            val snapshot = FirebaseFirestore.getInstance()
-                .collection("users").document(uid)
-                .collection("cashMemos").get().await()
-
-            val receipts = snapshot.documents.mapNotNull { it.toLegacyReceipt() }
-            check(receipts.isNotEmpty()) { "No old receipts found under this account" }
-
-            repository.importReceipts(receipts)
-            receipts.size
         }
     }
 
@@ -294,84 +267,6 @@ object FirebaseSync {
             createdAt = doc.long("createdAt"),
         )
     }
-
-    // ---- Legacy import -----------------------------------------------------
-    // The old app used different field names (title/place/note) and stored line
-    // items as {name, quantity, totalPrice}. Map each onto the current Receipt.
-
-    private fun com.google.firebase.firestore.DocumentSnapshot.toLegacyReceipt(): Receipt? =
-        runCatching {
-            val discountValue = dbl("discountValue")
-            val subtotal = dbl("subtotal")
-            val discount =
-                if (str("discountType").contains("percent", ignoreCase = true)) {
-                    subtotal * discountValue / 100.0
-                } else {
-                    discountValue
-                }
-
-            Receipt(
-                // Old "title" was the shop/business name shown as the header.
-                placeName = str("title").ifBlank { str("place") },
-                // Prefer the resolved GPS address; fall back to the free-text place.
-                locationAddress = getString("locationAddress").orEmpty()
-                    .ifBlank { str("place") },
-                customerName = str("customerName"),
-                customerPhone = str("customerPhone"),
-                customerEmail = str("customerEmail"),
-                currencyCode = str("currency").ifBlank { "PKR" },
-                category = legacyCategory(str("category")),
-                paymentType = legacyPaymentType(str("paymentType")),
-                subtotal = subtotal,
-                discount = discount,
-                taxPercent = dbl("taxPercentage"),
-                total = dbl("grandTotal"),
-                cashGiven = dbl("cashGiven"),
-                latitude = getDouble("latitude"),
-                longitude = getDouble("longitude"),
-                issuerName = str("accountName"),
-                issuerEmail = str("accountEmail"),
-                notesPage1 = str("note"),
-                notesPage2 = str("notePage2"),
-                signatureBase64 = getString("signatureBase64"),
-                itemsJson = legacyItemsJson(get("items")),
-                createdAt = getLong("timestamp") ?: System.currentTimeMillis(),
-            )
-        }.getOrNull()
-
-    private fun legacyItemsJson(raw: Any?): String {
-        val list = (raw as? List<*>).orEmpty().mapNotNull { entry ->
-            val m = entry as? Map<*, *> ?: return@mapNotNull null
-            val qty = (m["quantity"] as? Number)?.toDouble() ?: 1.0
-            val lineTotal = (m["totalPrice"] as? Number)?.toDouble() ?: 0.0
-            ReceiptItem(
-                productName = m["name"] as? String ?: "",
-                qty = qty,
-                // Old app stored the line total; the new one stores unit price.
-                unitPrice = if (qty != 0.0) lineTotal / qty else lineTotal,
-            )
-        }
-        return ReceiptItemCodec.encode(list)
-    }
-
-    /** Old category labels ("Bills", "Food") onto the current enum names. */
-    private fun legacyCategory(raw: String): String = when (raw.trim().lowercase()) {
-        "shopping" -> ReceiptCategory.SHOPPING
-        "groceries", "grocery" -> ReceiptCategory.GROCERIES
-        "food", "food & drink", "food and drink" -> ReceiptCategory.FOOD
-        "fuel", "petrol" -> ReceiptCategory.FUEL
-        "bills", "utilities", "utility" -> ReceiptCategory.UTILITIES
-        "services", "service" -> ReceiptCategory.SERVICES
-        "medical", "health" -> ReceiptCategory.MEDICAL
-        else -> ReceiptCategory.OTHER
-    }.name
-
-    /** Old payment labels ("Cash") onto the current enum names. */
-    private fun legacyPaymentType(raw: String): String =
-        PaymentType.entries.firstOrNull {
-            it.label.equals(raw.trim(), ignoreCase = true) ||
-                it.name.equals(raw.trim(), ignoreCase = true)
-        }?.name ?: PaymentType.CASH.name
 
     private fun com.google.firebase.firestore.DocumentSnapshot.str(field: String): String =
         getString(field).orEmpty()

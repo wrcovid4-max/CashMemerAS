@@ -304,9 +304,6 @@
     <string name="sync">Sync</string>
     <string name="restore">Restore</string>
     <string name="restore_warning">Restoring replaces everything on this phone with the cloud copy. Use it on a new phone, not to merge two.</string>
-    <string name="import_old_receipts">Import old receipts</string>
-    <string name="import_old_receipts_hint">Brings in receipts made in the previous Cash Memer app for the account you are signed in with, and adds them to your history. Run once per old account.</string>
-    <string name="msg_imported_old">Imported %1$d old receipt(s)</string>
     <string name="cloud_sync_off">Cloud backup is not set up on this build. The daily folder backup below still works.</string>
     <string name="connected_devices">Connected Devices</string>
     <string name="connected_devices_body">Card readers, receipt printers and barcode scanners.</string>
