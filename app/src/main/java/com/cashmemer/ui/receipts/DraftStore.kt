@@ -32,7 +32,6 @@ object DraftStore {
             .put("customerName", state.customerName)
             .put("customerPhone", state.customerPhone)
             .put("customerEmail", state.customerEmail)
-            .put("currencyCode", state.currencyCode)
             .put("category", state.category.name)
             .put("paymentType", state.paymentType.name)
             .put("items", ReceiptItemCodec.encode(state.items))
@@ -66,7 +65,15 @@ object DraftStore {
                 customerName = o.optString("customerName"),
                 customerPhone = o.optString("customerPhone"),
                 customerEmail = o.optString("customerEmail"),
-                currencyCode = o.optString("currencyCode", "PKR"),
+                // Currency is deliberately NOT restored from the draft. It used
+                // to be, which meant a half-finished sale rung up in a foreign
+                // currency (e.g. AED) would keep coming back as the app's
+                // currency on every launch, even after the receipt itself was
+                // deleted from History — the draft lives in its own separate
+                // store and isn't touched by clearing history. Currency now
+                // always starts from ReceiptFormState's own "PKR" default here
+                // and gets set to the real configured default a moment later
+                // by the settings collector in the ViewModel's init block.
                 category = ReceiptCategory.from(o.optString("category")),
                 paymentType = PaymentType.from(o.optString("paymentType")),
                 items = ReceiptItemCodec.decode(o.optString("items")),
