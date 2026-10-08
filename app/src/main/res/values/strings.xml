@@ -111,6 +111,12 @@
     <string name="info_show_page_2">Shows page 2 in the receipt viewer.</string>
     <string name="info_app_lock">Requires your device lock (fingerprint, face or PIN) before the app opens.</string>
     <string name="info_lock_page1_note">New receipts always use the default Page 1 note above, and the note field can\'t be edited on the receipt.</string>
+    <string name="info_subtotal">All item totals added together, before any discount or tax.</string>
+    <string name="info_grand_total">The final amount to pay: subtotal, minus discount, plus tax.</string>
+    <string name="info_change">Cash given minus the grand total. This is what goes back to the customer.</string>
+    <string name="info_line_item">Quantity × unit price gives this item\'s total. Use the bin icon to remove it.</string>
+    <string name="info_qty">How many of this item. Changing it recalculates the Price (Total) automatically.</string>
+    <string name="info_price_total">The total for this line (quantity × unit price). Type your own total to override it, for example for a special deal.</string>
     <string name="page1_note_locked_hint">Locked in Settings — change it there.</string>
     <string name="save_default_signature">Save as Default Signature</string>
     <string name="clear_and_redraw">Clear &amp; Redraw</string>

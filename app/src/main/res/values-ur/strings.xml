@@ -111,6 +111,12 @@
     <string name="info_show_page_2">رسید ویور میں صفحہ ۲ دکھاتا ہے۔</string>
     <string name="info_app_lock">ایپ کھولنے سے پہلے آپ کے فون کا لاک (فنگر پرنٹ، چہرہ یا PIN) مانگتا ہے۔</string>
     <string name="info_lock_page1_note">نئی رسیدوں میں ہمیشہ ترتیبات والا ڈیفالٹ صفحہ ۱ کا نوٹ ہوتا ہے، اور رسید پر یہ خانہ بدلا نہیں جا سکتا۔</string>
+    <string name="info_subtotal">تمام آئٹمز کا مجموعہ، رعایت اور ٹیکس سے پہلے۔</string>
+    <string name="info_grand_total">کل قابل ادائیگی رقم: سب ٹوٹل، منہا رعایت، جمع ٹیکس۔</string>
+    <string name="info_change">دی گئی رقم منہا کل رقم۔ یہ گاہک کو واپس دی جاتی ہے۔</string>
+    <string name="info_line_item">مقدار × فی یونٹ قیمت سے اس آئٹم کا کل بنتا ہے۔ ہٹانے کے لیے ڈسٹ بن کا آئیکن استعمال کریں۔</string>
+    <string name="info_qty">اس آئٹم کی تعداد۔ بدلنے پر کل قیمت خود دوبارہ حساب ہو جاتی ہے۔</string>
+    <string name="info_price_total">اس لائن کا کل (مقدار × فی یونٹ قیمت)۔ کسی خاص سودے کے لیے اپنا کل خود لکھ سکتے ہیں۔</string>
     <string name="page1_note_locked_hint">ترتیبات میں لاک ہے — تبدیل کرنے کے لیے وہاں جائیں۔</string>
     <string name="save_default_signature">بطور طے شدہ دستخط محفوظ کریں</string>
     <string name="clear_and_redraw">صاف کر کے دوبارہ بنائیں</string>

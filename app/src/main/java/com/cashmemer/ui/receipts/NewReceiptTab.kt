@@ -809,6 +809,12 @@ private fun AddItemCard(
                     }
                 },
                 label = { Text(stringResource(R.string.qty)) },
+                trailingIcon = {
+                    InfoIcon(
+                        title = stringResource(R.string.qty),
+                        body = stringResource(R.string.info_qty),
+                    )
+                },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
@@ -820,6 +826,12 @@ private fun AddItemCard(
                     unitPrice = null   // user is now driving the total manually
                 },
                 label = { Text(stringResource(R.string.price_total)) },
+                trailingIcon = {
+                    InfoIcon(
+                        title = stringResource(R.string.price_total),
+                        body = stringResource(R.string.info_price_total),
+                    )
+                },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
@@ -949,6 +961,10 @@ private fun LineItemRow(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
+            InfoIcon(
+                title = item.productName,
+                body = stringResource(R.string.info_line_item),
+            )
             IconButton(onClick = onRemove) {
                 Icon(
                     Icons.Filled.Delete,
@@ -1010,14 +1026,24 @@ private fun TotalsCard(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        TotalRow(stringResource(R.string.subtotal), state.subtotal, state.currencyCode)
-        TotalRow(stringResource(R.string.discount), -state.discountAmount, state.currencyCode)
-        TotalRow(stringResource(R.string.tax), state.taxAmount, state.currencyCode)
+        TotalRow(
+            stringResource(R.string.subtotal), state.subtotal, state.currencyCode,
+            info = stringResource(R.string.info_subtotal),
+        )
+        TotalRow(
+            stringResource(R.string.discount), -state.discountAmount, state.currencyCode,
+            info = stringResource(R.string.info_discount),
+        )
+        TotalRow(
+            stringResource(R.string.tax), state.taxAmount, state.currencyCode,
+            info = stringResource(R.string.info_tax),
+        )
         TotalRow(
             stringResource(R.string.grand_total),
             state.total,
             state.currencyCode,
             emphasised = true,
+            info = stringResource(R.string.info_grand_total),
         )
 
         OutlinedTextField(
@@ -1040,6 +1066,7 @@ private fun TotalsCard(
                 state.changeAmount,
                 state.currencyCode,
                 emphasised = true,
+                info = stringResource(R.string.info_change),
             )
         }
     }
@@ -1051,16 +1078,21 @@ private fun TotalRow(
     amount: Double,
     currencyCode: String,
     emphasised: Boolean = false,
+    info: String? = null,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = label,
-            style = if (emphasised) MaterialTheme.typography.titleLarge
-            else MaterialTheme.typography.bodyLarge,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = label,
+                style = if (emphasised) MaterialTheme.typography.titleLarge
+                else MaterialTheme.typography.bodyLarge,
+            )
+            if (info != null) InfoIcon(title = label, body = info)
+        }
         Text(
             text = Format.amountWithCurrency(amount, currencyCode),
             style = if (emphasised) MaterialTheme.typography.titleLarge
