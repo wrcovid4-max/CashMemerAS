@@ -1,5 +1,6 @@
 package com.cashmemer.ui.receipts
 
+import com.cashmemer.core.data.AppleLogo
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
@@ -241,9 +242,9 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         signatureBase64?.length ?: 0,
     ).joinToString("|")
 
-    fun setPlaceName(value: String) = _state.update { it.copy(placeName = value) }
-    fun setLocationAddress(value: String) = _state.update { it.copy(locationAddress = value) }
-    fun setCustomerName(value: String) = _state.update { it.copy(customerName = value) }
+    fun setPlaceName(value: String) = _state.update { it.copy(placeName = AppleLogo.normalize(value)) }
+    fun setLocationAddress(value: String) = _state.update { it.copy(locationAddress = AppleLogo.normalize(value)) }
+    fun setCustomerName(value: String) = _state.update { it.copy(customerName = AppleLogo.normalize(value)) }
     fun setCustomerPhone(value: String) = _state.update { it.copy(customerPhone = value) }
     fun setCustomerEmail(value: String) = _state.update { it.copy(customerEmail = value) }
     fun setCurrency(code: String) = _state.update { it.copy(currencyCode = code) }
@@ -264,8 +265,8 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
             )
         }
     fun setTaxPercent(value: Double) = _state.update { it.copy(taxPercent = value) }
-    fun setNotesPage1(value: String) = _state.update { it.copy(notesPage1 = value) }
-    fun setNotesPage2(value: String) = _state.update { it.copy(notesPage2 = value) }
+    fun setNotesPage1(value: String) = _state.update { it.copy(notesPage1 = AppleLogo.normalize(value)) }
+    fun setNotesPage2(value: String) = _state.update { it.copy(notesPage2 = AppleLogo.normalize(value)) }
     fun setSaveSignatureAsDefault(value: Boolean) =
         _state.update { it.copy(saveSignatureAsDefault = value) }
 
@@ -321,7 +322,8 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
      * continuous scanning usable. A different price for the same name stays a
      * separate line, since that is a genuinely different sale.
      */
-    fun addItem(item: ReceiptItem) {
+    fun addItem(incoming: ReceiptItem) {
+        val item = incoming.copy(productName = AppleLogo.normalize(incoming.productName))
         if (item.productName.isBlank()) return
 
         _state.update { current ->

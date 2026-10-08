@@ -1,6 +1,5 @@
 package com.cashmemer.ui.viewer
 
-import androidx.compose.foundation.layout.Modifier
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.border
