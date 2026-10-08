@@ -1,5 +1,6 @@
 package com.cashmemer.ui.history
 
+import com.cashmemer.ui.components.InfoIcon
 import androidx.compose.ui.draw.rotate
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.fadeIn
@@ -563,6 +564,17 @@ private fun HistoryRow(
         AnimatedVisibility(visible = expanded) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 HorizontalDivider()
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    InfoIcon(
+                        title = stringResource(R.string.receipt_details_title),
+                        body = stringResource(R.string.info_receipt_details),
+                    )
+                }
 
                 ReceiptItemCodec.decode(receipt.itemsJson).forEach { item ->
                     Row(
