@@ -760,6 +760,16 @@ private fun AddItemCard(
     var name by remember { mutableStateOf("") }
     var qty by remember { mutableStateOf("1") }
     var price by remember { mutableStateOf("") }
+    // The per-unit price behind whatever's showing in the Price (Total) field, so
+    // Qty edits can recompute the total instead of leaving it stuck at the price
+    // for the qty that was current when the product was picked (almost always 1,
+    // since picking a product is usually the very first thing done on this row).
+    // Null means the total field is under the user's own manual control (they
+    // typed a custom total themselves, e.g. for a discounted sale) — Qty edits
+    // leave a manual total alone rather than silently overwriting it.
+    var unitPrice by remember { mutableStateOf<Double?>(null) }
+
+    fun quantityOrDefault() = (qty.toAmount() ?: 1.0).takeIf { it > 0 } ?: 1.0
 
     SectionCard {
         SectionTitle(stringResource(R.string.add_purchased_items))
@@ -769,14 +779,23 @@ private fun AddItemCard(
             suggestions = productNames,
             onValueChange = { picked ->
                 name = picked
-                lookupPrice(picked)?.let { price = Format.amount(it) }
+                lookupPrice(picked)?.let { perUnit ->
+                    unitPrice = perUnit
+                    price = Format.amount(perUnit * quantityOrDefault())
+                }
             },
         )
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedTextField(
                 value = qty,
-                onValueChange = { qty = it },
+                onValueChange = { newQty ->
+                    qty = newQty
+                    unitPrice?.let { perUnit ->
+                        val quantity = (newQty.toAmount() ?: 0.0).takeIf { it > 0 }
+                        price = Format.amount(perUnit * (quantity ?: 0.0))
+                    }
+                },
                 label = { Text(stringResource(R.string.qty)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -784,7 +803,10 @@ private fun AddItemCard(
             )
             OutlinedTextField(
                 value = price,
-                onValueChange = { price = it },
+                onValueChange = {
+                    price = it
+                    unitPrice = null   // user is now driving the total manually
+                },
                 label = { Text(stringResource(R.string.price_total)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -794,20 +816,22 @@ private fun AddItemCard(
 
         Button(
             onClick = {
-                val quantity = (qty.toAmount() ?: 1.0).takeIf { it > 0 } ?: 1.0
-                // The field is labelled "Price (Total)", so split it back to a
-                // unit price — the row and the receipt both store per-unit.
-                val lineTotal = price.toAmount() ?: 0.0
+                val quantity = quantityOrDefault()
+                // unitPrice is already the true per-unit figure when it's set — use
+                // it directly rather than round-tripping lineTotal/quantity through
+                // the formatted string, which only the manual-total path still needs.
+                val resolvedUnitPrice = unitPrice ?: ((price.toAmount() ?: 0.0) / quantity)
                 onAdd(
                     ReceiptItem(
                         productName = name.trim(),
                         qty = quantity,
-                        unitPrice = lineTotal / quantity,
+                        unitPrice = resolvedUnitPrice,
                     )
                 )
                 name = ""
                 qty = "1"
                 price = ""
+                unitPrice = null
             },
             enabled = name.isNotBlank(),
             modifier = Modifier.fillMaxWidth(),
