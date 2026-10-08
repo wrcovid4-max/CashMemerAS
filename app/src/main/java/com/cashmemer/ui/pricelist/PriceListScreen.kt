@@ -1,5 +1,6 @@
 package com.cashmemer.ui.pricelist
 
+import com.cashmemer.ui.components.AppleText
 import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -93,7 +94,7 @@ fun PriceListScreen(viewModel: PriceListViewModel = viewModel()) {
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Icon(Icons.Filled.Add, contentDescription = null)
-                Text(stringResource(R.string.add_new_product))
+                AppleText(stringResource(R.string.add_new_product))
             }
         }
 
@@ -104,8 +105,8 @@ fun PriceListScreen(viewModel: PriceListViewModel = viewModel()) {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(product.name, style = MaterialTheme.typography.titleMedium)
-                        Text(
+                        AppleText(product.name, style = MaterialTheme.typography.titleMedium)
+                        AppleText(
                             "Price: ${Format.amount(product.price)} ${product.unit}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -129,7 +130,7 @@ fun PriceListScreen(viewModel: PriceListViewModel = viewModel()) {
 
         if (entries.isEmpty()) {
             item {
-                Text(
+                AppleText(
                     stringResource(R.string.price_list_empty),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -144,26 +145,26 @@ fun PriceListScreen(viewModel: PriceListViewModel = viewModel()) {
 
         AlertDialog(
             onDismissRequest = { editing = null },
-            title = { Text(stringResource(if (product.id == 0L) R.string.add_new_product else R.string.edit_product)) },
+            title = { AppleText(stringResource(if (product.id == 0L) R.string.add_new_product else R.string.edit_product)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text(stringResource(R.string.product_name)) },
+                        label = { AppleText(stringResource(R.string.product_name)) },
                         singleLine = true,
                     )
                     OutlinedTextField(
                         value = price,
                         onValueChange = { price = it },
-                        label = { Text(stringResource(R.string.price)) },
+                        label = { AppleText(stringResource(R.string.price)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     )
                     OutlinedTextField(
                         value = unit,
                         onValueChange = { unit = it },
-                        label = { Text(stringResource(R.string.unit)) },
+                        label = { AppleText(stringResource(R.string.unit)) },
                         singleLine = true,
                     )
                 }
@@ -181,9 +182,9 @@ fun PriceListScreen(viewModel: PriceListViewModel = viewModel()) {
                         editing = null
                     },
                     enabled = name.isNotBlank(),
-                ) { Text(stringResource(R.string.action_save)) }
+                ) { AppleText(stringResource(R.string.action_save)) }
             },
-            dismissButton = { TextButton(onClick = { editing = null }) { Text(stringResource(R.string.action_cancel)) } },
+            dismissButton = { TextButton(onClick = { editing = null }) { AppleText(stringResource(R.string.action_cancel)) } },
         )
     }
 }

@@ -1,5 +1,6 @@
 package com.cashmemer.ui.dashboard
 
+import com.cashmemer.ui.components.AppleText
 import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -246,7 +247,7 @@ fun DashboardTab(viewModel: DashboardViewModel = viewModel()) {
         item {
             SectionCard {
                 SectionTitle(stringResource(R.string.all_time_sales))
-                Text(
+                AppleText(
                     text = Format.amountWithCurrency(stats.allTimeTotal, currency),
                     style = MaterialTheme.typography.headlineLarge,
                     color = MaterialTheme.colorScheme.primary,
@@ -425,7 +426,7 @@ fun DashboardTab(viewModel: DashboardViewModel = viewModel()) {
             SectionCard {
                 SectionTitle(stringResource(R.string.top_stores))
                 if (stats.topStores.isEmpty()) {
-                    Text(
+                    AppleText(
                         stringResource(R.string.no_data_yet),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -445,7 +446,7 @@ fun DashboardTab(viewModel: DashboardViewModel = viewModel()) {
             SectionCard {
                 SectionTitle(stringResource(R.string.by_category))
                 if (stats.byCategory.isEmpty()) {
-                    Text(
+                    AppleText(
                         stringResource(R.string.no_data_yet),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -486,13 +487,13 @@ private fun StatTile(
     modifier: Modifier = Modifier,
 ) {
     SectionCard(modifier = modifier, accent = true) {
-        Text(
+        AppleText(
             text = label,
             style = MaterialTheme.typography.labelLarge,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        Text(
+        AppleText(
             text = value,
             style = MaterialTheme.typography.titleMedium,
             // A shop name or a product name can be long; a tile should get
@@ -500,7 +501,7 @@ private fun StatTile(
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )
-        Text(
+        AppleText(
             text = caption,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -517,14 +518,14 @@ private fun BarRow(label: String, value: String, fraction: Float) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
+            AppleText(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f, fill = false),
             )
-            Text(
+            AppleText(
                 text = value,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,

@@ -1,5 +1,6 @@
 package com.cashmemer.ui.viewer
 
+import com.cashmemer.ui.components.AppleText
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.border
@@ -248,7 +249,7 @@ private fun ReceiptViewerScreen(
             ) {
                 when {
                     state.loading -> CircularProgressIndicator()
-                    state.pages.isEmpty() -> Text(
+                    state.pages.isEmpty() -> AppleText(
                         text = stringResource(R.string.viewer_unavailable),
                         style = MaterialTheme.typography.bodyMedium,
                     )
@@ -405,7 +406,7 @@ private fun ViewerTopBar(
                 tint = MaterialTheme.colorScheme.onPrimary,
             )
         }
-        Text(
+        AppleText(
             text = title,
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.titleMedium,
@@ -466,11 +467,11 @@ private fun SearchBar(
         OutlinedTextField(
             value = query,
             onValueChange = onQueryChange,
-            placeholder = { Text(stringResource(R.string.search_in_receipt)) },
+            placeholder = { AppleText(stringResource(R.string.search_in_receipt)) },
             singleLine = true,
             modifier = Modifier.weight(1f),
         )
-        Text(
+        AppleText(
             text = when {
                 query.isBlank() -> ""
                 hitCount == 0 -> stringResource(R.string.no_matches)
@@ -1132,7 +1133,7 @@ private fun PageSelector(pageCount: Int, pageIndex: Int, onSelect: (Int) -> Unit
                             .padding(vertical = 8.dp),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(
+                        AppleText(
                             text = stringResource(R.string.page_number, index + 1),
                             style = MaterialTheme.typography.labelLarge,
                             // Same fix as ToolSegment: this pill's fill is
@@ -1166,12 +1167,12 @@ private fun TextMarkDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.add_text_mark)) },
+        title = { AppleText(stringResource(R.string.add_text_mark)) },
         text = {
             OutlinedTextField(
                 value = typed,
                 onValueChange = { typed = it },
-                label = { Text(stringResource(R.string.mark_text)) },
+                label = { AppleText(stringResource(R.string.mark_text)) },
                 singleLine = true,
             )
         },
@@ -1179,10 +1180,10 @@ private fun TextMarkDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
             TextButton(
                 onClick = { onConfirm(typed.trim()) },
                 enabled = typed.isNotBlank(),
-            ) { Text(stringResource(R.string.action_add)) }
+            ) { AppleText(stringResource(R.string.action_add)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
+            TextButton(onClick = onDismiss) { AppleText(stringResource(R.string.action_cancel)) }
         },
     )
 }

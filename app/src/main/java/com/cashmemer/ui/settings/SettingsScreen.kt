@@ -1,5 +1,6 @@
 package com.cashmemer.ui.settings
 
+import com.cashmemer.ui.components.AppleText
 import com.cashmemer.ui.components.InfoIcon
 import android.app.Application
 import android.content.Context
@@ -287,13 +288,13 @@ fun SettingsScreen(
         item {
             SectionCard {
                 RowTitle(Icons.Filled.Devices, stringResource(R.string.connected_devices))
-                Text(
+                AppleText(
                     stringResource(R.string.connected_devices_body),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 OutlinedButton(onClick = onOpenDevices, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.action_open))
+                    AppleText(stringResource(R.string.action_open))
                 }
             }
         }
@@ -301,7 +302,7 @@ fun SettingsScreen(
         item {
             SectionCard {
                 RowTitle(Icons.Filled.Palette, stringResource(R.string.appearance_settings))
-                Text(
+                AppleText(
                     stringResource(R.string.appearance_body),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -312,7 +313,7 @@ fun SettingsScreen(
                             selected = settings.themeMode == mode,
                             onClick = { viewModel.setThemeMode(mode) },
                             label = {
-                                Text(
+                                AppleText(
                                     stringResource(
                                         when (mode) {
                                             ThemeMode.SYSTEM -> R.string.theme_system
@@ -339,7 +340,7 @@ fun SettingsScreen(
         item {
             SectionCard {
                 RowTitle(Icons.Filled.Description, stringResource(R.string.default_note_page1))
-                Text(
+                AppleText(
                     stringResource(R.string.default_note_page1_hint),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -362,7 +363,7 @@ fun SettingsScreen(
                     info = stringResource(R.string.info_lock_page1_note),
                 )
 
-                Text(
+                AppleText(
                     stringResource(R.string.default_note_page2),
                     style = MaterialTheme.typography.titleMedium,
                 )
@@ -393,14 +394,14 @@ fun SettingsScreen(
                 ToggleRow(stringResource(R.string.show_page_1), settings.showPage1, viewModel::setShowPage1, info = stringResource(R.string.info_show_page_1))
                 ToggleRow(stringResource(R.string.show_page_2), settings.showPage2, viewModel::setShowPage2, info = stringResource(R.string.info_show_page_2))
 
-                Text(stringResource(R.string.mass_print_option), style = MaterialTheme.typography.titleMedium)
+                AppleText(stringResource(R.string.mass_print_option), style = MaterialTheme.typography.titleMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     MassPrintOption.entries.forEach { option ->
                         FilterChip(
                             selected = settings.massPrint == option,
                             onClick = { viewModel.setMassPrint(option) },
                             label = {
-                                Text(
+                                AppleText(
                                     when (option) {
                                         MassPrintOption.PAGE_1 -> stringResource(R.string.page_1)
                                         MassPrintOption.PAGE_2 -> stringResource(R.string.page_2)
@@ -411,7 +412,7 @@ fun SettingsScreen(
                         )
                     }
                 }
-                Text(
+                AppleText(
                     stringResource(R.string.mass_print_body),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -422,7 +423,7 @@ fun SettingsScreen(
         item {
             SectionCard {
                 RowTitle(Icons.Filled.Settings, stringResource(R.string.price_unit_title))
-                Text(
+                AppleText(
                     stringResource(R.string.price_unit_body),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -432,7 +433,7 @@ fun SettingsScreen(
                         FilterChip(
                             selected = settings.priceUnit == unit,
                             onClick = { viewModel.setPriceUnit(unit) },
-                            label = { Text(unit.unitLabel) },
+                            label = { AppleText(unit.unitLabel) },
                         )
                     }
                 }
@@ -443,7 +444,7 @@ fun SettingsScreen(
             SectionCard {
                 RowTitle(Icons.Filled.Lock, stringResource(R.string.app_lock))
                 ToggleRow(stringResource(R.string.require_secure_lock), settings.appLock, viewModel::setAppLock, info = stringResource(R.string.info_app_lock))
-                Text(
+                AppleText(
                     stringResource(R.string.app_lock_body),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -461,7 +462,7 @@ fun SettingsScreen(
 
         message?.let { text ->
             item {
-                Text(
+                AppleText(
                     text = text,
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyMedium,
@@ -509,7 +510,7 @@ private fun LinkRow(
     ) {
         Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.width(12.dp))
-        Text(
+        AppleText(
             text = stringResource(labelRes),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f),
@@ -541,7 +542,7 @@ private fun ToggleRow(
             modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(label, style = MaterialTheme.typography.titleMedium)
+            AppleText(label, style = MaterialTheme.typography.titleMedium)
             if (info != null) InfoIcon(title = label, body = info)
         }
         Switch(checked = checked, onCheckedChange = onCheckedChange)
@@ -555,7 +556,7 @@ private fun PasscodeCard(onUpdate: (String, String) -> Unit) {
 
     SectionCard {
         SectionTitle(stringResource(R.string.custom_passcode_lock))
-        Text(
+        AppleText(
             stringResource(R.string.custom_passcode_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -563,7 +564,7 @@ private fun PasscodeCard(onUpdate: (String, String) -> Unit) {
         OutlinedTextField(
             value = passcode,
             onValueChange = { if (it.length <= 4) passcode = it.filter(Char::isDigit) },
-            label = { Text(stringResource(R.string.enter_new_passcode)) },
+            label = { AppleText(stringResource(R.string.enter_new_passcode)) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
@@ -572,7 +573,7 @@ private fun PasscodeCard(onUpdate: (String, String) -> Unit) {
         OutlinedTextField(
             value = confirm,
             onValueChange = { if (it.length <= 4) confirm = it.filter(Char::isDigit) },
-            label = { Text(stringResource(R.string.confirm_new_passcode)) },
+            label = { AppleText(stringResource(R.string.confirm_new_passcode)) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
@@ -585,11 +586,11 @@ private fun PasscodeCard(onUpdate: (String, String) -> Unit) {
                     confirm = ""
                 },
                 modifier = Modifier.weight(1f),
-            ) { Text(stringResource(R.string.action_cancel)) }
+            ) { AppleText(stringResource(R.string.action_cancel)) }
             Button(
                 onClick = { onUpdate(passcode, confirm) },
                 modifier = Modifier.weight(1f),
-            ) { Text(stringResource(R.string.action_update)) }
+            ) { AppleText(stringResource(R.string.action_update)) }
         }
     }
 }
@@ -625,11 +626,11 @@ private fun AccountCard(
                     Spacer(Modifier.width(12.dp))
                 }
                 Column {
-                    Text(
+                    AppleText(
                         text = settings.accountName ?: "Signed in",
                         style = MaterialTheme.typography.titleMedium,
                     )
-                    Text(
+                    AppleText(
                         text = settings.accountEmail.orEmpty(),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -638,7 +639,7 @@ private fun AccountCard(
             }
 
             if (cloudReady) {
-                Text(
+                AppleText(
                     text = stringResource(R.string.cloud_sync_connected),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary,
@@ -651,7 +652,7 @@ private fun AccountCard(
                     ) {
                         Icon(Icons.Filled.CloudUpload, contentDescription = null)
                         Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-                        Text(stringResource(R.string.sync))
+                        AppleText(stringResource(R.string.sync))
                     }
                     OutlinedButton(
                         onClick = onSyncDown,
@@ -660,16 +661,16 @@ private fun AccountCard(
                     ) {
                         Icon(Icons.Filled.CloudDownload, contentDescription = null)
                         Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-                        Text(stringResource(R.string.restore))
+                        AppleText(stringResource(R.string.restore))
                     }
                 }
-                Text(
+                AppleText(
                     text = stringResource(R.string.restore_warning),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             } else {
-                Text(
+                AppleText(
                     text = stringResource(R.string.cloud_sync_off),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -683,10 +684,10 @@ private fun AccountCard(
             OutlinedButton(onClick = onSignOut, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
                 Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-                Text(stringResource(R.string.sign_out))
+                AppleText(stringResource(R.string.sign_out))
             }
         } else if (GoogleAuth.isConfigured) {
-            Text(
+            AppleText(
                 text = stringResource(R.string.sign_in_prompt),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -694,7 +695,7 @@ private fun AccountCard(
             Button(onClick = onSignIn, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Filled.AccountCircle, contentDescription = null)
                 Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-                Text(stringResource(R.string.sign_in_google))
+                AppleText(stringResource(R.string.sign_in_google))
             }
         } else {
             // Not an error — nothing is broken and nothing is lost. Offering a
@@ -702,7 +703,7 @@ private fun AccountCard(
             // it look like both.
             var showingSteps by remember { mutableStateOf(false) }
 
-            Text(
+            AppleText(
                 text = stringResource(R.string.sign_in_optional),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -713,17 +714,17 @@ private fun AccountCard(
             ) {
                 Icon(Icons.Filled.AccountCircle, contentDescription = null)
                 Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-                Text(stringResource(R.string.sign_in_how_to))
+                AppleText(stringResource(R.string.sign_in_how_to))
             }
 
             if (showingSteps) {
                 AlertDialog(
                     onDismissRequest = { showingSteps = false },
-                    title = { Text(stringResource(R.string.setup_sign_in_title)) },
-                    text = { Text(stringResource(R.string.setup_sign_in_steps)) },
+                    title = { AppleText(stringResource(R.string.setup_sign_in_title)) },
+                    text = { AppleText(stringResource(R.string.setup_sign_in_steps)) },
                     confirmButton = {
                         TextButton(onClick = { showingSteps = false }) {
-                            Text(stringResource(R.string.action_got_it))
+                            AppleText(stringResource(R.string.action_got_it))
                         }
                     },
                 )
@@ -747,7 +748,7 @@ private fun AutoBackupCard(
 
     SectionCard {
         RowTitle(Icons.Filled.Schedule, stringResource(R.string.automatic_backup))
-        Text(
+        AppleText(
             stringResource(R.string.automatic_backup_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -759,14 +760,14 @@ private fun AutoBackupCard(
         ) {
             Icon(Icons.Filled.FolderOpen, contentDescription = null)
             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-            Text(
+            AppleText(
                 text = if (settings.backupFolderUri == null) stringResource(R.string.choose_backup_folder)
                 else stringResource(R.string.change_backup_folder),
             )
         }
 
         settings.backupFolderUri?.let { uri ->
-            Text(
+            AppleText(
                 text = Uri.decode(uri.substringAfterLast(':')).ifBlank { uri },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -786,10 +787,10 @@ private fun AutoBackupCard(
         ) {
             Icon(Icons.Filled.Save, contentDescription = null)
             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-            Text(stringResource(R.string.back_up_now))
+            AppleText(stringResource(R.string.back_up_now))
         }
 
-        Text(
+        AppleText(
             text = when (val backupError = settings.lastBackupError) {
                 null -> if (settings.lastBackupAt > 0L) {
                     stringResource(R.string.last_backup, Format.timestamp(settings.lastBackupAt))
@@ -827,7 +828,7 @@ private fun BackupCard(viewModel: SettingsViewModel) {
 
     SectionCard {
         RowTitle(Icons.Filled.CloudUpload, stringResource(R.string.backup_recovery))
-        Text(
+        AppleText(
             stringResource(R.string.backup_recovery_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -841,7 +842,7 @@ private fun BackupCard(viewModel: SettingsViewModel) {
         ) {
             Icon(Icons.Filled.Download, contentDescription = null)
             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-            Text(
+            AppleText(
                 text = stringResource(R.string.save_a_copy),
                 modifier = Modifier.padding(start = 8.dp),
             )
@@ -853,7 +854,7 @@ private fun BackupCard(viewModel: SettingsViewModel) {
         ) {
             Icon(Icons.Filled.Restore, contentDescription = null)
             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-            Text(
+            AppleText(
                 text = stringResource(R.string.restore_a_copy),
                 modifier = Modifier.padding(start = 8.dp),
             )
@@ -864,19 +865,19 @@ private fun BackupCard(viewModel: SettingsViewModel) {
     if (confirmingRestore) {
         AlertDialog(
             onDismissRequest = { confirmingRestore = false },
-            title = { Text(stringResource(R.string.restore_a_copy)) },
-            text = { Text(stringResource(R.string.restore_warning_plain)) },
+            title = { AppleText(stringResource(R.string.restore_a_copy)) },
+            text = { AppleText(stringResource(R.string.restore_warning_plain)) },
             confirmButton = {
                 TextButton(
                     onClick = {
                         confirmingRestore = false
                         openFile.launch(arrayOf("application/json", "text/plain"))
                     }
-                ) { Text(stringResource(R.string.action_continue)) }
+                ) { AppleText(stringResource(R.string.action_continue)) }
             },
             dismissButton = {
                 TextButton(onClick = { confirmingRestore = false }) {
-                    Text(stringResource(R.string.action_cancel))
+                    AppleText(stringResource(R.string.action_cancel))
                 }
             },
         )

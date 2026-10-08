@@ -1,5 +1,6 @@
 package com.cashmemer.ui.members
 
+import com.cashmemer.ui.components.AppleText
 import android.app.Application
 import android.content.Context
 import android.net.Uri
@@ -159,8 +160,8 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                                 .weight(1f)
                                 .padding(start = 12.dp)
                         ) {
-                            Text(member.name, style = MaterialTheme.typography.titleLarge)
-                            Text(
+                            AppleText(member.name, style = MaterialTheme.typography.titleLarge)
+                            AppleText(
                                 member.phone,
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -181,7 +182,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
 
             if (members.isEmpty()) {
                 item {
-                    Text(
+                    AppleText(
                         stringResource(R.string.members_empty),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -241,7 +242,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                         .imePadding(),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Text(
+                    AppleText(
                         text = stringResource(
                             if (member.id == 0L) R.string.add_member else R.string.edit_member
                         ),
@@ -264,7 +265,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                                 }
                             ) {
                                 Icon(Icons.Filled.PhotoCamera, contentDescription = null)
-                                Text(
+                                AppleText(
                                     text = stringResource(
                                         if (photoUri == null) R.string.add_photo
                                         else R.string.change_photo
@@ -274,7 +275,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                             }
                             if (photoUri != null) {
                                 TextButton(onClick = { photoUri = null }) {
-                                    Text(
+                                    AppleText(
                                         text = stringResource(R.string.remove_photo),
                                         color = MaterialTheme.colorScheme.error,
                                     )
@@ -286,14 +287,14 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text(stringResource(R.string.name)) },
+                        label = { AppleText(stringResource(R.string.name)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                     )
                     OutlinedTextField(
                         value = phone,
                         onValueChange = { phone = it },
-                        label = { Text(stringResource(R.string.phone)) },
+                        label = { AppleText(stringResource(R.string.phone)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                         modifier = Modifier.fillMaxWidth(),
@@ -301,7 +302,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text(stringResource(R.string.email)) },
+                        label = { AppleText(stringResource(R.string.email)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         modifier = Modifier.fillMaxWidth(),
@@ -309,7 +310,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                     OutlinedTextField(
                         value = address,
                         onValueChange = { address = it },
-                        label = { Text(stringResource(R.string.address)) },
+                        label = { AppleText(stringResource(R.string.address)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -319,7 +320,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                         horizontalArrangement = Arrangement.End,
                     ) {
                         TextButton(onClick = { editing = null }) {
-                            Text(stringResource(R.string.action_cancel))
+                            AppleText(stringResource(R.string.action_cancel))
                         }
                         TextButton(
                             onClick = {
@@ -335,7 +336,7 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
                                 editing = null
                             },
                             enabled = name.isNotBlank(),
-                        ) { Text(stringResource(R.string.action_save)) }
+                        ) { AppleText(stringResource(R.string.action_save)) }
                     }
                 }
             }

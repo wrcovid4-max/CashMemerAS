@@ -444,7 +444,7 @@ object ReceiptPdfRenderer {
             AnnotationKind.PEN, AnnotationKind.HIGHLIGHT -> drawStroke(canvas, mark, width, height)
             AnnotationKind.TEXT ->
                 if (mark.text.isNotBlank()) {
-                    canvas.drawText(mark.text, x, y, annotationTextPaint)
+                    AppleLogoPdf.draw(canvas, mark.text, x, y, annotationTextPaint)
                 }
         }
     }
@@ -484,16 +484,16 @@ object ReceiptPdfRenderer {
     ) {
 
         fun write(text: String, x: Float, y: Float, paint: Paint = bodyPaint) {
-            canvas?.drawText(text, x, y, paint)
+            canvas?.let { AppleLogoPdf.draw(it, text, x, y, paint) }
             record(text, x, y, paint)
         }
 
         fun textRight(text: String, right: Float, y: Float, paint: Paint = bodyPaint) {
-            write(text, right - paint.measureText(text), y, paint)
+            write(text, right - AppleLogoPdf.measure(paint, text), y, paint)
         }
 
         fun centred(text: String, y: Float, paint: Paint) {
-            write(text, CENTRE - paint.measureText(text) / 2f, y, paint)
+            write(text, CENTRE - AppleLogoPdf.measure(paint, text) / 2f, y, paint)
         }
 
         fun money(
@@ -520,7 +520,7 @@ object ReceiptPdfRenderer {
 
             text.split(Regex("\\s+")).forEach { word ->
                 val candidate = if (line.isEmpty()) word else "$line $word"
-                if (bodyPaint.measureText(candidate) > maxWidth) {
+                if (AppleLogoPdf.measure(bodyPaint, candidate) > maxWidth) {
                     write(line.toString(), x, y)
                     y += ROW_TIGHT
                     line = StringBuilder(word)
@@ -543,7 +543,7 @@ object ReceiptPdfRenderer {
                 text = text,
                 left = x,
                 top = y + metrics.ascent,
-                right = x + paint.measureText(text),
+                right = x + AppleLogoPdf.measure(paint, text),
                 bottom = y + metrics.descent,
             )
         }

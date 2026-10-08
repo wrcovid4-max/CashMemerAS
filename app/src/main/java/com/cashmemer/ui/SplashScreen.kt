@@ -1,5 +1,6 @@
 package com.cashmemer.ui
 
+import com.cashmemer.ui.components.AppleText
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -41,14 +42,14 @@ fun SplashScreen() {
                 modifier = Modifier.size(144.dp),
             )
             Spacer(Modifier.height(20.dp))
-            Text(
+            AppleText(
                 text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
             )
             Spacer(Modifier.height(10.dp))
-            Text(
+            AppleText(
                 text = stringResource(R.string.splash_copyright),
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Bold,

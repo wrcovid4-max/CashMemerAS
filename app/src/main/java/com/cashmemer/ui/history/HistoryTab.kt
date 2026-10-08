@@ -133,7 +133,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                     modifier = Modifier.weight(1f),
                 ) {
                     Icon(Icons.Filled.CalendarMonth, contentDescription = null)
-                    Text(
+                    AppleText(
                         text = if (range.from == 0L) stringResource(R.string.start_date)
                         else Format.date(range.from),
                     )
@@ -143,7 +143,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                     modifier = Modifier.weight(1f),
                 ) {
                     Icon(Icons.Filled.CalendarMonth, contentDescription = null)
-                    Text(
+                    AppleText(
                         text = if (range.to == 0L) stringResource(R.string.end_date)
                         else Format.date(range.to),
                     )
@@ -153,7 +153,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
 
         if (range.from != 0L || range.to != 0L) {
             item {
-                TextButton(onClick = viewModel::clearRange) { Text(stringResource(R.string.clear_date_filter)) }
+                TextButton(onClick = viewModel::clearRange) { AppleText(stringResource(R.string.clear_date_filter)) }
             }
         }
 
@@ -167,7 +167,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                         checked = selected.size == receipts.size && receipts.isNotEmpty(),
                         onCheckedChange = { viewModel.selectAll(receipts.map { it.id }) },
                     )
-                    Text(
+                    AppleText(
                         text = stringResource(R.string.action_select_all),
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodyLarge,
@@ -212,13 +212,13 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
+                    AppleText(
                         text = text,
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error,
                     )
-                    TextButton(onClick = viewModel::consumeError) { Text(stringResource(R.string.action_dismiss)) }
+                    TextButton(onClick = viewModel::consumeError) { AppleText(stringResource(R.string.action_dismiss)) }
                 }
             }
         }
@@ -237,7 +237,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(Icons.Filled.PushPin, contentDescription = null, tint = PinnedGreen)
-                        Text(
+                        AppleText(
                             text = stringResource(R.string.pinned_count, pinned.size),
                             modifier = Modifier
                                 .weight(1f)
@@ -295,7 +295,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
 
         if (receipts.isEmpty()) {
             item {
-                Text(
+                AppleText(
                     text = stringResource(R.string.no_receipts_match),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -341,10 +341,10 @@ private fun DateDialog(
     DatePickerDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = { onPicked(state.selectedDateMillis) }) { Text(stringResource(android.R.string.ok)) }
+            TextButton(onClick = { onPicked(state.selectedDateMillis) }) { AppleText(stringResource(android.R.string.ok)) }
         },
         dismissButton = {
-            TextButton(onClick = { onPicked(null) }) { Text(stringResource(R.string.action_clear)) }
+            TextButton(onClick = { onPicked(null) }) { AppleText(stringResource(R.string.action_clear)) }
         },
     ) {
         DatePicker(state = state)
@@ -377,11 +377,11 @@ private fun WeeklySummaryCard(
                     .weight(1f)
                     .padding(start = 12.dp)
             ) {
-                Text(
+                AppleText(
                     text = stringResource(R.string.weekly_ai_summary),
                     style = MaterialTheme.typography.titleMedium,
                 )
-                Text(
+                AppleText(
                     text = if (open) {
                         stringResource(R.string.business_insights)
                     } else {
@@ -442,7 +442,7 @@ private fun WeeklySummaryCard(
                 }
 
                 summary.insight?.let { text ->
-                    Text(
+                    AppleText(
                         text = text,
                         style = MaterialTheme.typography.bodyLarge,
                         fontStyle = FontStyle.Italic,
@@ -455,7 +455,7 @@ private fun WeeklySummaryCard(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(Icons.Filled.AutoAwesome, contentDescription = null)
-                    Text(stringResource(if (summary.insight == null) R.string.generate_insight else R.string.regenerate_insight))
+                    AppleText(stringResource(if (summary.insight == null) R.string.generate_insight else R.string.regenerate_insight))
                 }
             }
         }
@@ -465,12 +465,12 @@ private fun WeeklySummaryCard(
 @Composable
 private fun StatTile(label: String, value: String, modifier: Modifier = Modifier) {
     SectionCard(modifier = modifier, accent = true) {
-        Text(
+        AppleText(
             label,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Text(value, style = MaterialTheme.typography.titleMedium)
+        AppleText(value, style = MaterialTheme.typography.titleMedium)
     }
 }
 
@@ -538,7 +538,7 @@ private fun HistoryRow(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
+                AppleText(
                     text = receipt.customerName.ifBlank {
                         stringResource(R.string.walk_in_customer)
                     },
@@ -547,14 +547,14 @@ private fun HistoryRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Text(
+                AppleText(
                     text = Format.timestamp(receipt.createdAt),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline,
                     maxLines = 1,
                 )
             }
-            Text(
+            AppleText(
                 text = Format.amountWithCurrency(receipt.total, receipt.currencyCode),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary,
@@ -586,7 +586,7 @@ private fun HistoryRow(
                             "${item.productName} × ${Format.amount(item.qty)}",
                             style = MaterialTheme.typography.bodyMedium,
                         )
-                        Text(
+                        AppleText(
                             Format.amountWithCurrency(item.lineTotal, receipt.currencyCode),
                             style = MaterialTheme.typography.bodyMedium,
                         )
@@ -600,7 +600,7 @@ private fun HistoryRow(
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                        Text(
+                        AppleText(
                             text = stringResource(R.string.notes_page_1) + ": " + receipt.notesPage1,
                             modifier = Modifier.padding(start = 8.dp),
                             style = MaterialTheme.typography.bodyMedium,
@@ -616,7 +616,7 @@ private fun HistoryRow(
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                         )
-                        Text(
+                        AppleText(
                             text = stringResource(R.string.saved_location) + ": " + receipt.locationAddress,
                             modifier = Modifier.padding(start = 8.dp),
                             style = MaterialTheme.typography.bodyMedium,
@@ -628,11 +628,11 @@ private fun HistoryRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Text(
+                    AppleText(
                         stringResource(R.string.payment_label) + ": " + PaymentType.from(receipt.paymentType).localized(),
                         style = MaterialTheme.typography.bodyMedium,
                     )
-                    Text(
+                    AppleText(
                         stringResource(R.string.change_label) + ": " + Format.amountWithCurrency(receipt.changeAmount, receipt.currencyCode),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary,

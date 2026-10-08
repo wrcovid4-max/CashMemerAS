@@ -1,5 +1,6 @@
 package com.cashmemer.ui.devices
 
+import com.cashmemer.ui.components.AppleText
 import android.app.Application
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
@@ -167,7 +168,7 @@ fun DevicesScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(
+                            AppleText(
                                 text = stringResource(toggle.labelRes),
                                 modifier = Modifier.weight(1f),
                                 style = MaterialTheme.typography.bodyLarge,
@@ -196,23 +197,23 @@ fun DevicesScreen(
 
                 when {
                     !status.bluetoothSupported ->
-                        Text(stringResource(R.string.no_bluetooth_radio))
+                        AppleText(stringResource(R.string.no_bluetooth_radio))
 
                     !status.permissionsGranted -> {
-                        Text(stringResource(R.string.bluetooth_permission_needed))
+                        AppleText(stringResource(R.string.bluetooth_permission_needed))
                         Button(
                             onClick = {
                                 permissionLauncher.launch(TerminalManager.requiredPermissions())
                             },
                             modifier = Modifier.fillMaxWidth(),
-                        ) { Text(stringResource(R.string.action_grant_permission)) }
+                        ) { AppleText(stringResource(R.string.action_grant_permission)) }
                     }
 
                     !status.bluetoothEnabled ->
-                        Text(stringResource(R.string.bluetooth_switch_on))
+                        AppleText(stringResource(R.string.bluetooth_switch_on))
 
                     status.paired.isEmpty() ->
-                        Text(
+                        AppleText(
                             stringResource(R.string.nothing_paired),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -243,21 +244,21 @@ fun DevicesScreen(
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error,
                     )
-                    Text(stringResource(R.string.forget_all_devices))
+                    AppleText(stringResource(R.string.forget_all_devices))
                 }
                 OutlinedButton(
                     onClick = { showDiagnostics = true },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(Icons.Filled.HealthAndSafety, contentDescription = null)
-                    Text(stringResource(R.string.run_diagnostics))
+                    AppleText(stringResource(R.string.run_diagnostics))
                 }
                 OutlinedButton(
                     onClick = { showLogs = true },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(Icons.Filled.BugReport, contentDescription = null)
-                    Text(stringResource(R.string.view_logs, logs.size))
+                    AppleText(stringResource(R.string.view_logs, logs.size))
                 }
             }
         }
@@ -267,7 +268,7 @@ fun DevicesScreen(
         val results = remember { viewModel.diagnostics(context) }
         AlertDialog(
             onDismissRequest = { showDiagnostics = false },
-            title = { Text(stringResource(R.string.diagnostics_title)) },
+            title = { AppleText(stringResource(R.string.diagnostics_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     results.forEach { (label, ok) ->
@@ -279,11 +280,11 @@ fun DevicesScreen(
                                 tint = if (ok) MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.error,
                             )
-                            Text(label, modifier = Modifier.padding(start = 8.dp))
+                            AppleText(label, modifier = Modifier.padding(start = 8.dp))
                         }
                     }
                     status.lastError?.let {
-                        Text(
+                        AppleText(
                             stringResource(R.string.last_error, it),
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodyMedium,
@@ -292,7 +293,7 @@ fun DevicesScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showDiagnostics = false }) { Text(stringResource(R.string.action_close)) }
+                TextButton(onClick = { showDiagnostics = false }) { AppleText(stringResource(R.string.action_close)) }
             },
         )
     }
@@ -300,14 +301,14 @@ fun DevicesScreen(
     if (showLogs) {
         AlertDialog(
             onDismissRequest = { showLogs = false },
-            title = { Text(stringResource(R.string.integration_logs)) },
+            title = { AppleText(stringResource(R.string.integration_logs)) },
             text = {
                 if (logs.isEmpty()) {
-                    Text(stringResource(R.string.nothing_logged))
+                    AppleText(stringResource(R.string.nothing_logged))
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxWidth()) {
                         items(logs.reversed()) { entry ->
-                            Text(
+                            AppleText(
                                 text = entry.toString(),
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.padding(vertical = 2.dp),
@@ -317,10 +318,10 @@ fun DevicesScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showLogs = false }) { Text(stringResource(R.string.action_close)) }
+                TextButton(onClick = { showLogs = false }) { AppleText(stringResource(R.string.action_close)) }
             },
             dismissButton = {
-                TextButton(onClick = viewModel::clearLogs) { Text(stringResource(R.string.action_clear)) }
+                TextButton(onClick = viewModel::clearLogs) { AppleText(stringResource(R.string.action_clear)) }
             },
         )
     }
@@ -328,9 +329,9 @@ fun DevicesScreen(
     if (confirmForgetAll) {
         AlertDialog(
             onDismissRequest = { confirmForgetAll = false },
-            title = { Text(stringResource(R.string.forget_all_title)) },
+            title = { AppleText(stringResource(R.string.forget_all_title)) },
             text = {
-                Text(
+                AppleText(
                     stringResource(R.string.forget_all_body)
                 )
             },
@@ -341,10 +342,10 @@ fun DevicesScreen(
                         viewModel.setDefaultDevice(null)
                         confirmForgetAll = false
                     }
-                ) { Text(stringResource(R.string.forget)) }
+                ) { AppleText(stringResource(R.string.forget)) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmForgetAll = false }) { Text(stringResource(R.string.action_cancel)) }
+                TextButton(onClick = { confirmForgetAll = false }) { AppleText(stringResource(R.string.action_cancel)) }
             },
         )
     }
@@ -380,7 +381,7 @@ private fun StatusBanner(
                     modifier = Modifier.padding(end = 12.dp),
                 )
             }
-            Text(text = text, color = colour, style = MaterialTheme.typography.titleMedium)
+            AppleText(text = text, color = colour, style = MaterialTheme.typography.titleMedium)
         }
     }
 }
@@ -404,8 +405,8 @@ private fun DeviceToggleRow(
             modifier = Modifier.padding(end = 12.dp),
         )
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            Text(
+            AppleText(title, style = MaterialTheme.typography.titleMedium)
+            AppleText(
                 subtitle,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -427,15 +428,15 @@ private fun DeviceRow(
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(device.name, style = MaterialTheme.typography.titleMedium)
-                Text(
+                AppleText(device.name, style = MaterialTheme.typography.titleMedium)
+                AppleText(
                     "${device.kind.label} · ${device.address}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             if (isDefault) {
-                AssistChip(onClick = {}, label = { Text(stringResource(R.string.default_device)) })
+                AssistChip(onClick = {}, label = { AppleText(stringResource(R.string.default_device)) })
             }
         }
 
@@ -447,18 +448,18 @@ private fun DeviceRow(
         ) {
             if (device.connected) {
                 OutlinedButton(onClick = onDisconnect, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.action_disconnect))
+                    AppleText(stringResource(R.string.action_disconnect))
                 }
             } else {
                 Button(
                     onClick = onConnect,
                     enabled = !connecting,
                     modifier = Modifier.weight(1f),
-                ) { Text(stringResource(if (connecting) R.string.device_connecting else R.string.action_connect)) }
+                ) { AppleText(stringResource(if (connecting) R.string.device_connecting else R.string.action_connect)) }
             }
             if (!isDefault) {
                 OutlinedButton(onClick = onMakeDefault, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.make_default))
+                    AppleText(stringResource(R.string.make_default))
                 }
             }
         }

@@ -92,7 +92,7 @@ fun FitText(
     var size by remember(text, startSize) { mutableStateOf(startSize) }
     var settled by remember(text, startSize) { mutableStateOf(false) }
 
-    Text(
+    AppleText(
         text = text,
         modifier = modifier.drawWithContent { if (settled) drawContent() },
         style = style.copy(fontSize = size),
@@ -194,7 +194,7 @@ private fun LanguagePill(
             .clip(Dimens.pillCorner)
             .clickable(onClick = onClick),
     ) {
-        Text(
+        AppleText(
             text = label,
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
             color = if (selected) MaterialTheme.colorScheme.onPrimary
@@ -480,7 +480,7 @@ fun SearchField(
                     .padding(horizontal = 10.dp, vertical = 14.dp),
                 decorationBox = { inner ->
                     if (value.isEmpty()) {
-                        Text(
+                        AppleText(
                             text = placeholder,
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -529,12 +529,12 @@ fun EmptyState(
                 tint = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.size(48.dp),
             )
-            Text(
+            AppleText(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Text(
+            AppleText(
                 text = subtitle,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.outline,
@@ -556,14 +556,14 @@ fun DetailRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
+        AppleText(
             text = label,
             style = if (emphasised) MaterialTheme.typography.titleMedium
             else MaterialTheme.typography.bodyLarge,
             color = if (emphasised) MaterialTheme.colorScheme.onSurface
             else MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Text(
+        AppleText(
             text = value,
             style = if (emphasised) MaterialTheme.typography.titleLarge
             else MaterialTheme.typography.bodyLarge,
@@ -592,10 +592,10 @@ fun InfoIcon(title: String, body: String, modifier: Modifier = Modifier) {
     if (open) {
         AlertDialog(
             onDismissRequest = { open = false },
-            title = { Text(title) },
-            text = { Text(body, style = MaterialTheme.typography.bodyMedium) },
+            title = { AppleText(title) },
+            text = { AppleText(body, style = MaterialTheme.typography.bodyMedium) },
             confirmButton = {
-                TextButton(onClick = { open = false }) { Text(stringResource(R.string.action_close)) }
+                TextButton(onClick = { open = false }) { AppleText(stringResource(R.string.action_close)) }
             },
         )
     }

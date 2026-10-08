@@ -1,5 +1,6 @@
 package com.cashmemer.ui.receipts
 
+import com.cashmemer.ui.components.AppleText
 import com.cashmemer.ui.components.InfoIcon
 import android.Manifest
 import android.widget.Toast
@@ -192,7 +193,7 @@ fun NewReceiptTab(
                 // its own reads cleanly in both languages.
                 SectionTitle(stringResource(R.string.receipt_details))
                 state.draftSavedAt?.let {
-                    Text(
+                    AppleText(
                         text = stringResource(R.string.draft_saved, Format.time(it)),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -203,7 +204,7 @@ fun NewReceiptTab(
                 OutlinedTextField(
                     value = state.placeName,
                     onValueChange = viewModel::setPlaceName,
-                    label = { Text(stringResource(R.string.place_store_name)) },
+                    label = { AppleText(stringResource(R.string.place_store_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -215,7 +216,7 @@ fun NewReceiptTab(
                 OutlinedTextField(
                     value = state.locationAddress,
                     onValueChange = viewModel::setLocationAddress,
-                    label = { Text(stringResource(R.string.location_address)) },
+                    label = { AppleText(stringResource(R.string.location_address)) },
                     // Starts at the normal one-line height like the other fields
                     // and only grows when a long address is actually entered —
                     // the fixed two-line box read as oversized when empty.
@@ -282,14 +283,14 @@ fun NewReceiptTab(
                 OutlinedTextField(
                     value = state.customerName,
                     onValueChange = viewModel::setCustomerName,
-                    label = { Text(stringResource(R.string.customer_name)) },
+                    label = { AppleText(stringResource(R.string.customer_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = state.customerPhone,
                     onValueChange = viewModel::setCustomerPhone,
-                    label = { Text(stringResource(R.string.customer_phone)) },
+                    label = { AppleText(stringResource(R.string.customer_phone)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     modifier = Modifier.fillMaxWidth(),
@@ -297,7 +298,7 @@ fun NewReceiptTab(
                 OutlinedTextField(
                     value = state.customerEmail,
                     onValueChange = viewModel::setCustomerEmail,
-                    label = { Text(stringResource(R.string.customer_email)) },
+                    label = { AppleText(stringResource(R.string.customer_email)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier.fillMaxWidth(),
@@ -307,7 +308,7 @@ fun NewReceiptTab(
 
         item {
             SectionCard {
-                Text(stringResource(R.string.select_currency_category), style = MaterialTheme.typography.titleMedium)
+                AppleText(stringResource(R.string.select_currency_category), style = MaterialTheme.typography.titleMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     CurrencyPicker(
                         selected = state.currencyCode,
@@ -365,12 +366,12 @@ fun NewReceiptTab(
                     value = state.notesPage1,
                     onValueChange = { if (!noteLocked) viewModel.setNotesPage1(it) },
                     readOnly = noteLocked,
-                    label = { Text(stringResource(R.string.notes_page_1)) },
+                    label = { AppleText(stringResource(R.string.notes_page_1)) },
                     trailingIcon = if (noteLocked) {
                         { Icon(Icons.Filled.Lock, contentDescription = null) }
                     } else null,
                     supportingText = if (noteLocked) {
-                        { Text(stringResource(R.string.page1_note_locked_hint)) }
+                        { AppleText(stringResource(R.string.page1_note_locked_hint)) }
                     } else null,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -379,12 +380,12 @@ fun NewReceiptTab(
                     value = state.notesPage2,
                     onValueChange = { if (!note2Locked) viewModel.setNotesPage2(it) },
                     readOnly = note2Locked,
-                    label = { Text(stringResource(R.string.notes_page_2)) },
+                    label = { AppleText(stringResource(R.string.notes_page_2)) },
                     trailingIcon = if (note2Locked) {
                         { Icon(Icons.Filled.Lock, contentDescription = null) }
                     } else null,
                     supportingText = if (note2Locked) {
-                        { Text(stringResource(R.string.page1_note_locked_hint)) }
+                        { AppleText(stringResource(R.string.page1_note_locked_hint)) }
                     } else null,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -412,7 +413,7 @@ fun NewReceiptTab(
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.error,
                     ),
-                ) { Text(stringResource(R.string.action_clear)) }
+                ) { AppleText(stringResource(R.string.action_clear)) }
 
                 Button(
                     onClick = { viewModel.generate() },
@@ -420,14 +421,14 @@ fun NewReceiptTab(
                     modifier = Modifier.weight(1f),
                 ) {
                     Icon(Icons.Filled.Check, contentDescription = null)
-                    Text(stringResource(R.string.action_generate))
+                    AppleText(stringResource(R.string.action_generate))
                 }
             }
         }
 
         state.message?.let { message ->
             item {
-                Text(
+                AppleText(
                     text = message,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary,
@@ -450,10 +451,10 @@ private fun UnknownBarcodeDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.product_not_found)) },
+        title = { AppleText(stringResource(R.string.product_not_found)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
+                AppleText(
                     "Barcode $barcode isn't in your inventory yet. " +
                         "Add it now and it will be recognised next time.",
                     style = MaterialTheme.typography.bodyMedium,
@@ -461,13 +462,13 @@ private fun UnknownBarcodeDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.product_name)) },
+                    label = { AppleText(stringResource(R.string.product_name)) },
                     singleLine = true,
                 )
                 OutlinedTextField(
                     value = price,
                     onValueChange = { price = it },
-                    label = { Text(stringResource(R.string.price)) },
+                    label = { AppleText(stringResource(R.string.price)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 )
@@ -477,10 +478,10 @@ private fun UnknownBarcodeDialog(
             TextButton(
                 onClick = { onSave(name, price.toAmount() ?: 0.0) },
                 enabled = name.isNotBlank(),
-            ) { Text(stringResource(R.string.save_and_add)) }
+            ) { AppleText(stringResource(R.string.save_and_add)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
+            TextButton(onClick = onDismiss) { AppleText(stringResource(R.string.action_cancel)) }
         },
     )
 }
@@ -503,12 +504,12 @@ private fun ScannerCard(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
             )
-            Text(
+            AppleText(
                 text = stringResource(R.string.scanner_title),
                 style = MaterialTheme.typography.titleMedium,
             )
         }
-        Text(
+        AppleText(
             text = stringResource(R.string.scanner_body),
             style = MaterialTheme.typography.bodySmall,
         )
@@ -579,7 +580,7 @@ private fun MemberPicker(
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.none)) },
+                text = { AppleText(stringResource(R.string.none)) },
                 onClick = {
                     onSelect(null)
                     expanded = false
@@ -587,7 +588,7 @@ private fun MemberPicker(
             )
             members.forEach { member ->
                 DropdownMenuItem(
-                    text = { Text("${member.name} · ${member.phone}") },
+                    text = { AppleText("${member.name} · ${member.phone}") },
                     onClick = {
                         onSelect(member)
                         expanded = false
@@ -630,7 +631,7 @@ private fun DiscountModeChip(label: String, selected: Boolean, onClick: () -> Un
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
+        AppleText(
             text = label,
             style = MaterialTheme.typography.labelMedium,
             maxLines = 1,
@@ -669,7 +670,7 @@ private fun CurrencyPicker(
             onValueChange = {},
             readOnly = true,
             singleLine = true,
-            label = { Text(stringResource(R.string.currency)) },
+            label = { AppleText(stringResource(R.string.currency)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
@@ -679,7 +680,7 @@ private fun CurrencyPicker(
             options.forEach { code ->
                 DropdownMenuItem(
                     text = {
-                        Text("$code (${com.cashmemer.core.data.CurrencyNames.symbolOf(code)})")
+                        AppleText("$code (${com.cashmemer.core.data.CurrencyNames.symbolOf(code)})")
                     },
                     onClick = {
                         onSelect(code)
@@ -712,7 +713,7 @@ private fun CategoryPicker(
             // Without singleLine, a narrow half-width field wrapped "Shopping"
             // to "Shoppin / g". One line, and the field shows it whole.
             singleLine = true,
-            label = { Text(stringResource(R.string.category)) },
+            label = { AppleText(stringResource(R.string.category)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
@@ -721,7 +722,7 @@ private fun CategoryPicker(
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             ReceiptCategory.entries.forEach { category ->
                 DropdownMenuItem(
-                    text = { Text(category.localized()) },
+                    text = { AppleText(category.localized()) },
                     onClick = {
                         onSelect(category)
                         expanded = false
@@ -751,7 +752,7 @@ private fun PaymentTypePicker(
             onValueChange = {},
             readOnly = true,
             singleLine = true,
-            label = { Text(stringResource(R.string.payment_type)) },
+            label = { AppleText(stringResource(R.string.payment_type)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
@@ -760,7 +761,7 @@ private fun PaymentTypePicker(
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             PaymentType.entries.forEach { type ->
                 DropdownMenuItem(
-                    text = { Text(type.localized()) },
+                    text = { AppleText(type.localized()) },
                     onClick = {
                         onSelect(type)
                         expanded = false
@@ -816,7 +817,7 @@ private fun AddItemCard(
                         price = Format.amount(perUnit * (quantity ?: 0.0))
                     }
                 },
-                label = { Text(stringResource(R.string.qty)) },
+                label = { AppleText(stringResource(R.string.qty)) },
                 trailingIcon = {
                     InfoIcon(
                         title = stringResource(R.string.qty),
@@ -833,7 +834,7 @@ private fun AddItemCard(
                     price = it
                     unitPrice = null   // user is now driving the total manually
                 },
-                label = { Text(stringResource(R.string.price_total)) },
+                label = { AppleText(stringResource(R.string.price_total)) },
                 trailingIcon = {
                     InfoIcon(
                         title = stringResource(R.string.price_total),
@@ -867,7 +868,7 @@ private fun AddItemCard(
             },
             enabled = name.isNotBlank(),
             modifier = Modifier.fillMaxWidth(),
-        ) { Text(stringResource(R.string.add_item)) }
+        ) { AppleText(stringResource(R.string.add_item)) }
     }
 }
 
@@ -903,7 +904,7 @@ private fun ProductNameField(
                 onValueChange(it)
                 expanded = true
             },
-            label = { Text(stringResource(R.string.product_name)) },
+            label = { AppleText(stringResource(R.string.product_name)) },
             singleLine = true,
             trailingIcon = {
                 IconButton(onClick = {
@@ -926,7 +927,7 @@ private fun ProductNameField(
         ) {
             filtered.take(20).forEach { suggestion ->
                 DropdownMenuItem(
-                    text = { Text(suggestion) },
+                    text = { AppleText(suggestion) },
                     onClick = {
                         onValueChange(suggestion)
                         expanded = false
@@ -951,10 +952,10 @@ private fun LineItemRow(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(item.productName, style = MaterialTheme.typography.titleMedium)
+                AppleText(item.productName, style = MaterialTheme.typography.titleMedium)
                 // Always the cost of a single unit — never "2 Qty" — so the rate
                 // reads the same however many were bought.
-                Text(
+                AppleText(
                     text = stringResource(
                         R.string.item_unit_price,
                         unitLabel,
@@ -964,7 +965,7 @@ private fun LineItemRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Text(
+            AppleText(
                 text = Format.amountWithCurrency(item.lineTotal, currencyCode),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
@@ -999,7 +1000,7 @@ private fun TotalsCard(
         OutlinedTextField(
             value = if (state.discount == 0.0) "" else state.discount.toString(),
             onValueChange = { onDiscountChange(it.toAmount() ?: 0.0) },
-            label = { Text(stringResource(R.string.discount)) },
+            label = { AppleText(stringResource(R.string.discount)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             // A small Rs / % switch inside the field flips how the number is
@@ -1022,7 +1023,7 @@ private fun TotalsCard(
         OutlinedTextField(
             value = if (state.taxPercent == 0.0) "" else state.taxPercent.toString(),
             onValueChange = { onTaxChange(it.toAmount() ?: 0.0) },
-            label = { Text(stringResource(R.string.tax_percent)) },
+            label = { AppleText(stringResource(R.string.tax_percent)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             trailingIcon = {
@@ -1057,7 +1058,7 @@ private fun TotalsCard(
         OutlinedTextField(
             value = if (state.cashGiven == 0.0) "" else state.cashGiven.toString(),
             onValueChange = { onCashGivenChange(it.toAmount() ?: 0.0) },
-            label = { Text(stringResource(R.string.cash_given)) },
+            label = { AppleText(stringResource(R.string.cash_given)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             trailingIcon = {
@@ -1094,14 +1095,14 @@ private fun TotalRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
+            AppleText(
                 text = label,
                 style = if (emphasised) MaterialTheme.typography.titleLarge
                 else MaterialTheme.typography.bodyLarge,
             )
             if (info != null) InfoIcon(title = label, body = info)
         }
-        Text(
+        AppleText(
             text = Format.amountWithCurrency(amount, currencyCode),
             style = if (emphasised) MaterialTheme.typography.titleLarge
             else MaterialTheme.typography.bodyLarge,
@@ -1129,12 +1130,12 @@ private fun SignatureCard(
             if (locked) {
                 AssistChip(
                     onClick = {},
-                    label = { Text(stringResource(R.string.signature_locked)) },
+                    label = { AppleText(stringResource(R.string.signature_locked)) },
                 )
             } else if (signatureBase64 != null) {
                 AssistChip(
                     onClick = {},
-                    label = { Text(stringResource(R.string.captured)) },
+                    label = { AppleText(stringResource(R.string.captured)) },
                     leadingIcon = { Icon(Icons.Filled.Check, contentDescription = null) },
                 )
             }
@@ -1148,7 +1149,7 @@ private fun SignatureCard(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(checked = saveAsDefault, onCheckedChange = onSaveAsDefaultChange)
-            Text(stringResource(R.string.save_default_signature))
+            AppleText(stringResource(R.string.save_default_signature))
         }
 
         OutlinedButton(
@@ -1159,7 +1160,7 @@ private fun SignatureCard(
             ),
         ) {
             Icon(Icons.Filled.Delete, contentDescription = null)
-            Text(stringResource(R.string.clear_and_redraw))
+            AppleText(stringResource(R.string.clear_and_redraw))
         }
     }
 }

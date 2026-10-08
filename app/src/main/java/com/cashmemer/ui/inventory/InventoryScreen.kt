@@ -1,5 +1,6 @@
 package com.cashmemer.ui.inventory
 
+import com.cashmemer.ui.components.AppleText
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.height
@@ -130,7 +131,7 @@ fun InventoryScreen(viewModel: InventoryViewModel = viewModel()) {
                 SectionTitle(stringResource(R.string.products))
                 Button(onClick = { editing = Product() }) {
                     Icon(Icons.Filled.Add, contentDescription = null)
-                    Text(stringResource(R.string.add_new))
+                    AppleText(stringResource(R.string.add_new))
                 }
             }
         }
@@ -140,7 +141,7 @@ fun InventoryScreen(viewModel: InventoryViewModel = viewModel()) {
                 value = query,
                 onValueChange = { query = it },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                placeholder = { Text(stringResource(R.string.search_products)) },
+                placeholder = { AppleText(stringResource(R.string.search_products)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -153,7 +154,7 @@ fun InventoryScreen(viewModel: InventoryViewModel = viewModel()) {
                         selected = filter == option,
                         onClick = { filter = option },
                         label = {
-                            Text(
+                            AppleText(
                                 stringResource(
                                     when (option) {
                                         ProductFilter.ALL -> R.string.filter_all
@@ -173,8 +174,8 @@ fun InventoryScreen(viewModel: InventoryViewModel = viewModel()) {
             val low = products.count { it.lowStock }
             val sellValue = products.filter { !it.archived }.sumOf { it.sellValue }
             SectionCard(accent = true) {
-                Text(stringResource(R.string.stock_summary, active, low), style = MaterialTheme.typography.titleMedium)
-                Text(
+                AppleText(stringResource(R.string.stock_summary, active, low), style = MaterialTheme.typography.titleMedium)
+                AppleText(
                     stringResource(R.string.sell_value, Format.amount(sellValue)),
                     style = MaterialTheme.typography.bodyLarge,
                 )
@@ -193,7 +194,7 @@ fun InventoryScreen(viewModel: InventoryViewModel = viewModel()) {
 
         if (visible.isEmpty()) {
             item {
-                Text(
+                AppleText(
                     stringResource(R.string.no_products_match),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -222,9 +223,9 @@ private fun ProductRow(
     onDelete: () -> Unit,
 ) {
     SectionCard {
-        Text(product.name, style = MaterialTheme.typography.titleMedium)
+        AppleText(product.name, style = MaterialTheme.typography.titleMedium)
         if (product.barcode.isNotBlank()) {
-            Text(
+            AppleText(
                 stringResource(R.string.barcode) + ": " + product.barcode,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -236,20 +237,20 @@ private fun ProductRow(
         ) {
             Column {
                 if (product.category.isNotBlank()) {
-                    Text(
+                    AppleText(
                         stringResource(R.string.category) + ": " + product.category,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                Text(
+                AppleText(
                     stringResource(R.string.stock) + ": " + Format.amount(product.stock) + " " + product.unit,
                     style = MaterialTheme.typography.bodyMedium,
                     color = if (product.lowStock) MaterialTheme.colorScheme.error
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Text(
+            AppleText(
                 Format.amount(product.price),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
@@ -263,7 +264,7 @@ private fun ProductRow(
         ) {
             AssistChip(
                 onClick = {},
-                label = { Text(stringResource(if (product.archived) R.string.archived else R.string.active)) },
+                label = { AppleText(stringResource(if (product.archived) R.string.archived else R.string.active)) },
             )
             Row {
                 IconButton(onClick = onArchive) {
@@ -330,7 +331,7 @@ private fun ProductEditorDialog(
                     .heightIn(max = maxHeight),
             ) {
                 Column(modifier = Modifier.padding(24.dp)) {
-                    Text(title, style = MaterialTheme.typography.headlineSmall)
+                    AppleText(title, style = MaterialTheme.typography.headlineSmall)
                     Spacer(Modifier.height(16.dp))
 
                     Column(
@@ -342,28 +343,28 @@ private fun ProductEditorDialog(
                         OutlinedTextField(
                             value = name,
                             onValueChange = { name = it },
-                            label = { Text(stringResource(R.string.name)) },
+                            label = { AppleText(stringResource(R.string.name)) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth(),
                         )
                         OutlinedTextField(
                             value = barcode,
                             onValueChange = { barcode = it },
-                            label = { Text(stringResource(R.string.barcode)) },
+                            label = { AppleText(stringResource(R.string.barcode)) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth(),
                         )
                         OutlinedTextField(
                             value = brand,
                             onValueChange = { brand = it },
-                            label = { Text(stringResource(R.string.brand)) },
+                            label = { AppleText(stringResource(R.string.brand)) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth(),
                         )
                         OutlinedTextField(
                             value = category,
                             onValueChange = { category = it },
-                            label = { Text(stringResource(R.string.category)) },
+                            label = { AppleText(stringResource(R.string.category)) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth(),
                         )
@@ -371,7 +372,7 @@ private fun ProductEditorDialog(
                             OutlinedTextField(
                                 value = purchasePrice,
                                 onValueChange = { purchasePrice = it },
-                                label = { Text(stringResource(R.string.cost)) },
+                                label = { AppleText(stringResource(R.string.cost)) },
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                 modifier = Modifier.weight(1f),
@@ -379,7 +380,7 @@ private fun ProductEditorDialog(
                             OutlinedTextField(
                                 value = price,
                                 onValueChange = { price = it },
-                                label = { Text(stringResource(R.string.price)) },
+                                label = { AppleText(stringResource(R.string.price)) },
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                 modifier = Modifier.weight(1f),
@@ -389,7 +390,7 @@ private fun ProductEditorDialog(
                             OutlinedTextField(
                                 value = stock,
                                 onValueChange = { stock = it },
-                                label = { Text(stringResource(R.string.stock)) },
+                                label = { AppleText(stringResource(R.string.stock)) },
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                 modifier = Modifier.weight(1f),
@@ -397,7 +398,7 @@ private fun ProductEditorDialog(
                             OutlinedTextField(
                                 value = unit,
                                 onValueChange = { unit = it },
-                                label = { Text(stringResource(R.string.unit)) },
+                                label = { AppleText(stringResource(R.string.unit)) },
                                 singleLine = true,
                                 modifier = Modifier.weight(1f),
                             )
@@ -405,7 +406,7 @@ private fun ProductEditorDialog(
                         OutlinedTextField(
                             value = taxPercent,
                             onValueChange = { taxPercent = it },
-                            label = { Text(stringResource(R.string.tax_percent)) },
+                            label = { AppleText(stringResource(R.string.tax_percent)) },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             modifier = Modifier.fillMaxWidth(),
@@ -418,7 +419,7 @@ private fun ProductEditorDialog(
                         horizontalArrangement = Arrangement.End,
                     ) {
                         TextButton(onClick = onDismiss) {
-                            Text(stringResource(R.string.action_cancel))
+                            AppleText(stringResource(R.string.action_cancel))
                         }
                         TextButton(
                             onClick = {
@@ -438,7 +439,7 @@ private fun ProductEditorDialog(
                             },
                             enabled = name.isNotBlank(),
                         ) {
-                            Text(stringResource(R.string.action_save))
+                            AppleText(stringResource(R.string.action_save))
                         }
                     }
                 }

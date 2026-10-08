@@ -1,5 +1,6 @@
 package com.cashmemer.ui.rates
 
+import com.cashmemer.ui.components.AppleText
 import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -130,7 +131,7 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     SectionTitle(stringResource(R.string.exchange_rates))
-                    Text(
+                    AppleText(
                         text = if (ui.lastUpdated == 0L) stringResource(R.string.not_refreshed)
                         else stringResource(R.string.last_updated, Format.timestamp(ui.lastUpdated)),
                         style = MaterialTheme.typography.bodyMedium,
@@ -156,12 +157,12 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
         if (!viewModel.keyConfigured) {
             item {
                 SectionCard {
-                    Text(
+                    AppleText(
                         stringResource(R.string.no_rate_key),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.error,
                     )
-                    Text(
+                    AppleText(
                         stringResource(R.string.no_rate_key_body),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -173,12 +174,12 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
         ui.error?.let { error ->
             item {
                 SectionCard {
-                    Text(
+                    AppleText(
                         stringResource(R.string.rates_failed),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.error,
                     )
-                    Text(
+                    AppleText(
                         text = error,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium,
@@ -186,7 +187,7 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
                     Button(
                         onClick = viewModel::refresh,
                         modifier = Modifier.fillMaxWidth(),
-                    ) { Text(stringResource(R.string.action_retry)) }
+                    ) { AppleText(stringResource(R.string.action_retry)) }
                 }
             }
         }
@@ -194,14 +195,14 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
         if (rates.isEmpty() && ui.error == null && !ui.refreshing && viewModel.keyConfigured) {
             item {
                 SectionCard {
-                    Text(
+                    AppleText(
                         stringResource(R.string.no_rates_yet),
                         style = MaterialTheme.typography.titleMedium,
                     )
                     Button(
                         onClick = viewModel::refresh,
                         modifier = Modifier.fillMaxWidth(),
-                    ) { Text(stringResource(R.string.load_rates)) }
+                    ) { AppleText(stringResource(R.string.load_rates)) }
                 }
             }
         }
@@ -210,7 +211,7 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                placeholder = { Text(stringResource(R.string.search_currency)) },
+                placeholder = { AppleText(stringResource(R.string.search_currency)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -222,20 +223,20 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
+                    AppleText(
                         text = rate.flagEmoji,
                         style = MaterialTheme.typography.headlineMedium,
                         modifier = Modifier.padding(end = 12.dp),
                     )
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(rate.code, style = MaterialTheme.typography.titleMedium)
-                        Text(
+                        AppleText(rate.code, style = MaterialTheme.typography.titleMedium)
+                        AppleText(
                             com.cashmemer.core.data.CurrencyNames.of(rate.code),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    Text(
+                    AppleText(
                         text = Format.rate(rate.rate),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary,
@@ -251,14 +252,14 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
                     OutlinedTextField(
                         value = customCode,
                         onValueChange = { customCode = it.uppercase().take(3) },
-                        label = { Text(stringResource(R.string.code)) },
+                        label = { AppleText(stringResource(R.string.code)) },
                         singleLine = true,
                         modifier = Modifier.weight(1f),
                     )
                     OutlinedTextField(
                         value = customRate,
                         onValueChange = { customRate = it },
-                        label = { Text(stringResource(R.string.rate_vs_usd)) },
+                        label = { AppleText(stringResource(R.string.rate_vs_usd)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         modifier = Modifier.weight(1f),
@@ -267,7 +268,7 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
                 OutlinedTextField(
                     value = customName,
                     onValueChange = { customName = it },
-                    label = { Text(stringResource(R.string.display_name)) },
+                    label = { AppleText(stringResource(R.string.display_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -284,7 +285,7 @@ fun RatesScreen(viewModel: RatesViewModel = viewModel()) {
                     },
                     enabled = customCode.length == 3,
                     modifier = Modifier.fillMaxWidth(),
-                ) { Text(stringResource(R.string.register_custom_currency)) }
+                ) { AppleText(stringResource(R.string.register_custom_currency)) }
             }
         }
     }
