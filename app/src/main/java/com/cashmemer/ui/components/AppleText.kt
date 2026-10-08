@@ -15,6 +15,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.appendInlineContent
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -78,10 +79,12 @@ fun AppleText(
         return
     }
 
-    val tint = if (color.isSpecified) color else LocalContentColor.current
-    val logoSize = if (fontSize.isSpecified) fontSize
-    else if (style.fontSize.isSpecified) style.fontSize
-    else 16.sp
+    val tint = if (color != Color.Unspecified) color else LocalContentColor.current
+    val logoSize = when {
+        fontSize != TextUnit.Unspecified -> fontSize
+        style.fontSize != TextUnit.Unspecified -> style.fontSize
+        else -> 16.sp
+    }
     val logo = InlineTextContent(
         placeholder = Placeholder(
             width = logoSize,
