@@ -265,6 +265,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
     fun setDiscountIsPercent(percent: Boolean) =
         _state.update { it.copy(discountIsPercent = percent) }
     fun setCashGiven(value: Double) = _state.update { it.copy(cashGiven = value) }
+    fun setExtraFees(value: Double) = _state.update { it.copy(extraFees = value) }
 
     /** Applies a point chosen on the map, address and coordinates together. */
     fun setPickedLocation(address: String, latitude: Double, longitude: Double) =

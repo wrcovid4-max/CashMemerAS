@@ -360,6 +360,7 @@ fun NewReceiptTab(
                 onDiscountModeChange = viewModel::setDiscountIsPercent,
                 onTaxChange = viewModel::setTaxPercent,
                 onCashGivenChange = viewModel::setCashGiven,
+                onExtraFeesChange = viewModel::setExtraFees,
             )
         }
 
@@ -1003,6 +1004,7 @@ private fun TotalsCard(
     onDiscountModeChange: (Boolean) -> Unit,
     onTaxChange: (Double) -> Unit,
     onCashGivenChange: (Double) -> Unit,
+    onExtraFeesChange: (Double) -> Unit,
 ) {
     SectionCard {
         // Full width rather than side-by-side: the Rs / % switch needs room in
@@ -1080,6 +1082,14 @@ private fun TotalsCard(
             info = stringResource(R.string.info_grand_total),
         )
 
+        OutlinedTextField(
+            value = if (state.extraFees == 0.0) "" else state.extraFees.toString(),
+            onValueChange = { onExtraFeesChange(it.toAmount() ?: 0.0) },
+            label = { AppleText(stringResource(R.string.extra_fees)) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            modifier = Modifier.fillMaxWidth(),
+        )
         OutlinedTextField(
             value = if (state.cashGiven == 0.0) "" else state.cashGiven.toString(),
             onValueChange = { onCashGivenChange(it.toAmount() ?: 0.0) },
