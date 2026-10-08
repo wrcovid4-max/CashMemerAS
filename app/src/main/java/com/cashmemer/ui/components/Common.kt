@@ -1,5 +1,9 @@
 package com.cashmemer.ui.components
 
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.text.BasicTextField
@@ -566,6 +570,33 @@ fun DetailRow(
             fontWeight = if (emphasised) FontWeight.Bold else FontWeight.Normal,
             color = if (emphasised) MaterialTheme.colorScheme.primary
             else MaterialTheme.colorScheme.onSurface,
+        )
+    }
+}
+
+/**
+ * A small (i) button that opens a short plain-language explanation. Use it wherever a
+ * label or toggle isn't obvious on its own.
+ */
+@Composable
+fun InfoIcon(title: String, body: String, modifier: Modifier = Modifier) {
+    var open by remember { mutableStateOf(false) }
+    IconButton(onClick = { open = true }, modifier = modifier.size(32.dp)) {
+        Icon(
+            Icons.Filled.Info,
+            contentDescription = stringResource(R.string.info_about, title),
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp),
+        )
+    }
+    if (open) {
+        AlertDialog(
+            onDismissRequest = { open = false },
+            title = { Text(title) },
+            text = { Text(body, style = MaterialTheme.typography.bodyMedium) },
+            confirmButton = {
+                TextButton(onClick = { open = false }) { Text(stringResource(R.string.action_close)) }
+            },
         )
     }
 }

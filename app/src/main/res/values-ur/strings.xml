@@ -100,6 +100,17 @@
     <string name="default_note_page1">صفحہ ۱ کا نوٹ</string>
     <string name="default_note_page1_hint">ہر نئی رسید کے صفحہ ۱ کے نوٹ میں پہلے سے بھر دیا جاتا ہے۔</string>
     <string name="lock_page1_note">صفحہ ۱ کا نوٹ لاک کریں</string>
+    <string name="info_about">%1$s کے بارے میں</string>
+    <string name="info_discount">رقم خود لکھیں، یا Rs / % کے بٹن سے اسے سب ٹوٹل کا فیصد بنائیں۔</string>
+    <string name="info_tax">رعایت کے بعد لگایا جانے والا ٹیکس۔ ٹیکس نہ ہو تو خالی چھوڑ دیں۔</string>
+    <string name="info_cash_given">گاہک نے جو رقم دی۔ بقایا کل رقم سے خود نکل آتا ہے۔</string>
+    <string name="info_save_signature">دستخط محفوظ رکھتا ہے تاکہ نئی رسیدوں میں خود بھر جائے۔</string>
+    <string name="info_lock_signature">دستخط کے خانے پر لمس روک دیتا ہے تاکہ غلطی سے نشان نہ لگے۔</string>
+    <string name="info_auto_print">ہر رسید محفوظ ہوتے ہی پرنٹ کر دیتا ہے۔</string>
+    <string name="info_show_page_1">رسید ویور میں صفحہ ۱ (گاہک کی کاپی) دکھاتا ہے۔</string>
+    <string name="info_show_page_2">رسید ویور میں صفحہ ۲ دکھاتا ہے۔</string>
+    <string name="info_app_lock">ایپ کھولنے سے پہلے آپ کے فون کا لاک (فنگر پرنٹ، چہرہ یا PIN) مانگتا ہے۔</string>
+    <string name="info_lock_page1_note">نئی رسیدوں میں ہمیشہ ترتیبات والا ڈیفالٹ صفحہ ۱ کا نوٹ ہوتا ہے، اور رسید پر یہ خانہ بدلا نہیں جا سکتا۔</string>
     <string name="page1_note_locked_hint">ترتیبات میں لاک ہے — تبدیل کرنے کے لیے وہاں جائیں۔</string>
     <string name="save_default_signature">بطور طے شدہ دستخط محفوظ کریں</string>
     <string name="clear_and_redraw">صاف کر کے دوبارہ بنائیں</string>

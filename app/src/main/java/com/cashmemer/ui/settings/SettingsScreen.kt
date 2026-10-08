@@ -1,5 +1,6 @@
 package com.cashmemer.ui.settings
 
+import com.cashmemer.ui.components.InfoIcon
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -328,8 +329,8 @@ fun SettingsScreen(
         item {
             SectionCard {
                 RowTitle(Icons.Filled.Settings, stringResource(R.string.general_settings))
-                ToggleRow(stringResource(R.string.save_signature), settings.saveSignature, viewModel::setSaveSignature)
-                ToggleRow(stringResource(R.string.lock_signature), settings.signatureLocked, viewModel::setSignatureLocked)
+                ToggleRow(stringResource(R.string.save_signature), settings.saveSignature, viewModel::setSaveSignature, info = stringResource(R.string.info_save_signature))
+                ToggleRow(stringResource(R.string.lock_signature), settings.signatureLocked, viewModel::setSignatureLocked, info = stringResource(R.string.info_lock_signature))
             }
         }
 
@@ -356,6 +357,7 @@ fun SettingsScreen(
                     stringResource(R.string.lock_page1_note),
                     settings.notePage1Locked,
                     viewModel::setNotePage1Locked,
+                    info = stringResource(R.string.info_lock_page1_note),
                 )
             }
         }
@@ -363,9 +365,9 @@ fun SettingsScreen(
         item {
             SectionCard {
                 RowTitle(Icons.Filled.Print, stringResource(R.string.print_settings))
-                ToggleRow(stringResource(R.string.auto_print), settings.autoPrint, viewModel::setAutoPrint)
-                ToggleRow(stringResource(R.string.show_page_1), settings.showPage1, viewModel::setShowPage1)
-                ToggleRow(stringResource(R.string.show_page_2), settings.showPage2, viewModel::setShowPage2)
+                ToggleRow(stringResource(R.string.auto_print), settings.autoPrint, viewModel::setAutoPrint, info = stringResource(R.string.info_auto_print))
+                ToggleRow(stringResource(R.string.show_page_1), settings.showPage1, viewModel::setShowPage1, info = stringResource(R.string.info_show_page_1))
+                ToggleRow(stringResource(R.string.show_page_2), settings.showPage2, viewModel::setShowPage2, info = stringResource(R.string.info_show_page_2))
 
                 Text(stringResource(R.string.mass_print_option), style = MaterialTheme.typography.titleMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -416,7 +418,7 @@ fun SettingsScreen(
         item {
             SectionCard {
                 RowTitle(Icons.Filled.Lock, stringResource(R.string.app_lock))
-                ToggleRow(stringResource(R.string.require_secure_lock), settings.appLock, viewModel::setAppLock)
+                ToggleRow(stringResource(R.string.require_secure_lock), settings.appLock, viewModel::setAppLock, info = stringResource(R.string.info_app_lock))
                 Text(
                     stringResource(R.string.app_lock_body),
                     style = MaterialTheme.typography.bodyMedium,
@@ -500,13 +502,24 @@ private fun RowTitle(icon: androidx.compose.ui.graphics.vector.ImageVector, titl
 }
 
 @Composable
-private fun ToggleRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+private fun ToggleRow(
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    info: String? = null,
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(label, style = MaterialTheme.typography.titleMedium)
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(label, style = MaterialTheme.typography.titleMedium)
+            if (info != null) InfoIcon(title = label, body = info)
+        }
         Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }

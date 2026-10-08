@@ -1,5 +1,6 @@
 package com.cashmemer.ui.receipts
 
+import com.cashmemer.ui.components.InfoIcon
 import android.Manifest
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -980,11 +981,17 @@ private fun TotalsCard(
             // A small Rs / % switch inside the field flips how the number is
             // read — a flat amount, or a percentage of the subtotal.
             trailingIcon = {
-                DiscountModeToggle(
-                    isPercent = state.discountIsPercent,
-                    currencyCode = state.currencyCode,
-                    onChange = onDiscountModeChange,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    InfoIcon(
+                        title = stringResource(R.string.discount),
+                        body = stringResource(R.string.info_discount),
+                    )
+                    DiscountModeToggle(
+                        isPercent = state.discountIsPercent,
+                        currencyCode = state.currencyCode,
+                        onChange = onDiscountModeChange,
+                    )
+                }
             },
             modifier = Modifier.fillMaxWidth(),
         )
@@ -994,6 +1001,12 @@ private fun TotalsCard(
             label = { Text(stringResource(R.string.tax_percent)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            trailingIcon = {
+                InfoIcon(
+                    title = stringResource(R.string.tax_percent),
+                    body = stringResource(R.string.info_tax),
+                )
+            },
             modifier = Modifier.fillMaxWidth(),
         )
 
@@ -1013,6 +1026,12 @@ private fun TotalsCard(
             label = { Text(stringResource(R.string.cash_given)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            trailingIcon = {
+                InfoIcon(
+                    title = stringResource(R.string.cash_given),
+                    body = stringResource(R.string.info_cash_given),
+                )
+            },
             modifier = Modifier.fillMaxWidth(),
         )
         if (state.cashGiven > 0) {
