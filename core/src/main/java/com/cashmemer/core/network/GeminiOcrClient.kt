@@ -38,7 +38,7 @@ data class ParsedReceipt(
 object GeminiOcrClient {
 
     /** Swap this for a newer model id as they ship. */
-    const val MODEL = "gemini-2.5-flash"
+    const val MODEL = "gemini-3.8-flash"
 
     private const val ENDPOINT =
         "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent"
