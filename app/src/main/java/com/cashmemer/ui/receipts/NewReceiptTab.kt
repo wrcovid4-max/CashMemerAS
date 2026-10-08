@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.MyLocation
@@ -356,10 +357,20 @@ fun NewReceiptTab(
 
         item {
             SectionCard {
+                // Locked: read-only, so every receipt prints the Settings default.
+                // Editing it still happens in Settings; the lock icon says so.
+                val noteLocked = settings.notePage1Locked
                 OutlinedTextField(
                     value = state.notesPage1,
-                    onValueChange = viewModel::setNotesPage1,
+                    onValueChange = { if (!noteLocked) viewModel.setNotesPage1(it) },
+                    readOnly = noteLocked,
                     label = { Text(stringResource(R.string.notes_page_1)) },
+                    trailingIcon = if (noteLocked) {
+                        { Icon(Icons.Filled.Lock, contentDescription = null) }
+                    } else null,
+                    supportingText = if (noteLocked) {
+                        { Text(stringResource(R.string.page1_note_locked_hint)) }
+                    } else null,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(

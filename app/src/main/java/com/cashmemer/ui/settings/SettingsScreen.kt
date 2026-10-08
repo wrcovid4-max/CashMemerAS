@@ -110,6 +110,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setSaveSignature(value: Boolean) = launch { store.setSaveSignature(value) }
     fun setSignatureLocked(value: Boolean) = launch { store.setSignatureLocked(value) }
     fun setDefaultNotePage1(value: String) = launch { store.setDefaultNotePage1(value) }
+    fun setNotePage1Locked(value: Boolean) = launch { store.setNotePage1Locked(value) }
     fun setAutoPrint(value: Boolean) = launch { store.setAutoPrint(value) }
     fun setShowPage1(value: Boolean) = launch { store.setShowPage1(value) }
     fun setShowPage2(value: Boolean) = launch { store.setShowPage2(value) }
@@ -350,6 +351,11 @@ fun SettingsScreen(
                         viewModel.setDefaultNotePage1(it)
                     },
                     modifier = Modifier.fillMaxWidth(),
+                )
+                ToggleRow(
+                    stringResource(R.string.lock_page1_note),
+                    settings.notePage1Locked,
+                    viewModel::setNotePage1Locked,
                 )
             }
         }

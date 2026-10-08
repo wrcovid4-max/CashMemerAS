@@ -182,10 +182,12 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                         // Fill the configured Page 1 note only while the form is
                         // fresh and still carries the built-in default — never
                         // overwrite a note the shopkeeper has already changed.
-                        notesPage1 = if (fresh && current.notesPage1 == DEFAULT_NOTE_1) {
-                            settings.defaultNotePage1
-                        } else {
-                            current.notesPage1
+                        // Locked: always the Settings default, even over a note restored
+                        // from an old draft, so the printed Page 1 note can't drift.
+                        notesPage1 = when {
+                            settings.notePage1Locked -> settings.defaultNotePage1
+                            fresh && current.notesPage1 == DEFAULT_NOTE_1 -> settings.defaultNotePage1
+                            else -> current.notesPage1
                         },
                         signatureBase64 = current.signatureBase64
                             ?: settings.defaultSignatureBase64,

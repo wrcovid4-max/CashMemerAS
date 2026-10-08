@@ -99,6 +99,8 @@
     <string name="pinned_count">پن شدہ (%1$d)</string>
     <string name="default_note_page1">صفحہ ۱ کا نوٹ</string>
     <string name="default_note_page1_hint">ہر نئی رسید کے صفحہ ۱ کے نوٹ میں پہلے سے بھر دیا جاتا ہے۔</string>
+    <string name="lock_page1_note">صفحہ ۱ کا نوٹ لاک کریں</string>
+    <string name="page1_note_locked_hint">ترتیبات میں لاک ہے — تبدیل کرنے کے لیے وہاں جائیں۔</string>
     <string name="save_default_signature">بطور طے شدہ دستخط محفوظ کریں</string>
     <string name="clear_and_redraw">صاف کر کے دوبارہ بنائیں</string>
 
