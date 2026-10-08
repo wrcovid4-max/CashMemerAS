@@ -592,7 +592,7 @@ fun InfoIcon(title: String, body: String, modifier: Modifier = Modifier) {
     if (open) {
         AlertDialog(
             onDismissRequest = { open = false },
-            title = { AppleText(title) },
+            title = { AppleText(title, fontWeight = FontWeight.Bold) },
             text = { AppleText(body, style = MaterialTheme.typography.bodyMedium) },
             confirmButton = {
                 TextButton(onClick = { open = false }) { AppleText(stringResource(R.string.action_close)) }

@@ -52,7 +52,7 @@ fun SplashScreen() {
             AppleText(
                 text = stringResource(R.string.splash_copyright),
                 style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 24.dp),
