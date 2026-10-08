@@ -508,6 +508,10 @@ private fun ScannerCard(
                 text = stringResource(R.string.scanner_title),
                 style = MaterialTheme.typography.titleMedium,
             )
+            InfoIcon(
+                title = stringResource(R.string.scanner_title),
+                body = stringResource(R.string.info_scanner),
+            )
         }
         AppleText(
             text = stringResource(R.string.scanner_body),
