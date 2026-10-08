@@ -1,5 +1,6 @@
 package com.cashmemer.ui.history
 
+import com.cashmemer.ui.components.AppleText
 import com.cashmemer.ui.components.InfoIcon
 import androidx.compose.ui.draw.rotate
 import androidx.compose.animation.fadeOut
@@ -500,7 +501,7 @@ private fun HistoryRow(
             Checkbox(checked = checked, onCheckedChange = { onCheckedChange() })
 
             // Tapping the row opens the memo, the way it always did.
-            Text(
+            AppleText(
                 text = receipt.placeName.ifBlank { stringResource(R.string.untitled) },
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
@@ -581,7 +582,7 @@ private fun HistoryRow(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text(
+                        AppleText(
                             "${item.productName} × ${Format.amount(item.qty)}",
                             style = MaterialTheme.typography.bodyMedium,
                         )
