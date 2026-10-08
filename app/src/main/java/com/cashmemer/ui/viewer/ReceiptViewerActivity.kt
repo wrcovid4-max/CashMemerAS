@@ -190,6 +190,8 @@ private fun ReceiptViewerScreen(
     var editing by remember { mutableStateOf(false) }
     // The pen colour and width the next stroke uses.
     var ink by remember { mutableStateOf(Ink(InkColours[0], InkSizes[1])) }
+    // Tapping the receipt hides the title, search, page and tool bars; tap again to bring them back.
+    var chromeVisible by remember { mutableStateOf(true) }
 
     LaunchedEffect(receiptId) { viewModel.load(receiptId) }
 
@@ -203,6 +205,7 @@ private fun ReceiptViewerScreen(
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
 
+            AnimatedVisibility(visible = chromeVisible) {
             ViewerTopBar(
                 title = stringResource(R.string.viewer_title, receiptId),
                 searching = searching,
@@ -228,8 +231,9 @@ private fun ReceiptViewerScreen(
                 onSave = { viewModel.save() },
                 saveEnabled = state.dirty,
             )
+            }
 
-            if (searching) {
+            if (searching && chromeVisible) {
                 SearchBar(
                     query = state.query,
                     hitCount = state.hits.size,
@@ -290,6 +294,7 @@ private fun ReceiptViewerScreen(
                                         ink.strokeFor(viewerPage.layout.page, points, tool)
                                     )
                                 },
+                                onTapPage = { chromeVisible = !chromeVisible },
                                 onErase = { x, y ->
                                     viewModel.eraseNear(viewerPage.layout.page, x, y)
                                 },
@@ -324,7 +329,7 @@ private fun ReceiptViewerScreen(
                         }
                     }
                 }
-                if (!editing && state.pages.isNotEmpty()) {
+                if (!editing && state.pages.isNotEmpty() && chromeVisible) {
                     SmallFloatingActionButton(
                         onClick = { editing = true },
                         modifier = Modifier
@@ -339,6 +344,7 @@ private fun ReceiptViewerScreen(
                 }
             }
 
+            AnimatedVisibility(visible = chromeVisible) {
             ViewerBottomBar(
                 tool = tool,
                 onToolChange = { tool = it },
@@ -355,6 +361,7 @@ private fun ReceiptViewerScreen(
                     tool = ViewerTool.PAN
                 },
             )
+            }
         }
     }
 
@@ -512,6 +519,7 @@ private fun PageCanvas(
     ink: Ink,
     onStroke: (List<Float>) -> Unit,
     onErase: (Float, Float) -> Unit,
+    onTapPage: () -> Unit,
     onPlace: (Offset) -> Unit,
 ) {
     val pageNumber = page.layout.page
@@ -659,7 +667,10 @@ private fun PageCanvas(
             }
             .pointerInput(tool, container, zoom, offset) {
                 detectTapGestures { tap ->
-                    if (tool == ViewerTool.PAN) return@detectTapGestures
+                    if (tool == ViewerTool.PAN) {
+                        onTapPage()
+                        return@detectTapGestures
+                    }
                     val frame = frameFor(container, image.width, image.height, zoom, offset)
                     if (frame.width <= 0f || frame.height <= 0f) return@detectTapGestures
                     val fx = (tap.x - frame.left) / frame.width
