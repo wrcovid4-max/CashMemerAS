@@ -523,8 +523,8 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                                 .ifBlank { current.currencyCode },
                             category = if (parsed.category.isBlank()) current.category
                             else ReceiptCategory.from(parsed.category),
-                            paymentType = if (parsed.paymentType.isBlank()) current.paymentType
-                            else PaymentType.from(parsed.paymentType),
+                            paymentType = PaymentType.fromScanned(parsed.paymentType)
+                                ?: current.paymentType,
                             discount = parsed.discount.takeIf { it > 0 } ?: current.discount,
                             taxPercent = parsed.taxPercent.takeIf { it > 0 }
                                 ?: current.taxPercent,

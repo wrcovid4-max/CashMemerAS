@@ -18,6 +18,30 @@ enum class PaymentType(val label: String) {
     companion object {
         fun from(raw: String?): PaymentType =
             entries.firstOrNull { it.name == raw } ?: CASH
+
+        /**
+         * Reads whatever the scanner found ("Apple Pay", "VISA ****1234", "EasyPaisa",
+         * "IBFT", "Cash") and returns the matching type, or null when it is unclear.
+         */
+        fun fromScanned(raw: String?): PaymentType? {
+            val text = raw?.uppercase()?.filter { it.isLetter() } ?: return null
+            if (text.isEmpty()) return null
+            entries.firstOrNull { it.name.replace("_", "") == text }?.let { return it }
+            return when {
+                "APPLE" in text -> APPLE_PAY
+                "GOOGLEPAY" in text || "GPAY" in text -> GOOGLE_PAY
+                "GOOGLEWALLET" in text -> GOOGLE_WALLET
+                "KLARNA" in text -> KLARNA
+                "PAYPAK" in text -> PAY_PAK
+                listOf("BANK", "TRANSFER", "IBFT", "ACCOUNT").any { it in text } -> BANK_TRANSFER
+                listOf("EASYPAISA", "JAZZCASH", "SADAPAY", "NAYAPAY", "WALLET", "MOBILE").any { it in text } ->
+                    MOBILE_WALLET
+                listOf("CARD", "VISA", "MASTERCARD", "MASTER", "AMEX", "DEBIT", "CREDIT", "MAESTRO", "UNIONPAY")
+                    .any { it in text } -> CARD
+                "CASH" in text -> CASH
+                else -> null
+            }
+        }
     }
 }
 

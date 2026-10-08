@@ -55,7 +55,7 @@ You are parsing a retail receipt photograph for a point-of-sale app.
 Read every visible line item. Return ONLY the requested JSON.
 Use an empty string when a field is not visible. Never invent totals —
 if a total is unreadable, sum the line items instead.
-Currency must be a 3-letter ISO code. Payment type must be one of:
+Currency must be a 3-letter ISO code. Payment type must be one of (choose from the payment evidence: a card brand, "VISA", "Mastercard" or "card ending" means CARD; EasyPaisa, JazzCash or a mobile wallet means MOBILE_WALLET; IBFT, bank or transfer means BANK_TRANSFER; Apple Pay means APPLE_PAY; Google Pay means GOOGLE_PAY; Klarna means KLARNA; PayPak means PAY_PAK; otherwise CASH):
 CASH, CARD, BANK_TRANSFER, MOBILE_WALLET, APPLE_PAY, GOOGLE_WALLET,
 GOOGLE_PAY, KLARNA, PAY_PAK.
 Category must be one of: SHOPPING, GROCERIES, FOOD, FUEL, UTILITIES,
