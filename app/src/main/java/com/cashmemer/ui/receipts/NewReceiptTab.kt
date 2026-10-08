@@ -1047,10 +1047,21 @@ private fun TotalsCard(
             stringResource(R.string.discount), -state.discountAmount, state.currencyCode,
             info = stringResource(R.string.info_discount),
         )
-        TotalRow(
-            stringResource(R.string.tax), state.taxAmount, state.currencyCode,
-            info = stringResource(R.string.info_tax),
-        )
+        if (state.showTaxBreakdown && state.taxLines.isNotEmpty()) {
+            val base = (state.subtotal - state.discountAmount).coerceAtLeast(0.0)
+            state.taxLines.forEach { line ->
+                TotalRow(
+                    "${line.name} (${Format.amount(line.percent)}%)",
+                    base * line.percent / 100.0,
+                    state.currencyCode,
+                )
+            }
+        } else {
+            TotalRow(
+                stringResource(R.string.tax), state.taxAmount, state.currencyCode,
+                info = stringResource(R.string.info_tax),
+            )
+        }
         TotalRow(
             stringResource(R.string.grand_total),
             state.total,

@@ -1,5 +1,7 @@
 package com.cashmemer.ui.receipts
 
+import com.cashmemer.core.data.TaxBreakdownCodec
+import com.cashmemer.core.model.TaxLine
 import com.cashmemer.core.data.AppleLogo
 import android.app.Application
 import android.graphics.Bitmap
@@ -63,6 +65,10 @@ data class ReceiptFormState(
     /** When true, [discount] is read as a percentage of the subtotal. */
     val discountIsPercent: Boolean = false,
     val taxPercent: Double = 0.0,
+    /** Each tax from a scan, kept so the memo can list them. Cleared when tax is typed by hand. */
+    val taxLines: List<TaxLine> = emptyList(),
+    /** Settings: list each tax on its own line instead of one combined tax. */
+    val showTaxBreakdown: Boolean = false,
     val cashGiven: Double = 0.0,
     val latitude: Double? = null,
     val longitude: Double? = null,
@@ -197,6 +203,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                         signatureBase64 = current.signatureBase64
                             ?: settings.defaultSignatureBase64,
                         notesPage2Default = settings.defaultNotePage2,
+                        showTaxBreakdown = settings.showTaxBreakdown,
                         // Same rule as Page 1: locked always means the Settings default.
                         notesPage2 = when {
                             settings.notePage2Locked -> settings.defaultNotePage2
@@ -264,7 +271,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                 longitude = longitude,
             )
         }
-    fun setTaxPercent(value: Double) = _state.update { it.copy(taxPercent = value) }
+    fun setTaxPercent(value: Double) = _state.update { it.copy(taxPercent = value, taxLines = emptyList()) }
     fun setNotesPage1(value: String) = _state.update { it.copy(notesPage1 = AppleLogo.normalize(value)) }
     fun setNotesPage2(value: String) = _state.update { it.copy(notesPage2 = AppleLogo.normalize(value)) }
     fun setSaveSignatureAsDefault(value: Boolean) =
@@ -526,8 +533,9 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                             paymentType = PaymentType.fromScanned(parsed.paymentType)
                                 ?: current.paymentType,
                             discount = parsed.discount.takeIf { it > 0 } ?: current.discount,
-                            taxPercent = parsed.taxPercent.takeIf { it > 0 }
-                                ?: current.taxPercent,
+                            taxLines = parsed.taxes,
+                            taxPercent = if (parsed.taxes.isNotEmpty()) parsed.taxes.sumOf { it.percent }
+                            else parsed.taxPercent.takeIf { it > 0 } ?: current.taxPercent,
                             items = current.items + parsed.items,
                             message = str(R.string.msg_scanned_items, parsed.items.size),
                         )
@@ -574,6 +582,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                 // the same as a fixed one and the receipt row stays simple.
                 discount = current.discountAmount,
                 taxPercent = current.taxPercent,
+                taxBreakdownJson = if (current.showTaxBreakdown) TaxBreakdownCodec.encode(current.taxLines) else "[]",
                 total = current.total,
                 cashGiven = current.cashGiven,
                 latitude = current.latitude,
@@ -650,6 +659,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                 items = ReceiptItemCodec.decode(receipt.itemsJson),
                 discount = receipt.discount,
                 taxPercent = receipt.taxPercent,
+                taxLines = TaxBreakdownCodec.decode(receipt.taxBreakdownJson),
                 cashGiven = receipt.cashGiven,
                 latitude = receipt.latitude,
                 longitude = receipt.longitude,

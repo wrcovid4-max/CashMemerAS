@@ -1,5 +1,6 @@
 package com.cashmemer.core.network
 
+import com.cashmemer.core.model.TaxLine
 import android.graphics.Bitmap
 import android.util.Base64
 import com.cashmemer.core.BuildConfig
@@ -25,6 +26,7 @@ data class ParsedReceipt(
     val subtotal: Double = 0.0,
     val discount: Double = 0.0,
     val taxPercent: Double = 0.0,
+    val taxes: List<TaxLine> = emptyList(),
     val total: Double = 0.0,
     val items: List<ReceiptItem> = emptyList(),
 )
@@ -55,7 +57,7 @@ You are parsing a retail receipt photograph for a point-of-sale app.
 Read every visible line item. Return ONLY the requested JSON.
 Use an empty string when a field is not visible. Never invent totals —
 if a total is unreadable, sum the line items instead.
-Currency must be a 3-letter ISO code. Payment type must be one of (choose from the payment evidence: a card brand, "VISA", "Mastercard" or "card ending" means CARD; EasyPaisa, JazzCash or a mobile wallet means MOBILE_WALLET; IBFT, bank or transfer means BANK_TRANSFER; Apple Pay means APPLE_PAY; Google Pay means GOOGLE_PAY; Klarna means KLARNA; PayPak means PAY_PAK; otherwise CASH):
+Currency must be a 3-letter ISO code. List every tax or service charge separately in taxes, with its name and percent, and set taxPercent to their combined total. Payment type must be one of (choose from the payment evidence: a card brand, "VISA", "Mastercard" or "card ending" means CARD; EasyPaisa, JazzCash or a mobile wallet means MOBILE_WALLET; IBFT, bank or transfer means BANK_TRANSFER; Apple Pay means APPLE_PAY; Google Pay means GOOGLE_PAY; Klarna means KLARNA; PayPak means PAY_PAK; otherwise CASH):
 CASH, CARD, BANK_TRANSFER, MOBILE_WALLET, APPLE_PAY, GOOGLE_WALLET,
 GOOGLE_PAY, KLARNA, PAY_PAK.
 Category must be one of: SHOPPING, GROCERIES, FOOD, FUEL, UTILITIES,
@@ -123,6 +125,15 @@ SERVICES, MEDICAL, OTHER.
             )
             .put("required", JSONArray().put("productName").put("qty").put("unitPrice"))
 
+        val taxItem = JSONObject()
+            .put("type", "OBJECT")
+            .put(
+                "properties", JSONObject()
+                    .put("name", str())
+                    .put("percent", num())
+            )
+            .put("required", JSONArray().put("name").put("percent"))
+
         return JSONObject()
             .put("type", "OBJECT")
             .put(
@@ -135,6 +146,7 @@ SERVICES, MEDICAL, OTHER.
                     .put("subtotal", num())
                     .put("discount", num())
                     .put("taxPercent", num())
+                    .put("taxes", JSONObject().put("type", "ARRAY").put("items", taxItem))
                     .put("total", num())
                     .put("items", JSONObject().put("type", "ARRAY").put("items", item))
             )
@@ -170,6 +182,11 @@ SERVICES, MEDICAL, OTHER.
             subtotal = o.optDouble("subtotal", 0.0),
             discount = o.optDouble("discount", 0.0),
             taxPercent = o.optDouble("taxPercent", 0.0),
+            taxes = o.optJSONArray("taxes")?.let { arr ->
+                (0 until arr.length()).mapNotNull { i ->
+                    arr.optJSONObject(i)?.let { t -> TaxLine(t.optString("name"), t.optDouble("percent", 0.0)) }
+                }
+            }.orEmpty(),
             total = o.optDouble("total", 0.0),
             items = items,
         )

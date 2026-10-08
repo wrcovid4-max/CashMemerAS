@@ -95,6 +95,8 @@ data class Receipt(
     /** PNG bytes of the captured signature, base64 encoded. */
     val signatureBase64: String? = null,
     val itemsJson: String = "[]",
+    /** JSON list of each tax on the receipt (name and percent). "[]" when shown combined. */
+    val taxBreakdownJson: String = "[]",
     /** Marks the shopkeeper drew on the memo in the viewer. See [ReceiptAnnotation]. */
     val annotationsJson: String = "[]",
     /** Local file uri of the scanned source image, when the receipt came from OCR. */

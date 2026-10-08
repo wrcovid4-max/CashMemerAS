@@ -1,5 +1,6 @@
 package com.cashmemer.print
 
+import com.cashmemer.core.data.TaxBreakdownCodec
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -301,7 +302,14 @@ object ReceiptPdfRenderer {
             sheet.money("Discount:", receipt.discount, symbol, y, sign = "- ")
             y += ROW
         }
-        if (receipt.taxPercent > 0) {
+        val taxLines = TaxBreakdownCodec.decode(receipt.taxBreakdownJson)
+        if (taxLines.isNotEmpty()) {
+            val base = (receipt.subtotal - receipt.discount).coerceAtLeast(0.0)
+            taxLines.forEach { line ->
+                sheet.money("${line.name} (${Format.amount(line.percent)}%):", base * line.percent / 100.0, symbol, y, "+ ")
+                y += ROW
+            }
+        } else if (receipt.taxPercent > 0) {
             val tax = (receipt.subtotal - receipt.discount).coerceAtLeast(0.0) *
                 receipt.taxPercent / 100.0
             sheet.money("Tax (${Format.amount(receipt.taxPercent)}%):", tax, symbol, y, "+ ")

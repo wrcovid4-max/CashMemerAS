@@ -53,6 +53,8 @@ data class AppSettings(
     val defaultNotePage2: String = "",
     /** When on, the Page 2 note on the receipt form is read-only — it always prints the default. */
     val notePage2Locked: Boolean = false,
+    /** When on, a scanned receipt lists each of its taxes instead of one combined tax. */
+    val showTaxBreakdown: Boolean = false,
     /** SAF tree uri of the folder auto-backups are written into. */
     val backupFolderUri: String? = null,
     val autoBackup: Boolean = false,
@@ -97,6 +99,7 @@ class SettingsStore(private val context: Context) {
         val NOTE_PAGE1_LOCKED = booleanPreferencesKey("note_page1_locked")
         val DEFAULT_NOTE_PAGE2 = stringPreferencesKey("default_note_page2")
         val NOTE_PAGE2_LOCKED = booleanPreferencesKey("note_page2_locked")
+        val SHOW_TAX_BREAKDOWN = booleanPreferencesKey("show_tax_breakdown")
         val BACKUP_FOLDER = stringPreferencesKey("backup_folder_uri")
         val AUTO_BACKUP = booleanPreferencesKey("auto_backup")
         val LAST_BACKUP_AT = longPreferencesKey("last_backup_at")
@@ -175,6 +178,7 @@ class SettingsStore(private val context: Context) {
         notePage1Locked = this[Keys.NOTE_PAGE1_LOCKED] ?: false,
         defaultNotePage2 = this[Keys.DEFAULT_NOTE_PAGE2] ?: "",
         notePage2Locked = this[Keys.NOTE_PAGE2_LOCKED] ?: false,
+        showTaxBreakdown = this[Keys.SHOW_TAX_BREAKDOWN] ?: false,
         backupFolderUri = this[Keys.BACKUP_FOLDER],
         autoBackup = this[Keys.AUTO_BACKUP] ?: false,
         lastBackupAt = this[Keys.LAST_BACKUP_AT] ?: 0L,
@@ -213,6 +217,7 @@ class SettingsStore(private val context: Context) {
     suspend fun setNotePage1Locked(value: Boolean) = put(Keys.NOTE_PAGE1_LOCKED, value)
     suspend fun setDefaultNotePage2(value: String) = put(Keys.DEFAULT_NOTE_PAGE2, value)
     suspend fun setNotePage2Locked(value: Boolean) = put(Keys.NOTE_PAGE2_LOCKED, value)
+    suspend fun setShowTaxBreakdown(value: Boolean) = put(Keys.SHOW_TAX_BREAKDOWN, value)
     suspend fun setAutoBackup(value: Boolean) = put(Keys.AUTO_BACKUP, value)
 
     suspend fun setBackupFolder(uri: String?) {
