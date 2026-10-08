@@ -1,5 +1,12 @@
 package com.cashmemer
 
+import androidx.core.view.WindowCompat
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.Composable
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -28,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val settings by settingsFlow.collectAsState(initial = AppSettings())
             CashMemerTheme(themeMode = settings.themeMode) {
+                SystemBarIcons()
                 var showSplash by remember { mutableStateOf(true) }
                 LaunchedEffect(Unit) {
                     delay(SPLASH_MILLIS)
@@ -47,5 +55,22 @@ class MainActivity : AppCompatActivity() {
 
     private companion object {
         const val SPLASH_MILLIS = 1600L
+    }
+}
+
+/**
+ * Dark status bar icons on light backgrounds, light icons on dark ones. Without this,
+ * Android keeps the system default, which is white icons on a light app.
+ */
+@Composable
+private fun SystemBarIcons() {
+    val view = LocalView.current
+    val lightBackground = MaterialTheme.colorScheme.background.luminance() > 0.5f
+    SideEffect {
+        val window = (view.context as? Activity)?.window ?: return@SideEffect
+        WindowCompat.getInsetsController(window, view).apply {
+            isAppearanceLightStatusBars = lightBackground
+            isAppearanceLightNavigationBars = lightBackground
+        }
     }
 }

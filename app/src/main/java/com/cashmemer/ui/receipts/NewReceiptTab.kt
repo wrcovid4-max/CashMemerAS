@@ -1069,6 +1069,9 @@ private fun TotalsCard(
                 info = stringResource(R.string.info_tax),
             )
         }
+        if (state.extraFees > 0.0) {
+            TotalRow(stringResource(R.string.extra_fees), state.extraFees, state.currencyCode)
+        }
         TotalRow(
             stringResource(R.string.grand_total),
             state.total,

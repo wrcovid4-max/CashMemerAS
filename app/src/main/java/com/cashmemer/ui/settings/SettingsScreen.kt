@@ -116,6 +116,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setDefaultNotePage2(value: String) = launch { store.setDefaultNotePage2(value) }
     fun setNotePage2Locked(value: Boolean) = launch { store.setNotePage2Locked(value) }
     fun setShowTaxBreakdown(value: Boolean) = launch { store.setShowTaxBreakdown(value) }
+    fun setIncludeScanFees(value: Boolean) = launch { store.setIncludeScanFees(value) }
     fun setAutoPrint(value: Boolean) = launch { store.setAutoPrint(value) }
     fun setShowPage1(value: Boolean) = launch { store.setShowPage1(value) }
     fun setShowPage2(value: Boolean) = launch { store.setShowPage2(value) }
@@ -340,6 +341,12 @@ fun SettingsScreen(
                     settings.showTaxBreakdown,
                     viewModel::setShowTaxBreakdown,
                     info = stringResource(R.string.info_show_tax_breakdown),
+                )
+                ToggleRow(
+                    stringResource(R.string.show_scan_fees),
+                    settings.includeScanFees,
+                    viewModel::setIncludeScanFees,
+                    info = stringResource(R.string.info_show_scan_fees),
                 )
             }
         }

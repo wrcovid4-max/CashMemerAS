@@ -318,6 +318,10 @@ object ReceiptPdfRenderer {
 
         y = sheet.rule(y - 6f)
 
+        if (receipt.extraFees > 0.0) {
+            sheet.money("Extra / other fees:", receipt.extraFees, symbol, y, "+ ")
+            y += ROW
+        }
         sheet.write("GRAND TOTAL:", L, y, grandPaint)
         sheet.textRight("$symbol ${Format.amount(receipt.total)}", R, y)
         y = sheet.rule(y + 10f, double = true)

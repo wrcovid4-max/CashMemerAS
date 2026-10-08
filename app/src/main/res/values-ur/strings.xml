@@ -106,6 +106,9 @@
     <string name="receipt_details_title">رسید کی تفصیل</string>
     <string name="info_receipt_details">آئٹمز، مقدار، نوٹس، محفوظ جگہ، ادائیگی کا طریقہ اور بقایا دکھاتا ہے۔ نیچے کے بٹن رسید کھولتے، شیئر، پرنٹ، نقل یا ترمیم کرتے ہیں۔</string>
     <string name="info_receipt_form">یہاں رسید بھریں، یا کاغذی رسید کو OCR سے اسکین کر کے خود بھرنے دیں۔ آئٹمز شامل کریں، پھر رعایت، ٹیکس اور دی گئی رقم لکھیں۔ ٹوٹل آپ کے لکھنے کے ساتھ بدلتا ہے۔</string>
+    <string name="extra_fees">اضافی / دیگر فیس</string>
+    <string name="show_scan_fees">اسکین کی گئی رسید کی فیس شامل کریں</string>
+    <string name="info_show_scan_fees">اسکین کی گئی رسید سے پڑھی گئی ڈیلیوری، پیکنگ یا سروس فیس کل میں شامل ہوتی ہے۔ انہیں چھوڑنے کے لیے بند کریں۔</string>
     <string name="language_restart_title">زبان بدلنے کے لیے ایپ دوبارہ شروع کریں؟</string>
     <string name="language_restart_body">زبان %1$s میں بدلنے کے لیے ایپ دوبارہ شروع ہو گی۔ آپ کی رسیدیں، ڈرافٹ اور ترتیبات محفوظ رہیں گی۔</string>
     <string name="language_name_en">انگریزی</string>

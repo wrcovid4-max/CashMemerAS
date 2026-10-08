@@ -55,6 +55,8 @@ data class AppSettings(
     val notePage2Locked: Boolean = false,
     /** When on, a scanned receipt lists each of its taxes instead of one combined tax. */
     val showTaxBreakdown: Boolean = false,
+    /** When on, fees read from a scan (delivery, packing) are added to the receipt total. */
+    val includeScanFees: Boolean = true,
     /** SAF tree uri of the folder auto-backups are written into. */
     val backupFolderUri: String? = null,
     val autoBackup: Boolean = false,
@@ -100,6 +102,7 @@ class SettingsStore(private val context: Context) {
         val DEFAULT_NOTE_PAGE2 = stringPreferencesKey("default_note_page2")
         val NOTE_PAGE2_LOCKED = booleanPreferencesKey("note_page2_locked")
         val SHOW_TAX_BREAKDOWN = booleanPreferencesKey("show_tax_breakdown")
+        val INCLUDE_SCAN_FEES = booleanPreferencesKey("include_scan_fees")
         val BACKUP_FOLDER = stringPreferencesKey("backup_folder_uri")
         val AUTO_BACKUP = booleanPreferencesKey("auto_backup")
         val LAST_BACKUP_AT = longPreferencesKey("last_backup_at")
@@ -179,6 +182,7 @@ class SettingsStore(private val context: Context) {
         defaultNotePage2 = this[Keys.DEFAULT_NOTE_PAGE2] ?: "",
         notePage2Locked = this[Keys.NOTE_PAGE2_LOCKED] ?: false,
         showTaxBreakdown = this[Keys.SHOW_TAX_BREAKDOWN] ?: false,
+        includeScanFees = this[Keys.INCLUDE_SCAN_FEES] ?: true,
         backupFolderUri = this[Keys.BACKUP_FOLDER],
         autoBackup = this[Keys.AUTO_BACKUP] ?: false,
         lastBackupAt = this[Keys.LAST_BACKUP_AT] ?: 0L,
@@ -218,6 +222,7 @@ class SettingsStore(private val context: Context) {
     suspend fun setDefaultNotePage2(value: String) = put(Keys.DEFAULT_NOTE_PAGE2, value)
     suspend fun setNotePage2Locked(value: Boolean) = put(Keys.NOTE_PAGE2_LOCKED, value)
     suspend fun setShowTaxBreakdown(value: Boolean) = put(Keys.SHOW_TAX_BREAKDOWN, value)
+    suspend fun setIncludeScanFees(value: Boolean) = put(Keys.INCLUDE_SCAN_FEES, value)
     suspend fun setAutoBackup(value: Boolean) = put(Keys.AUTO_BACKUP, value)
 
     suspend fun setBackupFolder(uri: String?) {

@@ -67,6 +67,8 @@ data class ReceiptFormState(
     val taxPercent: Double = 0.0,
     /** Each tax from a scan, kept so the memo can list them. Cleared when tax is typed by hand. */
     val taxLines: List<TaxLine> = emptyList(),
+    /** Other charges (delivery, packing) read from a scan. Added to the total. */
+    val extraFees: Double = 0.0,
     /** Settings: list each tax on its own line instead of one combined tax. */
     val showTaxBreakdown: Boolean = false,
     val cashGiven: Double = 0.0,
@@ -96,7 +98,7 @@ data class ReceiptFormState(
 
     val taxAmount: Double
         get() = (subtotal - discountAmount).coerceAtLeast(0.0) * taxPercent / 100.0
-    val total: Double get() = (subtotal - discountAmount).coerceAtLeast(0.0) + taxAmount
+    val total: Double get() = (subtotal - discountAmount).coerceAtLeast(0.0) + taxAmount + extraFees
     val changeAmount: Double get() = (cashGiven - total).coerceAtLeast(0.0)
     val canGenerate: Boolean get() = placeName.isNotBlank() && items.isNotEmpty()
 
@@ -142,6 +144,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
     /** Latest Settings value for the Page 1 note, used to pre-fill fresh forms. */
     private var defaultNotePage1: String = DEFAULT_NOTE_1
     private var defaultNotePage2: String = ""
+    private var includeScanFees: Boolean = true
 
     val members: StateFlow<List<Member>> = repository.observeMembers()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -186,6 +189,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
             settingsStore.settings.collect { settings ->
                 defaultNotePage1 = settings.defaultNotePage1
                 defaultNotePage2 = settings.defaultNotePage2
+                includeScanFees = settings.includeScanFees
                 _state.update { current ->
                     val fresh = current.items.isEmpty() && current.placeName.isBlank()
                     current.copy(
@@ -534,6 +538,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                                 ?: current.paymentType,
                             discount = parsed.discount.takeIf { it > 0 } ?: current.discount,
                             taxLines = parsed.taxes,
+                            extraFees = if (includeScanFees) parsed.extraFees else 0.0,
                             taxPercent = if (parsed.taxes.isNotEmpty()) parsed.taxes.sumOf { it.percent }
                             else parsed.taxPercent.takeIf { it > 0 } ?: current.taxPercent,
                             items = current.items + parsed.items,
@@ -584,6 +589,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                 taxPercent = current.taxPercent,
                 taxBreakdownJson = if (current.showTaxBreakdown) TaxBreakdownCodec.encode(current.taxLines) else "[]",
                 total = current.total,
+                extraFees = current.extraFees,
                 cashGiven = current.cashGiven,
                 latitude = current.latitude,
                 longitude = current.longitude,
@@ -660,6 +666,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                 discount = receipt.discount,
                 taxPercent = receipt.taxPercent,
                 taxLines = TaxBreakdownCodec.decode(receipt.taxBreakdownJson),
+                extraFees = receipt.extraFees,
                 cashGiven = receipt.cashGiven,
                 latitude = receipt.latitude,
                 longitude = receipt.longitude,

@@ -97,6 +97,8 @@ data class Receipt(
     val itemsJson: String = "[]",
     /** JSON list of each tax on the receipt (name and percent). "[]" when shown combined. */
     val taxBreakdownJson: String = "[]",
+    /** Other charges that are not tax, such as delivery or packing. */
+    val extraFees: Double = 0.0,
     /** Marks the shopkeeper drew on the memo in the viewer. See [ReceiptAnnotation]. */
     val annotationsJson: String = "[]",
     /** Local file uri of the scanned source image, when the receipt came from OCR. */
