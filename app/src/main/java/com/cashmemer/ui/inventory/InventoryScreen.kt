@@ -1,5 +1,15 @@
 package com.cashmemer.ui.inventory
 
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Dialog
 import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,7 +29,6 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
@@ -292,104 +301,148 @@ private fun ProductEditorDialog(
     var stock by remember { mutableStateOf(product.stock.toString()) }
     var unit by remember { mutableStateOf(product.unit) }
 
-    AlertDialog(
+    val title = stringResource(if (product.id == 0L) R.string.add_new_product else R.string.edit_product)
+
+    // A custom Dialog instead of AlertDialog: AlertDialog is a fixed-size window the
+    // keyboard shoves around, which made fields disappear and the whole dialog jump.
+    // Here the dialog lifts above the keyboard with imePadding, the field area scrolls
+    // inside a bounded height, and Cancel/Save always stay visible.
+    Dialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(if (product.id == 0L) R.string.add_new_product else R.string.edit_product)) },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false,
+        ),
+    ) {
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .imePadding()
+                .padding(horizontal = 20.dp, vertical = 24.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Surface(
+                shape = AlertDialogDefaults.shape,
+                color = AlertDialogDefaults.containerColor,
+                tonalElevation = AlertDialogDefaults.TonalElevation,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
+                    .heightIn(max = maxHeight),
             ) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.name)) },
-                    singleLine = true,
-                )
-                OutlinedTextField(
-                    value = barcode,
-                    onValueChange = { barcode = it },
-                    label = { Text(stringResource(R.string.barcode)) },
-                    singleLine = true,
-                )
-                OutlinedTextField(
-                    value = brand,
-                    onValueChange = { brand = it },
-                    label = { Text(stringResource(R.string.brand)) },
-                    singleLine = true,
-                )
-                OutlinedTextField(
-                    value = category,
-                    onValueChange = { category = it },
-                    label = { Text(stringResource(R.string.category)) },
-                    singleLine = true,
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
-                        value = purchasePrice,
-                        onValueChange = { purchasePrice = it },
-                        label = { Text(stringResource(R.string.cost)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.weight(1f),
-                    )
-                    OutlinedTextField(
-                        value = price,
-                        onValueChange = { price = it },
-                        label = { Text(stringResource(R.string.price)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
-                        value = stock,
-                        onValueChange = { stock = it },
-                        label = { Text(stringResource(R.string.stock)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.weight(1f),
-                    )
-                    OutlinedTextField(
-                        value = unit,
-                        onValueChange = { unit = it },
-                        label = { Text(stringResource(R.string.unit)) },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-                OutlinedTextField(
-                    value = taxPercent,
-                    onValueChange = { taxPercent = it },
-                    label = { Text(stringResource(R.string.tax_percent)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onSave(
-                        product.copy(
-                            name = name.trim(),
-                            barcode = barcode.trim(),
-                            brand = brand.trim(),
-                            category = category.trim(),
-                            purchasePrice = purchasePrice.toDoubleOrNull() ?: 0.0,
-                            price = price.toDoubleOrNull() ?: 0.0,
-                            taxPercent = taxPercent.toDoubleOrNull() ?: 0.0,
-                            stock = stock.toDoubleOrNull() ?: 0.0,
-                            unit = unit.ifBlank { "piece" },
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Text(title, style = MaterialTheme.typography.headlineSmall)
+                    Spacer(Modifier.height(16.dp))
+
+                    Column(
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        OutlinedTextField(
+                            value = name,
+                            onValueChange = { name = it },
+                            label = { Text(stringResource(R.string.name)) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
                         )
-                    )
-                },
-                enabled = name.isNotBlank(),
-            ) { Text(stringResource(R.string.action_save)) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
-    )
+                        OutlinedTextField(
+                            value = barcode,
+                            onValueChange = { barcode = it },
+                            label = { Text(stringResource(R.string.barcode)) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        OutlinedTextField(
+                            value = brand,
+                            onValueChange = { brand = it },
+                            label = { Text(stringResource(R.string.brand)) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        OutlinedTextField(
+                            value = category,
+                            onValueChange = { category = it },
+                            label = { Text(stringResource(R.string.category)) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedTextField(
+                                value = purchasePrice,
+                                onValueChange = { purchasePrice = it },
+                                label = { Text(stringResource(R.string.cost)) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                modifier = Modifier.weight(1f),
+                            )
+                            OutlinedTextField(
+                                value = price,
+                                onValueChange = { price = it },
+                                label = { Text(stringResource(R.string.price)) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedTextField(
+                                value = stock,
+                                onValueChange = { stock = it },
+                                label = { Text(stringResource(R.string.stock)) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                modifier = Modifier.weight(1f),
+                            )
+                            OutlinedTextField(
+                                value = unit,
+                                onValueChange = { unit = it },
+                                label = { Text(stringResource(R.string.unit)) },
+                                singleLine = true,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                        OutlinedTextField(
+                            value = taxPercent,
+                            onValueChange = { taxPercent = it },
+                            label = { Text(stringResource(R.string.tax_percent)) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        TextButton(onClick = onDismiss) {
+                            Text(stringResource(R.string.action_cancel))
+                        }
+                        TextButton(
+                            onClick = {
+                                onSave(
+                                    product.copy(
+                                        name = name.trim(),
+                                        barcode = barcode.trim(),
+                                        brand = brand.trim(),
+                                        category = category.trim(),
+                                        purchasePrice = purchasePrice.toDoubleOrNull() ?: 0.0,
+                                        price = price.toDoubleOrNull() ?: 0.0,
+                                        taxPercent = taxPercent.toDoubleOrNull() ?: 0.0,
+                                        stock = stock.toDoubleOrNull() ?: 0.0,
+                                        unit = unit.ifBlank { "piece" },
+                                    )
+                                )
+                            },
+                            enabled = name.isNotBlank(),
+                        ) {
+                            Text(stringResource(R.string.action_save))
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
