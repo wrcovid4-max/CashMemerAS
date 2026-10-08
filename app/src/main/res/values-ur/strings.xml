@@ -105,6 +105,11 @@
     <string name="info_lock_page2_note">نئی رسیدوں میں ہمیشہ ترتیبات والا ڈیفالٹ صفحہ ۲ کا نوٹ ہوتا ہے، اور رسید پر یہ خانہ بدلا نہیں جا سکتا۔</string>
     <string name="receipt_details_title">رسید کی تفصیل</string>
     <string name="info_receipt_details">آئٹمز، مقدار، نوٹس، محفوظ جگہ، ادائیگی کا طریقہ اور بقایا دکھاتا ہے۔ نیچے کے بٹن رسید کھولتے، شیئر، پرنٹ، نقل یا ترمیم کرتے ہیں۔</string>
+    <string name="language_restart_title">زبان بدلنے کے لیے ایپ دوبارہ شروع کریں؟</string>
+    <string name="language_restart_body">زبان %1$s میں بدلنے کے لیے ایپ دوبارہ شروع ہو گی۔ آپ کی رسیدیں، ڈرافٹ اور ترتیبات محفوظ رہیں گی۔</string>
+    <string name="language_name_en">انگریزی</string>
+    <string name="language_name_ur">اردو</string>
+    <string name="action_restart">دوبارہ شروع کریں</string>
     <string name="show_tax_breakdown">ہر ٹیکس الگ دکھائیں</string>
     <string name="info_show_tax_breakdown">جب اسکین کی گئی رسید میں ایک سے زیادہ ٹیکس یا سروس چارجز ہوں تو ہر ایک کو اپنے فیصد کے ساتھ الگ لکھیں۔ بند ہونے پر ایک مجموعی ٹیکس لائن دکھائی جاتی ہے۔</string>
     <string name="info_scanner">کاغذی رسید کی تصویر کو AI (Gemini) سے پڑھ کر پورا فارم بھر دیتا ہے۔ محفوظ کرنے سے پہلے بھری ہوئی تفصیلات دیکھ لیں۔ بلک اسکین ایک وقت میں 10 تصاویر تک پڑھتا ہے۔</string>

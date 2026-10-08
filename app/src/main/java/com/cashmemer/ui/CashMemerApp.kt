@@ -1,5 +1,14 @@
 package com.cashmemer.ui
 
+import com.cashmemer.ui.components.AppleText
+import com.cashmemer.R
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -44,6 +53,8 @@ fun CashMemerApp(settings: AppSettings) {
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    // Language the user picked, waiting for confirmation before the app restarts.
+    var pendingLanguage by remember { mutableStateOf<String?>(null) }
 
     // Drive the toggle from the locale actually in effect, not from the saved
     // setting. Those two used to be read from different places and drifted
@@ -57,17 +68,46 @@ fun CashMemerApp(settings: AppSettings) {
         else -> settings.language.ifBlank { "en" }
     }
 
+    pendingLanguage?.let { tag ->
+        val languageName = stringResource(
+            if (tag == "ur") R.string.language_name_ur else R.string.language_name_en,
+        )
+        AlertDialog(
+            onDismissRequest = { pendingLanguage = null },
+            title = {
+                AppleText(
+                    text = stringResource(R.string.language_restart_title),
+                    fontWeight = FontWeight.Bold,
+                )
+            },
+            text = {
+                AppleText(text = stringResource(R.string.language_restart_body, languageName))
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    pendingLanguage = null
+                    // Per-app language: AppCompat recreates the activity, which is the restart.
+                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag))
+                    val app = context.applicationContext as CashMemerApplication
+                    scope.launch { app.settingsStore.setLanguage(tag) }
+                }) {
+                    AppleText(stringResource(R.string.action_restart))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingLanguage = null }) {
+                    AppleText(stringResource(R.string.action_cancel))
+                }
+            },
+        )
+    }
+
     Scaffold(
         topBar = {
             BrandHeader(
                 language = currentLanguage,
                 onLanguageChange = { tag ->
-                    // Per-app language: AppCompat recreates the activity for us.
-                    AppCompatDelegate.setApplicationLocales(
-                        LocaleListCompat.forLanguageTags(tag)
-                    )
-                    val app = context.applicationContext as CashMemerApplication
-                    scope.launch { app.settingsStore.setLanguage(tag) }
+                    if (tag != currentLanguage) pendingLanguage = tag
                 },
             )
         },

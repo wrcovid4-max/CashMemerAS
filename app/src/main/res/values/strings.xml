@@ -105,6 +105,11 @@
     <string name="info_lock_page2_note">New receipts always use the default Page 2 note above, and the note field can\'t be edited on the receipt.</string>
     <string name="receipt_details_title">Receipt details</string>
     <string name="info_receipt_details">Lists the items with quantities, any notes and saved location, plus how it was paid and the change given. The buttons below open, share, print, duplicate or edit the receipt.</string>
+    <string name="language_restart_title">Restart to change language?</string>
+    <string name="language_restart_body">The app will restart to switch to %1$s. Your receipts, drafts and settings are kept.</string>
+    <string name="language_name_en">English</string>
+    <string name="language_name_ur">Urdu</string>
+    <string name="action_restart">Restart</string>
     <string name="show_tax_breakdown">Show each tax separately</string>
     <string name="info_show_tax_breakdown">When a scanned receipt has several taxes or service charges, list each one with its own percentage. Off shows one combined tax line.</string>
     <string name="info_scanner">Reads a photo of a paper receipt with AI (Gemini) and fills in the whole form. Check the filled-in details before saving. Bulk Scan reads up to 10 photos at once.</string>
