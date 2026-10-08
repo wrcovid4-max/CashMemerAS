@@ -167,7 +167,10 @@ class SettingsStore(private val context: Context) {
         priceUnit = PriceUnit.from(this[Keys.PRICE_UNIT]),
         appLock = this[Keys.APP_LOCK] ?: false,
         passcode = this[Keys.PASSCODE],
-        defaultCurrency = this[Keys.DEFAULT_CURRENCY] ?: "PKR",
+        // Always PKR. An older build could save another currency here, and that value
+        // would otherwise survive every rebuild and reopen the form in that currency.
+        // No screen can change the default, so the stored value is ignored.
+        defaultCurrency = "PKR",
         defaultNotePage1 = this[Keys.DEFAULT_NOTE_PAGE1] ?: "Thank You for shopping !!!",
         notePage1Locked = this[Keys.NOTE_PAGE1_LOCKED] ?: false,
         defaultNotePage2 = this[Keys.DEFAULT_NOTE_PAGE2] ?: "",
