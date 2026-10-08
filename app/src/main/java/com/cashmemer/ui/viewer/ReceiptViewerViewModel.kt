@@ -1,5 +1,6 @@
 package com.cashmemer.ui.viewer
 
+import com.cashmemer.core.model.AnnotationKind
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -157,6 +158,22 @@ class ReceiptViewerViewModel(application: Application) : AndroidViewModel(applic
 
     fun addAnnotation(mark: ReceiptAnnotation) = _state.update {
         it.copy(annotations = it.annotations + mark, dirty = true)
+    }
+
+    /** Eraser: removes every freehand stroke on [page] that passes within [radius] of (x, y). */
+    fun eraseNear(page: Int, x: Float, y: Float, radius: Float = 0.02f) = _state.update { current ->
+        val radiusSq = radius * radius
+        val kept = current.annotations.filterNot { mark ->
+            mark.page == page &&
+                (mark.kind == AnnotationKind.PEN || mark.kind == AnnotationKind.HIGHLIGHT) &&
+                mark.points.chunked(2).any { pair ->
+                    val dx = pair[0] - x
+                    val dy = pair[1] - y
+                    dx * dx + dy * dy <= radiusSq
+                }
+        }
+        if (kept.size == current.annotations.size) current
+        else current.copy(annotations = kept, dirty = true)
     }
 
     /** Removes the most recent mark on the page being looked at. */

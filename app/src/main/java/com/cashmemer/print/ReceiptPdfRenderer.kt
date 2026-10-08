@@ -441,11 +441,33 @@ object ReceiptPdfRenderer {
                 canvas.drawLine(x - MARK, y - MARK, x + MARK, y + MARK, crossPaint)
                 canvas.drawLine(x + MARK, y - MARK, x - MARK, y + MARK, crossPaint)
             }
+            AnnotationKind.PEN, AnnotationKind.HIGHLIGHT -> drawStroke(canvas, mark, width, height)
             AnnotationKind.TEXT ->
                 if (mark.text.isNotBlank()) {
                     canvas.drawText(mark.text, x, y, annotationTextPaint)
                 }
         }
+    }
+
+    /** Freehand strokes, drawn with the same colour and width as on screen. */
+    private fun drawStroke(canvas: Canvas, mark: ReceiptAnnotation, width: Float, height: Float) {
+        val points = mark.points
+        if (points.size < 4) return
+        val path = android.graphics.Path()
+        path.moveTo(points[0] * width, points[1] * height)
+        var i = 2
+        while (i + 1 < points.size) {
+            path.lineTo(points[i] * width, points[i + 1] * height)
+            i += 2
+        }
+        val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            style = android.graphics.Paint.Style.STROKE
+            strokeCap = android.graphics.Paint.Cap.ROUND
+            strokeJoin = android.graphics.Paint.Join.ROUND
+            color = mark.colour
+            strokeWidth = mark.strokeWidth * width
+        }
+        canvas.drawPath(path, paint)
     }
 
     /**

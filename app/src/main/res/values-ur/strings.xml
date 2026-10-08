@@ -208,6 +208,9 @@
     <string name="tool_text">متن</string>
     <string name="tool_tick">درست کا نشان</string>
     <string name="tool_cross">غلط کا نشان</string>
+    <string name="tool_pen">قلم</string>
+    <string name="tool_highlight">ہائی لائٹ</string>
+    <string name="tool_eraser">ربڑ</string>
     <string name="action_undo">واپس کریں</string>
     <string name="page_number">صفحہ %1$d</string>
     <string name="add_text_mark">متن شامل کریں</string>

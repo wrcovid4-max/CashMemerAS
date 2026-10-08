@@ -94,7 +94,7 @@ data class ReceiptItem(
 }
 
 /** What a shopkeeper can stamp onto a memo in the viewer. */
-enum class AnnotationKind { TEXT, CHECK, CROSS }
+enum class AnnotationKind { TEXT, CHECK, CROSS, PEN, HIGHLIGHT }
 
 /**
  * One mark placed on a rendered memo page.
@@ -111,6 +111,12 @@ data class ReceiptAnnotation(
     val kind: AnnotationKind = AnnotationKind.CHECK,
     /** Only meaningful for [AnnotationKind.TEXT]. */
     val text: String = "",
+    /** PEN and HIGHLIGHT only: the stroke as flattened page fractions [x0, y0, x1, y1, ...]. */
+    val points: List<Float> = emptyList(),
+    /** PEN and HIGHLIGHT only: ARGB colour of the stroke (highlights carry their own alpha). */
+    val colour: Int = 0xFF000000.toInt(),
+    /** PEN and HIGHLIGHT only: stroke width as a fraction of the page width. */
+    val strokeWidth: Float = 0f,
 )
 
 /** Inventory product. Backs both the Inventory and Price List screens. */

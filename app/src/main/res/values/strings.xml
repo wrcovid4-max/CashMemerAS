@@ -207,7 +207,9 @@
     <string name="tool_pan">Pan</string>
     <string name="tool_text">Text</string>
     <string name="tool_tick">Tick</string>
-    <string name="tool_cross">Cross</string>
+    <string name="tool_pen">Pen</string>
+    <string name="tool_highlight">Highlight</string>
+    <string name="tool_eraser">Eraser</string>
     <string name="action_undo">Undo</string>
     <string name="page_number">Page %1$d</string>
     <string name="add_text_mark">Add text</string>

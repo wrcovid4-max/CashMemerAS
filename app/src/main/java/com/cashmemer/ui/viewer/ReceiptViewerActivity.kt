@@ -1,5 +1,18 @@
 package com.cashmemer.ui.viewer
 
+import androidx.compose.foundation.layout.Modifier
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.border
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.FormatColorFill
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.Path
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -98,7 +111,40 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 /** What a tap on the page does. */
-private enum class ViewerTool { PAN, TEXT, CHECK, CROSS }
+private enum class ViewerTool {
+    PAN, TEXT, CHECK, CROSS, PEN, HIGHLIGHT, ERASER;
+
+    /** The three tools that draw on the page with a finger rather than stamping. */
+    val isInk: Boolean get() = this == PEN || this == HIGHLIGHT || this == ERASER
+}
+
+/** The ink a freehand stroke is drawn with: colour, and width as a fraction of the page. */
+private data class Ink(val colour: Int, val size: Float)
+
+/** Pen colours. The highlighter uses the same colours at a translucent strength. */
+private val InkColours = listOf(
+    0xFF000000.toInt(), // black
+    0xFF1565C0.toInt(), // blue
+    0xFFD32F2F.toInt(), // red
+    0xFF2E7D32.toInt(), // green
+    0xFFEF6C00.toInt(), // orange
+    0xFF6A1B9A.toInt(), // purple
+)
+
+/** Pen widths as fractions of the page width: fine, medium, bold. */
+private val InkSizes = listOf(0.0035f, 0.007f, 0.013f)
+
+/** Builds the stored stroke for the active tool: a pen line, or a wider translucent highlight. */
+private fun Ink.strokeFor(page: Int, points: List<Float>, tool: ViewerTool): ReceiptAnnotation {
+    val highlight = tool == ViewerTool.HIGHLIGHT
+    return ReceiptAnnotation(
+        page = page,
+        kind = if (highlight) AnnotationKind.HIGHLIGHT else AnnotationKind.PEN,
+        points = points,
+        colour = if (highlight) (colour and 0x00FFFFFF) or 0x66000000 else colour,
+        strokeWidth = if (highlight) size * 4f else size,
+    )
+}
 
 /** The stamp colours, shared by the toolbar and the marks on the page. */
 private val MarkGreen = Color(0xFF1B7F37)
@@ -142,6 +188,8 @@ private fun ReceiptViewerScreen(
     // Whether the marking tools are shown. Off is a clean, read-only view.
     // Start collapsed (view-only): the memo opens clean, tools appear on tap.
     var editing by remember { mutableStateOf(false) }
+    // The pen colour and width the next stroke uses.
+    var ink by remember { mutableStateOf(Ink(InkColours[0], InkSizes[1])) }
 
     LaunchedEffect(receiptId) { viewModel.load(receiptId) }
 
@@ -236,10 +284,22 @@ private fun ReceiptViewerScreen(
                                 state = state,
                                 page = viewerPage,
                                 tool = tool,
+                                ink = ink,
+                                onStroke = { points ->
+                                    viewModel.addAnnotation(
+                                        ink.strokeFor(viewerPage.layout.page, points, tool)
+                                    )
+                                },
+                                onErase = { x, y ->
+                                    viewModel.eraseNear(viewerPage.layout.page, x, y)
+                                },
                                 onPlace = { fraction ->
                                     val pageNumber = viewerPage.layout.page
                                     when (tool) {
-                                        ViewerTool.PAN -> Unit
+                                        ViewerTool.PAN,
+                                        ViewerTool.PEN,
+                                        ViewerTool.HIGHLIGHT,
+                                        ViewerTool.ERASER -> Unit
                                         ViewerTool.TEXT -> pendingText =
                                             PendingText(pageNumber, fraction)
                                         ViewerTool.CHECK -> viewModel.addAnnotation(
@@ -264,22 +324,35 @@ private fun ReceiptViewerScreen(
                         }
                     }
                 }
+                if (!editing && state.pages.isNotEmpty()) {
+                    SmallFloatingActionButton(
+                        onClick = { editing = true },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(16.dp),
+                    ) {
+                        Icon(
+                            Icons.Filled.Edit,
+                            contentDescription = stringResource(R.string.show_tools),
+                        )
+                    }
+                }
             }
 
             ViewerBottomBar(
                 tool = tool,
                 onToolChange = { tool = it },
+                ink = ink,
+                onInkChange = { ink = it },
                 onUndo = viewModel::undo,
                 onClear = viewModel::clearPage,
                 pageCount = state.pages.size,
                 pageIndex = state.pageIndex,
                 onSelectPage = viewModel::showPage,
                 editing = editing,
-                onToggleEditing = {
-                    editing = !editing
-                    // Leaving edit mode drops back to Pan so a stray tap on the
-                    // page can't stamp a mark while you are only reading.
-                    if (!editing) tool = ViewerTool.PAN
+                onDone = {
+                    editing = false
+                    tool = ViewerTool.PAN
                 },
             )
         }
@@ -436,6 +509,9 @@ private fun PageCanvas(
     state: ViewerState,
     page: ViewerPage,
     tool: ViewerTool,
+    ink: Ink,
+    onStroke: (List<Float>) -> Unit,
+    onErase: (Float, Float) -> Unit,
     onPlace: (Offset) -> Unit,
 ) {
     val pageNumber = page.layout.page
@@ -446,6 +522,21 @@ private fun PageCanvas(
     var container by remember { mutableStateOf(IntSize.Zero) }
     var zoom by remember(page) { mutableStateOf(1f) }
     var offset by remember(page) { mutableStateOf(Offset.Zero) }
+
+    // The stroke under the finger, as page fractions [x0, y0, x1, y1, ...]. Kept as state
+    // so the ink shows while the finger is still down.
+    var liveStroke by remember(page) { mutableStateOf(emptyList<Float>()) }
+    val currentTool by rememberUpdatedState(tool)
+    val currentInk by rememberUpdatedState(ink)
+    val currentOnStroke by rememberUpdatedState(onStroke)
+    val currentOnErase by rememberUpdatedState(onErase)
+
+    // Screen point -> position on the page, as fractions. Null outside the page.
+    fun toFraction(point: Offset): Offset? {
+        val frame = frameFor(container, image.width, image.height, zoom, offset)
+        if (frame.width <= 0f || frame.height <= 0f) return null
+        return Offset((point.x - frame.left) / frame.width, (point.y - frame.top) / frame.height)
+    }
 
     val textColour = MaterialTheme.colorScheme.error
     val highlight = MaterialTheme.colorScheme.tertiary
@@ -477,8 +568,16 @@ private fun PageCanvas(
                 // (zoom) are consumed as before.
                 val tracker = VelocityTracker()
                 awaitEachGesture {
-                    awaitFirstDown(requireUnconsumed = false)
+                    val down = awaitFirstDown(requireUnconsumed = false)
                     tracker.resetTracking()
+                    val drawing = currentTool.isInk
+                    liveStroke = emptyList()
+                    if (drawing) {
+                        toFraction(down.position)?.let { p ->
+                            if (currentTool == ViewerTool.ERASER) currentOnErase(p.x, p.y)
+                            else liveStroke = listOf(p.x, p.y)
+                        }
+                    }
 
                     do {
                         val event = awaitPointerEvent()
@@ -500,7 +599,13 @@ private fun PageCanvas(
                             pressed.forEach { it.consume() }
                         } else {
                             val change = pressed.first()
-                            if (zoom > 1f) {
+                            if (drawing) {
+                                toFraction(change.position)?.let { p ->
+                                    if (currentTool == ViewerTool.ERASER) currentOnErase(p.x, p.y)
+                                    else liveStroke = liveStroke + p.x + p.y
+                                }
+                                change.consume()
+                            } else if (zoom > 1f) {
                                 // Zoomed in: the finger pans the page in both axes.
                                 offset = Offset(
                                     x = offset.x + pan.x,
@@ -528,6 +633,15 @@ private fun PageCanvas(
                             }
                         }
                     } while (true)
+
+                    if (drawing) {
+                        val points = liveStroke
+                        if (currentTool != ViewerTool.ERASER && points.size >= 4) {
+                            currentOnStroke(points)
+                        }
+                        liveStroke = emptyList()
+                        return@awaitEachGesture
+                    }
 
                     // Carry a vertical flick on after the finger lifts.
                     val velocity = tracker.calculateVelocity().y
@@ -584,6 +698,16 @@ private fun PageCanvas(
                 )
             }
 
+            // The stroke still under the finger, shown in the chosen ink.
+            if (tool.isInk && tool != ViewerTool.ERASER && liveStroke.size >= 4) {
+                drawStrokeMark(
+                    mark = ink.strokeFor(pageNumber, liveStroke, tool),
+                    origin = Offset(frame.left, frame.top),
+                    width = frame.width,
+                    height = frame.height,
+                )
+            }
+
             state.annotations
                 .filter { it.page == pageNumber }
                 .forEach { mark ->
@@ -636,6 +760,33 @@ private fun frameFor(
     return PageFrame(left, top, width, height)
 }
 
+/** Freehand pen and highlighter strokes. Points are page fractions, so they hold at any zoom. */
+private fun DrawScope.drawStrokeMark(
+    mark: ReceiptAnnotation,
+    origin: Offset,
+    width: Float,
+    height: Float,
+) {
+    val points = mark.points
+    if (points.size < 4) return
+    val path = Path()
+    path.moveTo(origin.x + points[0] * width, origin.y + points[1] * height)
+    var i = 2
+    while (i + 1 < points.size) {
+        path.lineTo(origin.x + points[i] * width, origin.y + points[i + 1] * height)
+        i += 2
+    }
+    drawPath(
+        path = path,
+        color = Color(mark.colour),
+        style = Stroke(
+            width = mark.strokeWidth * width,
+            cap = StrokeCap.Round,
+            join = StrokeJoin.Round,
+        ),
+    )
+}
+
 /** Same shapes the PDF renderer stamps, so screen and paper agree. */
 private fun DrawScope.drawMark(
     mark: ReceiptAnnotation,
@@ -684,6 +835,7 @@ private fun DrawScope.drawMark(
                 cap = StrokeCap.Round,
             )
         }
+        AnnotationKind.PEN, AnnotationKind.HIGHLIGHT -> drawStrokeMark(mark, origin, width, height)
         AnnotationKind.TEXT -> if (mark.text.isNotBlank()) {
             drawContext.canvas.nativeCanvas.drawText(
                 mark.text,
@@ -701,27 +853,39 @@ private fun DrawScope.drawMark(
 }
 
 /**
- * The whole bottom control surface: the marking tools, undo/clear, and page
- * navigation, on one raised sheet.
- *
- * Rebuilt to read like a real editor's toolbar — the four tools sit in a single
- * segmented track that slides a pill under the active one, the destructive Clear
- * is set apart on the right, and the pages are their own segmented control. The
- * point is that the controls look deliberate rather than like loose buttons
- * dropped on a black strip.
+ * The bottom of the viewer. In reading mode it is only the page chips (for a
+ * multi-page memo) and takes no room from the receipt. In markup mode it is the
+ * full tool sheet: tools, pen colour and width, undo and clear, and a Done button.
  */
 @Composable
 private fun ViewerBottomBar(
     tool: ViewerTool,
     onToolChange: (ViewerTool) -> Unit,
+    ink: Ink,
+    onInkChange: (Ink) -> Unit,
     onUndo: () -> Unit,
     onClear: () -> Unit,
     pageCount: Int,
     pageIndex: Int,
     onSelectPage: (Int) -> Unit,
     editing: Boolean,
-    onToggleEditing: () -> Unit,
+    onDone: () -> Unit,
 ) {
+    if (!editing) {
+        if (pageCount > 1) {
+            Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
+                Box(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                ) {
+                    PageSelector(pageCount = pageCount, pageIndex = pageIndex, onSelect = onSelectPage)
+                }
+            }
+        }
+        return
+    }
+
     Surface(
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 12.dp,
@@ -735,86 +899,129 @@ private fun ViewerBottomBar(
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            // The handle row: a page label on the left, and the collapse toggle
-            // on the right. Collapsing hides the tools for a clean, read-only
-            // look — tap it again to mark the memo up.
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onToggleEditing),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = stringResource(
-                        if (editing) R.string.tools_shown else R.string.view_only
-                    ),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
                     modifier = Modifier.weight(1f),
-                )
-                Icon(
-                    imageVector = if (editing) Icons.Filled.KeyboardArrowDown
-                    else Icons.Filled.KeyboardArrowUp,
-                    contentDescription = stringResource(
-                        if (editing) R.string.hide_tools else R.string.show_tools
-                    ),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .horizontalScroll(rememberScrollState()),
+                    ) {
+                        ToolSegment(Icons.Filled.OpenWith, R.string.tool_pan, tool == ViewerTool.PAN) {
+                            onToolChange(ViewerTool.PAN)
+                        }
+                        ToolSegment(Icons.Filled.Create, R.string.tool_pen, tool == ViewerTool.PEN,
+                            selectedColour = Color(ink.colour), onSelectedColour = Color.White) {
+                            onToolChange(ViewerTool.PEN)
+                        }
+                        ToolSegment(Icons.Filled.FormatColorFill, R.string.tool_highlight,
+                            tool == ViewerTool.HIGHLIGHT,
+                            selectedColour = Color(ink.colour), onSelectedColour = Color.White) {
+                            onToolChange(ViewerTool.HIGHLIGHT)
+                        }
+                        ToolSegment(Icons.Filled.Clear, R.string.tool_eraser, tool == ViewerTool.ERASER) {
+                            onToolChange(ViewerTool.ERASER)
+                        }
+                        ToolSegment(Icons.Filled.TextFields, R.string.tool_text, tool == ViewerTool.TEXT) {
+                            onToolChange(ViewerTool.TEXT)
+                        }
+                        ToolSegment(Icons.Filled.Check, R.string.tool_tick, tool == ViewerTool.CHECK,
+                            selectedColour = MarkGreen, onSelectedColour = Color.White) {
+                            onToolChange(ViewerTool.CHECK)
+                        }
+                        ToolSegment(Icons.Filled.Close, R.string.tool_cross, tool == ViewerTool.CROSS,
+                            selectedColour = MarkRed, onSelectedColour = Color.White) {
+                            onToolChange(ViewerTool.CROSS)
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                RoundIconButton(
+                    icon = Icons.Filled.KeyboardArrowDown,
+                    label = stringResource(R.string.hide_tools),
+                    onClick = onDone,
                 )
             }
 
-            // The tools only exist in edit mode.
-            AnimatedVisibility(visible = editing) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                    ) {
-                        Row(modifier = Modifier.padding(4.dp)) {
-                            ToolSegment(
-                                Icons.Filled.OpenWith, R.string.tool_pan,
-                                tool == ViewerTool.PAN,
-                            ) { onToolChange(ViewerTool.PAN) }
-                            ToolSegment(
-                                Icons.Filled.TextFields, R.string.tool_text,
-                                tool == ViewerTool.TEXT,
-                            ) { onToolChange(ViewerTool.TEXT) }
-                            ToolSegment(
-                                Icons.Filled.Check, R.string.tool_tick,
-                                tool == ViewerTool.CHECK,
-                                selectedColour = MarkGreen,
-                                onSelectedColour = Color.White,
-                            ) { onToolChange(ViewerTool.CHECK) }
-                            ToolSegment(
-                                Icons.Filled.Close, R.string.tool_cross,
-                                tool == ViewerTool.CROSS,
-                                selectedColour = MarkRed,
-                                onSelectedColour = Color.White,
-                            ) { onToolChange(ViewerTool.CROSS) }
-                        }
-                    }
-
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (tool == ViewerTool.PEN || tool == ViewerTool.HIGHLIGHT) {
+                    InkPicker(ink = ink, onInkChange = onInkChange, modifier = Modifier.weight(1f))
+                } else {
                     Spacer(modifier = Modifier.weight(1f))
-
-                    RoundIconButton(
-                        icon = Icons.Filled.Undo,
-                        label = stringResource(R.string.action_undo),
-                        onClick = onUndo,
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    RoundIconButton(
-                        icon = Icons.Filled.Delete,
-                        label = stringResource(R.string.action_clear),
-                        onClick = onClear,
-                        danger = true,
-                    )
                 }
+                RoundIconButton(
+                    icon = Icons.Filled.Undo,
+                    label = stringResource(R.string.action_undo),
+                    onClick = onUndo,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                RoundIconButton(
+                    icon = Icons.Filled.Delete,
+                    label = stringResource(R.string.action_clear),
+                    onClick = onClear,
+                    danger = true,
+                )
             }
 
             if (pageCount > 1) {
-                PageSelector(
-                    pageCount = pageCount,
-                    pageIndex = pageIndex,
-                    onSelect = onSelectPage,
+                PageSelector(pageCount = pageCount, pageIndex = pageIndex, onSelect = onSelectPage)
+            }
+        }
+    }
+}
+
+/** Colour dots and line-size dots for the pen and highlighter. */
+@Composable
+private fun InkPicker(
+    ink: Ink,
+    onInkChange: (Ink) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.horizontalScroll(rememberScrollState()),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        InkColours.forEach { colour ->
+            val selected = colour == ink.colour
+            Box(
+                modifier = Modifier
+                    .size(30.dp)
+                    .clip(CircleShape)
+                    .background(Color(colour))
+                    .border(
+                        width = if (selected) 3.dp else 1.dp,
+                        color = if (selected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.outline,
+                        shape = CircleShape,
+                    )
+                    .clickable { onInkChange(ink.copy(colour = colour)) },
+            )
+        }
+        Spacer(modifier = Modifier.width(4.dp))
+        InkSizes.forEachIndexed { index, size ->
+            val selected = size == ink.size
+            Box(
+                modifier = Modifier
+                    .size(30.dp)
+                    .clip(CircleShape)
+                    .border(
+                        width = if (selected) 2.dp else 1.dp,
+                        color = if (selected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.outline,
+                        shape = CircleShape,
+                    )
+                    .clickable { onInkChange(ink.copy(size = size)) },
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size((5 + index * 4).dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.onSurface),
                 )
             }
         }

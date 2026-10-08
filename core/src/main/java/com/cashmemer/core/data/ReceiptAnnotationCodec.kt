@@ -22,6 +22,9 @@ object ReceiptAnnotationCodec {
                     .put("y", mark.y.toDouble())
                     .put("kind", mark.kind.name)
                     .put("text", mark.text)
+                    .put("colour", mark.colour)
+                    .put("width", mark.strokeWidth.toDouble())
+                    .put("points", JSONArray(mark.points.map { it.toDouble() }))
             )
         }
         return array.toString()
@@ -41,6 +44,11 @@ object ReceiptAnnotationCodec {
                         AnnotationKind.valueOf(o.optString("kind"))
                     }.getOrDefault(AnnotationKind.CHECK),
                     text = o.optString("text"),
+                    colour = o.optInt("colour", 0xFF000000.toInt()),
+                    strokeWidth = o.optDouble("width", 0.0).toFloat(),
+                    points = o.optJSONArray("points")?.let { arr ->
+                        (0 until arr.length()).map { arr.optDouble(it).toFloat() }
+                    } ?: emptyList(),
                 )
             }
         }.getOrDefault(emptyList())
