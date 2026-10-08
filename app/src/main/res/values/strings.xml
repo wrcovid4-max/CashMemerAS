@@ -105,6 +105,7 @@
     <string name="info_lock_page2_note">New receipts always use the default Page 2 note above, and the note field can\'t be edited on the receipt.</string>
     <string name="receipt_details_title">Receipt details</string>
     <string name="info_receipt_details">Lists the items with quantities, any notes and saved location, plus how it was paid and the change given. The buttons below open, share, print, duplicate or edit the receipt.</string>
+    <string name="info_receipt_form">Fill in the receipt here, or scan a paper receipt with OCR to fill it in. Add items, then set the discount, tax and cash given. The totals update as you type.</string>
     <string name="language_restart_title">Restart to change language?</string>
     <string name="language_restart_body">The app will restart to switch to %1$s. Your receipts, drafts and settings are kept.</string>
     <string name="language_name_en">English</string>

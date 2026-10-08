@@ -191,7 +191,13 @@ fun NewReceiptTab(
                 // Side by side, the two collided in Urdu — the right-to-left
                 // heading and the stamp fought over the same corner. A line of
                 // its own reads cleanly in both languages.
-                SectionTitle(stringResource(R.string.receipt_details))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    SectionTitle(stringResource(R.string.receipt_details))
+                    InfoIcon(
+                        title = stringResource(R.string.receipt_details),
+                        body = stringResource(R.string.info_receipt_form),
+                    )
+                }
                 state.draftSavedAt?.let {
                     AppleText(
                         text = stringResource(R.string.draft_saved, Format.time(it)),
@@ -507,6 +513,7 @@ private fun ScannerCard(
             AppleText(
                 text = stringResource(R.string.scanner_title),
                 style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f),
             )
             InfoIcon(
                 title = stringResource(R.string.scanner_title),

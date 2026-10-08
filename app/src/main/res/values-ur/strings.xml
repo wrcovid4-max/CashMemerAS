@@ -105,6 +105,7 @@
     <string name="info_lock_page2_note">نئی رسیدوں میں ہمیشہ ترتیبات والا ڈیفالٹ صفحہ ۲ کا نوٹ ہوتا ہے، اور رسید پر یہ خانہ بدلا نہیں جا سکتا۔</string>
     <string name="receipt_details_title">رسید کی تفصیل</string>
     <string name="info_receipt_details">آئٹمز، مقدار، نوٹس، محفوظ جگہ، ادائیگی کا طریقہ اور بقایا دکھاتا ہے۔ نیچے کے بٹن رسید کھولتے، شیئر، پرنٹ، نقل یا ترمیم کرتے ہیں۔</string>
+    <string name="info_receipt_form">یہاں رسید بھریں، یا کاغذی رسید کو OCR سے اسکین کر کے خود بھرنے دیں۔ آئٹمز شامل کریں، پھر رعایت، ٹیکس اور دی گئی رقم لکھیں۔ ٹوٹل آپ کے لکھنے کے ساتھ بدلتا ہے۔</string>
     <string name="language_restart_title">زبان بدلنے کے لیے ایپ دوبارہ شروع کریں؟</string>
     <string name="language_restart_body">زبان %1$s میں بدلنے کے لیے ایپ دوبارہ شروع ہو گی۔ آپ کی رسیدیں، ڈرافٹ اور ترتیبات محفوظ رہیں گی۔</string>
     <string name="language_name_en">انگریزی</string>
