@@ -1,5 +1,12 @@
 package com.cashmemer.ui.history
 
+import androidx.compose.ui.draw.rotate
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -88,6 +95,11 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
     var pickingFrom by remember { mutableStateOf(false) }
     var pickingTo by remember { mutableStateOf(false) }
     var pinnedExpanded by remember { mutableStateOf(true) }
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (pinnedExpanded) 180f else 0f,
+        animationSpec = tween(durationMillis = 300),
+        label = "pinnedChevron",
+    )
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -210,7 +222,6 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
         }
 
         val pinned = receipts.filter { it.pinned }
-        val others = receipts.filter { !it.pinned }
 
         // A tappable header lets the shopkeeper fold the pinned receipts away so
         // a long list of favourites doesn't bury the recent ones.
@@ -232,16 +243,25 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                             style = MaterialTheme.typography.titleMedium,
                         )
                         Icon(
-                            imageVector = if (pinnedExpanded) Icons.Filled.ExpandLess
-                            else Icons.Filled.ExpandMore,
-                            contentDescription = null,
+                            imageVector = Icons.Filled.ExpandMore,
+                            contentDescription = stringResource(
+                                if (pinnedExpanded) R.string.hide_details else R.string.show_details
+                            ),
+                            modifier = Modifier.rotate(chevronRotation),
                         )
                     }
                 }
             }
         }
 
-        items(if (pinnedExpanded) receipts else others, key = { it.id }) { receipt ->
+        // Every receipt stays in the list; pinned rows animate in and out with the
+        // header instead of vanishing instantly. Unpinned rows are always shown.
+        items(receipts, key = { it.id }) { receipt ->
+            AnimatedVisibility(
+                visible = pinnedExpanded || !receipt.pinned,
+                enter = expandVertically(animationSpec = tween(300)) + fadeIn(tween(300)),
+                exit = shrinkVertically(animationSpec = tween(300)) + fadeOut(tween(200)),
+            ) {
             HistoryRow(
                 receipt = receipt,
                 checked = receipt.id in selected,
@@ -268,6 +288,7 @@ fun HistoryTab(viewModel: HistoryViewModel = viewModel()) {
                 onEdit = { ReceiptEditBus.requestEdit(receipt.id) },
                 onDelete = { viewModel.delete(receipt) },
             )
+            }
         }
 
         if (receipts.isEmpty()) {
