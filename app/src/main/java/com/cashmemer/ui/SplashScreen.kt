@@ -51,6 +51,7 @@ fun SplashScreen() {
             Text(
                 text = stringResource(R.string.splash_copyright),
                 style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 24.dp),

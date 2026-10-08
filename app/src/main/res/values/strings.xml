@@ -100,6 +100,9 @@
     <string name="default_note_page1">Page 1 note</string>
     <string name="default_note_page1_hint">Pre-filled on the Page 1 notes of every new receipt.</string>
     <string name="lock_page1_note">Lock Page 1 note</string>
+    <string name="default_note_page2">Page 2 note</string>
+    <string name="lock_page2_note">Lock Page 2 note</string>
+    <string name="info_lock_page2_note">New receipts always use the default Page 2 note above, and the note field can\'t be edited on the receipt.</string>
     <string name="info_about">About %1$s</string>
     <string name="info_discount">Type a flat amount, or tap the Rs / % switch to make it a percentage of the subtotal.</string>
     <string name="info_tax">The tax rate added after any discount. Leave it empty for no tax.</string>

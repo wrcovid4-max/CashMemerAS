@@ -49,6 +49,10 @@ data class AppSettings(
     val defaultNotePage1: String = "Thank You for shopping !!!",
     /** When on, the Page 1 note on the receipt form is read-only — it always prints the default. */
     val notePage1Locked: Boolean = false,
+    /** Pre-filled Page 2 note on a new receipt. Editable in Settings. */
+    val defaultNotePage2: String = "",
+    /** When on, the Page 2 note on the receipt form is read-only — it always prints the default. */
+    val notePage2Locked: Boolean = false,
     /** SAF tree uri of the folder auto-backups are written into. */
     val backupFolderUri: String? = null,
     val autoBackup: Boolean = false,
@@ -91,6 +95,8 @@ class SettingsStore(private val context: Context) {
         val DEFAULT_CURRENCY = stringPreferencesKey("default_currency")
         val DEFAULT_NOTE_PAGE1 = stringPreferencesKey("default_note_page1")
         val NOTE_PAGE1_LOCKED = booleanPreferencesKey("note_page1_locked")
+        val DEFAULT_NOTE_PAGE2 = stringPreferencesKey("default_note_page2")
+        val NOTE_PAGE2_LOCKED = booleanPreferencesKey("note_page2_locked")
         val BACKUP_FOLDER = stringPreferencesKey("backup_folder_uri")
         val AUTO_BACKUP = booleanPreferencesKey("auto_backup")
         val LAST_BACKUP_AT = longPreferencesKey("last_backup_at")
@@ -164,6 +170,8 @@ class SettingsStore(private val context: Context) {
         defaultCurrency = this[Keys.DEFAULT_CURRENCY] ?: "PKR",
         defaultNotePage1 = this[Keys.DEFAULT_NOTE_PAGE1] ?: "Thank You for shopping !!!",
         notePage1Locked = this[Keys.NOTE_PAGE1_LOCKED] ?: false,
+        defaultNotePage2 = this[Keys.DEFAULT_NOTE_PAGE2] ?: "",
+        notePage2Locked = this[Keys.NOTE_PAGE2_LOCKED] ?: false,
         backupFolderUri = this[Keys.BACKUP_FOLDER],
         autoBackup = this[Keys.AUTO_BACKUP] ?: false,
         lastBackupAt = this[Keys.LAST_BACKUP_AT] ?: 0L,
@@ -200,6 +208,8 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setDefaultNotePage1(value: String) = put(Keys.DEFAULT_NOTE_PAGE1, value)
     suspend fun setNotePage1Locked(value: Boolean) = put(Keys.NOTE_PAGE1_LOCKED, value)
+    suspend fun setDefaultNotePage2(value: String) = put(Keys.DEFAULT_NOTE_PAGE2, value)
+    suspend fun setNotePage2Locked(value: Boolean) = put(Keys.NOTE_PAGE2_LOCKED, value)
     suspend fun setAutoBackup(value: Boolean) = put(Keys.AUTO_BACKUP, value)
 
     suspend fun setBackupFolder(uri: String?) {

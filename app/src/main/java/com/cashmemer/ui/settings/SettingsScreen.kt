@@ -112,6 +112,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setSignatureLocked(value: Boolean) = launch { store.setSignatureLocked(value) }
     fun setDefaultNotePage1(value: String) = launch { store.setDefaultNotePage1(value) }
     fun setNotePage1Locked(value: Boolean) = launch { store.setNotePage1Locked(value) }
+    fun setDefaultNotePage2(value: String) = launch { store.setDefaultNotePage2(value) }
+    fun setNotePage2Locked(value: Boolean) = launch { store.setNotePage2Locked(value) }
     fun setAutoPrint(value: Boolean) = launch { store.setAutoPrint(value) }
     fun setShowPage1(value: Boolean) = launch { store.setShowPage1(value) }
     fun setShowPage2(value: Boolean) = launch { store.setShowPage2(value) }
@@ -358,6 +360,28 @@ fun SettingsScreen(
                     settings.notePage1Locked,
                     viewModel::setNotePage1Locked,
                     info = stringResource(R.string.info_lock_page1_note),
+                )
+
+                Text(
+                    stringResource(R.string.default_note_page2),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                var note2 by remember(settings.defaultNotePage2) {
+                    mutableStateOf(settings.defaultNotePage2)
+                }
+                OutlinedTextField(
+                    value = note2,
+                    onValueChange = {
+                        note2 = it
+                        viewModel.setDefaultNotePage2(it)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                ToggleRow(
+                    stringResource(R.string.lock_page2_note),
+                    settings.notePage2Locked,
+                    viewModel::setNotePage2Locked,
+                    info = stringResource(R.string.info_lock_page2_note),
                 )
             }
         }

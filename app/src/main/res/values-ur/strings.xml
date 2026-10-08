@@ -100,6 +100,9 @@
     <string name="default_note_page1">صفحہ ۱ کا نوٹ</string>
     <string name="default_note_page1_hint">ہر نئی رسید کے صفحہ ۱ کے نوٹ میں پہلے سے بھر دیا جاتا ہے۔</string>
     <string name="lock_page1_note">صفحہ ۱ کا نوٹ لاک کریں</string>
+    <string name="default_note_page2">صفحہ ۲ کا نوٹ</string>
+    <string name="lock_page2_note">صفحہ ۲ کا نوٹ لاک کریں</string>
+    <string name="info_lock_page2_note">نئی رسیدوں میں ہمیشہ ترتیبات والا ڈیفالٹ صفحہ ۲ کا نوٹ ہوتا ہے، اور رسید پر یہ خانہ بدلا نہیں جا سکتا۔</string>
     <string name="info_about">%1$s کے بارے میں</string>
     <string name="info_discount">رقم خود لکھیں، یا Rs / % کے بٹن سے اسے سب ٹوٹل کا فیصد بنائیں۔</string>
     <string name="info_tax">رعایت کے بعد لگایا جانے والا ٹیکس۔ ٹیکس نہ ہو تو خالی چھوڑ دیں۔</string>

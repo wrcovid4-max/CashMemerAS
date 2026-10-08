@@ -374,10 +374,18 @@ fun NewReceiptTab(
                     } else null,
                     modifier = Modifier.fillMaxWidth(),
                 )
+                val note2Locked = settings.notePage2Locked
                 OutlinedTextField(
                     value = state.notesPage2,
-                    onValueChange = viewModel::setNotesPage2,
+                    onValueChange = { if (!note2Locked) viewModel.setNotesPage2(it) },
+                    readOnly = note2Locked,
                     label = { Text(stringResource(R.string.notes_page_2)) },
+                    trailingIcon = if (note2Locked) {
+                        { Icon(Icons.Filled.Lock, contentDescription = null) }
+                    } else null,
+                    supportingText = if (note2Locked) {
+                        { Text(stringResource(R.string.page1_note_locked_hint)) }
+                    } else null,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

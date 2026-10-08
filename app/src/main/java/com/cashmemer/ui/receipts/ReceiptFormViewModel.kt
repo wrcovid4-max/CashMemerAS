@@ -69,6 +69,8 @@ data class ReceiptFormState(
     val notesPage1: String = DEFAULT_NOTE_1,
     /** Stays empty on purpose — page 2 is the shopkeeper's own note. */
     val notesPage2: String = "",
+    /** The Settings default for Page 2, so an untouched pre-filled note doesn't count as content. */
+    val notesPage2Default: String = "",
     val signatureBase64: String? = null,
     val sourceImageUri: String? = null,
     val saveSignatureAsDefault: Boolean = true,
@@ -110,7 +112,7 @@ data class ReceiptFormState(
             discount > 0 ||
             taxPercent > 0 ||
             cashGiven > 0 ||
-            notesPage2.isNotBlank() ||
+            (notesPage2.isNotBlank() && notesPage2 != notesPage2Default) ||
             notesPage1 != DEFAULT_NOTE_1
 }
 
@@ -132,6 +134,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
 
     /** Latest Settings value for the Page 1 note, used to pre-fill fresh forms. */
     private var defaultNotePage1: String = DEFAULT_NOTE_1
+    private var defaultNotePage2: String = ""
 
     val members: StateFlow<List<Member>> = repository.observeMembers()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -175,6 +178,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         viewModelScope.launch {
             settingsStore.settings.collect { settings ->
                 defaultNotePage1 = settings.defaultNotePage1
+                defaultNotePage2 = settings.defaultNotePage2
                 _state.update { current ->
                     val fresh = current.items.isEmpty() && current.placeName.isBlank()
                     current.copy(
@@ -191,6 +195,13 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                         },
                         signatureBase64 = current.signatureBase64
                             ?: settings.defaultSignatureBase64,
+                        notesPage2Default = settings.defaultNotePage2,
+                        // Same rule as Page 1: locked always means the Settings default.
+                        notesPage2 = when {
+                            settings.notePage2Locked -> settings.defaultNotePage2
+                            fresh && current.notesPage2.isBlank() -> settings.defaultNotePage2
+                            else -> current.notesPage2
+                        },
                         saveSignatureAsDefault = settings.saveSignature,
                     )
                 }
@@ -599,6 +610,8 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
             _state.value = ReceiptFormState(
                 currencyCode = "PKR",
                 notesPage1 = defaultNotePage1,
+                notesPage2 = defaultNotePage2,
+                notesPage2Default = defaultNotePage2,
                 signatureBase64 = if (current.saveSignatureAsDefault) {
                     current.signatureBase64
                 } else {
@@ -658,6 +671,8 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
             // Back to the PKR default rather than carrying the last-used currency.
             currencyCode = "PKR",
             notesPage1 = defaultNotePage1,
+            notesPage2 = defaultNotePage2,
+            notesPage2Default = defaultNotePage2,
             signatureBase64 = current.signatureBase64,
             saveSignatureAsDefault = current.saveSignatureAsDefault,
         )
