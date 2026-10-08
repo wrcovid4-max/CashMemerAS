@@ -40,6 +40,12 @@ object GeminiOcrClient {
     /** Swap this for a newer model id as they ship. */
     const val MODEL = "gemini-3.8-flash"
 
+    /** Newest model first; the scanner falls back to the next one if the newest stays busy. */
+    private val MODELS = listOf(MODEL, "gemini-3.6-flash")
+
+    /** Busy or overloaded responses worth retrying. */
+    private val RETRYABLE = setOf(429, 500, 503)
+
     private const val ENDPOINT =
         "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent"
 
@@ -95,19 +101,25 @@ SERVICES, MEDICAL, OTHER.
                 )
                 .toString()
 
-            val request = Request.Builder()
-                .url(ENDPOINT.format(MODEL))
-                .header("x-goog-api-key", key)
-                .post(body.toRequestBody(json))
-                .build()
-
-            client.newCall(request).execute().use { response ->
-                val raw = response.body?.string().orEmpty()
-                check(response.isSuccessful) {
-                    "Gemini request failed: HTTP ${response.code} $raw"
+            var lastError = "Gemini request failed"
+            for (model in MODELS) {
+                for (attempt in 1..3) {
+                    val request = Request.Builder()
+                        .url(ENDPOINT.format(model))
+                        .header("x-goog-api-key", key)
+                        .post(body.toRequestBody(json))
+                        .build()
+                    val (code, raw) = client.newCall(request).execute().use { r ->
+                        r.code to r.body?.string().orEmpty()
+                    }
+                    if (code in 200..299) return@runCatching parseResponse(raw)
+                    lastError = "Gemini request failed: HTTP $code $raw"
+                    // Not a busy error (e.g. model unavailable): move on to the next model.
+                    if (code !in RETRYABLE) break
+                    Thread.sleep(attempt * 2000L)
                 }
-                parseResponse(raw)
             }
+            throw IllegalStateException(lastError)
         }
     }
 
