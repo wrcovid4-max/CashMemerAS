@@ -42,7 +42,14 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             val settings by settingsFlow.collectAsState(initial = AppSettings())
-            LaunchedEffect(settings.appSounds) { com.cashmemer.audio.AppSounds.enabled = settings.appSounds }
+            LaunchedEffect(settings.appSounds) {
+                com.cashmemer.audio.AppSounds.enabled = settings.appSounds
+                if (settings.appSounds) {
+                    com.cashmemer.audio.AppSounds.startMusic(this@MainActivity)
+                } else {
+                    com.cashmemer.audio.AppSounds.stopMusic()
+                }
+            }
             CashMemerTheme(themeMode = settings.themeMode) {
                 SystemBarIcons()
                 var showSplash by remember { mutableStateOf(true) }
@@ -64,6 +71,16 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        com.cashmemer.audio.AppSounds.pauseMusic()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        com.cashmemer.audio.AppSounds.resumeMusic()
     }
 
     override fun onNewIntent(intent: android.content.Intent) {

@@ -2,6 +2,7 @@ package com.cashmemer.audio
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.MediaPlayer
 import android.media.SoundPool
 import com.cashmemer.R
 
@@ -18,6 +19,36 @@ object AppSounds {
 
     private var pool: SoundPool? = null
     private val ids = mutableMapOf<Kind, Int>()
+
+    /** The background track (the cellar stairs), looping quietly while the app is open. */
+    private var music: MediaPlayer? = null
+
+    fun startMusic(context: Context) {
+        if (!enabled) return
+        val player = music ?: MediaPlayer.create(context.applicationContext, R.raw.the_cellar_stairs)
+            ?.also {
+                it.isLooping = true
+                it.setVolume(0.35f, 0.35f)
+                music = it
+            } ?: return
+        if (!player.isPlaying) player.start()
+    }
+
+    fun pauseMusic() {
+        music?.takeIf { it.isPlaying }?.pause()
+    }
+
+    fun resumeMusic() {
+        if (enabled) music?.takeIf { !it.isPlaying }?.start()
+    }
+
+    fun stopMusic() {
+        music?.let {
+            it.stop()
+            it.release()
+        }
+        music = null
+    }
 
     fun play(context: Context, kind: Kind) {
         if (!enabled) return
