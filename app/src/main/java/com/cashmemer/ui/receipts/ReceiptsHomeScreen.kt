@@ -1,5 +1,6 @@
 package com.cashmemer.ui.receipts
 
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.size
