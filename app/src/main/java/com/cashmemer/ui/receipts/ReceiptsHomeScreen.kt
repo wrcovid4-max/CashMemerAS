@@ -82,7 +82,7 @@ fun ReceiptsHomeScreen(
                     modifier = Modifier
                         .align(Alignment.Center)
                         .size(340.dp),
-                    alpha = 0.07f,
+                    alpha = 0.18f,
                 )
                 NewReceiptTab(settings, onOpenBulkScan = onOpenBulkScan)
             }
