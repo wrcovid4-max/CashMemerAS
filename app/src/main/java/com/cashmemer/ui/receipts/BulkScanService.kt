@@ -1,5 +1,7 @@
 package com.cashmemer.ui.receipts
 
+import com.cashmemer.MainActivity
+import android.app.PendingIntent
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
@@ -135,7 +137,22 @@ object BulkNotifier {
             .setProgress(total, done, false)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
+            .setContentIntent(openBarcodeIntent(context))
             .build()
+    }
+
+    /** Tapping the notification opens the app and goes to the barcode scanner. */
+    private fun openBarcodeIntent(context: Context): PendingIntent {
+        val intent = Intent(context, MainActivity::class.java).apply {
+            putExtra(BarcodeScanBus.EXTRA_OPEN_BARCODE, true)
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        return PendingIntent.getActivity(
+            context,
+            1,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
     }
 
     fun finished(context: Context, done: Int, total: Int): Notification {

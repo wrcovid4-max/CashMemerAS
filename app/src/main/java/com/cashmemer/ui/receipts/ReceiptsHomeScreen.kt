@@ -34,6 +34,12 @@ fun ReceiptsHomeScreen(
         stringResource(R.string.tab_dashboard),
     )
 
+    // A tap on the live notification asks for the barcode scanner: show the form tab.
+    val barcodePending by BarcodeScanBus.pending.collectAsState()
+    LaunchedEffect(barcodePending) {
+        if (barcodePending) selectedTab = 0
+    }
+
     // Tapping Edit in History jumps back to the form with that receipt loaded.
     val editRequest by ReceiptEditBus.requestedId.collectAsState()
     LaunchedEffect(editRequest) {

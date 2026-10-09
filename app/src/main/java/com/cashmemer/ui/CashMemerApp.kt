@@ -1,5 +1,8 @@
 package com.cashmemer.ui
 
+import com.cashmemer.ui.receipts.BarcodeScanBus
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import com.cashmemer.ui.receipts.BulkScanScreen
 import com.cashmemer.ui.components.AppleText
 import com.cashmemer.R
@@ -143,6 +146,11 @@ private fun AppNavHost(
     settings: AppSettings,
     contentPadding: PaddingValues,
 ) {
+    val barcodePending by BarcodeScanBus.pending.collectAsState()
+    LaunchedEffect(barcodePending) {
+        if (barcodePending) navController.popBackStack(Destination.Receipts.route, false)
+    }
+
     Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
         NavHost(
             navController = navController,

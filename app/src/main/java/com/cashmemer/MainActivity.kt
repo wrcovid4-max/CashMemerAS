@@ -1,5 +1,6 @@
 package com.cashmemer
 
+import com.cashmemer.ui.receipts.BarcodeScanBus
 import androidx.core.view.WindowCompat
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.luminance
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        handleBarcodeIntent(intent)
 
         val settingsFlow = (application as CashMemerApplication).settingsStore.settings
 
@@ -50,6 +52,17 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        handleBarcodeIntent(intent)
+    }
+
+    private fun handleBarcodeIntent(intent: android.content.Intent?) {
+        if (intent?.getBooleanExtra(BarcodeScanBus.EXTRA_OPEN_BARCODE, false) == true) {
+            BarcodeScanBus.request()
         }
     }
 

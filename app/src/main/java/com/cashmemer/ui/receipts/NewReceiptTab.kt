@@ -130,6 +130,10 @@ fun NewReceiptTab(
 
     val context = LocalContext.current
 
+    val barcodePending by BarcodeScanBus.pending.collectAsState()
+    LaunchedEffect(barcodePending) {
+        if (barcodePending && BarcodeScanBus.consume()) scanBarcode.launch(Unit)
+    }
     val editingBulk by BulkScanSession.editingId.collectAsState()
     val saveRequested by BulkScanSession.saveRequested.collectAsState()
     LaunchedEffect(editingBulk) {

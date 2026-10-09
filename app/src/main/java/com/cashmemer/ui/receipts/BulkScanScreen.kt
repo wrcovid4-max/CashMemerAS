@@ -307,7 +307,7 @@ fun BulkScanScreen(
                 stringResource(R.string.bulk_section_receipts),
                 style = MaterialTheme.typography.titleSmall,
             )
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(batch, key = { it.id }) { item ->
                     val canEdit = item.status == BulkStatus.Done || item.status == BulkStatus.Failed
                     BulkRow(
@@ -327,7 +327,7 @@ fun BulkScanScreen(
         }
 
         // Save / Clear once everything is scanned
-        if (allDone) {
+        if (batch.isNotEmpty()) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -343,6 +343,7 @@ fun BulkScanScreen(
                         BulkScanSession.requestSave()
                         onSaveAll()
                     },
+                    enabled = allDone,
                     modifier = Modifier.weight(1f),
                 ) {
                     Text(stringResource(R.string.bulk_save))

@@ -146,6 +146,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
     private var defaultNotePage1: String = DEFAULT_NOTE_1
     private var defaultNotePage2: String = ""
     private var includeScanFees: Boolean = true
+    private var defaultSignature: String? = null
 
     val members: StateFlow<List<Member>> = repository.observeMembers()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -191,6 +192,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                 defaultNotePage1 = settings.defaultNotePage1
                 defaultNotePage2 = settings.defaultNotePage2
                 includeScanFees = settings.includeScanFees
+                defaultSignature = settings.defaultSignatureBase64
                 _state.update { current ->
                     val fresh = current.items.isEmpty() && current.placeName.isBlank()
                     current.copy(
@@ -571,6 +573,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         val current = _state.value
         val base = ReceiptFormState(
             currencyCode = current.currencyCode,
+            signatureBase64 = defaultSignature,
             notesPage1 = current.notesPage1,
             notesPage2 = current.notesPage2,
         )
