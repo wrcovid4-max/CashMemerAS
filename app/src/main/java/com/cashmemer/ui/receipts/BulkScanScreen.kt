@@ -173,14 +173,14 @@ fun BulkScanScreen(
     onSaveAll: () -> Unit,
     viewModel: BulkScanViewModel = viewModel(),
 ) {
-    val items by BulkScanSession.items.collectAsState()
+    val batch by BulkScanSession.items.collectAsState()
     val pick = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(BULK_LIMIT),
     ) { uris -> viewModel.scan(uris) }
     val imagesOnly = ActivityResultContracts.PickVisualMedia.ImageOnly
 
-    val finished = items.count { it.status == BulkStatus.Done || it.status == BulkStatus.Failed }
-    val allDone = items.isNotEmpty() && items.none {
+    val finished = batch.count { it.status == BulkStatus.Done || it.status == BulkStatus.Failed }
+    val allDone = batch.isNotEmpty() && batch.none {
         it.status == BulkStatus.Waiting || it.status == BulkStatus.Scanning
     }
 
@@ -211,15 +211,15 @@ fun BulkScanScreen(
             Text(stringResource(R.string.bulk_pick))
         }
 
-        if (items.isNotEmpty()) {
+        if (batch.isNotEmpty()) {
             Text(
-                stringResource(R.string.bulk_progress, finished, items.size),
+                stringResource(R.string.bulk_progress, finished, batch.size),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(items, key = { it.id }) { item ->
+            items(batch, key = { it.id }) { item ->
                 val canEdit = item.status == BulkStatus.Done || item.status == BulkStatus.Failed
                 BulkRow(
                     number = item.id + 1,

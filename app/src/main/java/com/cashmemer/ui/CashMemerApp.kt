@@ -1,5 +1,6 @@
 package com.cashmemer.ui
 
+import com.cashmemer.ui.receipts.BulkScanScreen
 import com.cashmemer.ui.components.AppleText
 import com.cashmemer.R
 import androidx.compose.ui.res.stringResource
