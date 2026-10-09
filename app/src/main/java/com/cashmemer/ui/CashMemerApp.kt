@@ -44,6 +44,7 @@ import com.cashmemer.ui.settings.SettingsScreen
 
 /** Sub-screen of More, so it stays off the bottom bar. */
 private const val ROUTE_DEVICES = "devices"
+private const val ROUTE_BULK = "bulk"
 
 @Composable
 fun CashMemerApp(settings: AppSettings) {
@@ -153,7 +154,13 @@ private fun AppNavHost(
             popEnterTransition = { fadeIn(animationSpec = snap()) },
             popExitTransition = { fadeOut(animationSpec = snap()) },
         ) {
-            composable(Destination.Receipts.route) { ReceiptsHomeScreen(settings) }
+            composable(Destination.Receipts.route) {
+                ReceiptsHomeScreen(
+                    settings = settings,
+                    onOpenBulkScan = { navController.navigate(ROUTE_BULK) },
+                )
+            }
+            composable(ROUTE_BULK) { BulkScanScreen(onBack = { navController.popBackStack() }) }
             composable(Destination.Inventory.route) { InventoryScreen() }
             composable(Destination.PriceList.route) { PriceListScreen() }
             composable(Destination.Rates.route) { RatesScreen() }

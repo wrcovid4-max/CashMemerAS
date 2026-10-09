@@ -22,7 +22,10 @@ import com.cashmemer.ui.components.FitText
 
 /** Receipts · History · Dashboard — the three tabs of the app's home screen. */
 @Composable
-fun ReceiptsHomeScreen(settings: AppSettings) {
+fun ReceiptsHomeScreen(
+    settings: AppSettings,
+    onOpenBulkScan: () -> Unit = {},
+) {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
 
     val titles = listOf(
@@ -60,7 +63,7 @@ fun ReceiptsHomeScreen(settings: AppSettings) {
         }
 
         when (selectedTab) {
-            0 -> NewReceiptTab(settings)
+            0 -> NewReceiptTab(settings, onOpenBulkScan = onOpenBulkScan)
             1 -> HistoryTab()
             else -> DashboardTab()
         }

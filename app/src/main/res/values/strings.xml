@@ -513,4 +513,13 @@
     <string name="link_privacy">Privacy Policy</string>
     <string name="link_terms">Terms of Service</string>
     <string name="link_trademarks">Trademarks</string>
+    <string name="bulk_title">Bulk scan</string>
+    <string name="bulk_back">Back</string>
+    <string name="bulk_pick">Choose receipts</string>
+    <string name="bulk_progress">%1$d of %2$d done</string>
+    <string name="bulk_receipt_number">Receipt %1$d</string>
+    <string name="bulk_waiting">Waiting</string>
+    <string name="bulk_scanning">Scanning…</string>
+    <string name="bulk_done">Scanned</string>
+    <string name="bulk_failed">Could not read</string>
 </resources>

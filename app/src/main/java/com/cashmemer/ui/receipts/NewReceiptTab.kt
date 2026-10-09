@@ -107,6 +107,7 @@ private fun String.toAmount(): Double? =
 fun NewReceiptTab(
     settings: AppSettings,
     viewModel: ReceiptFormViewModel = viewModel(),
+    onOpenBulkScan: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     val members by viewModel.members.collectAsState()
@@ -178,9 +179,7 @@ fun NewReceiptTab(
                 onImportImage = {
                     pickImage.launch(PickVisualMediaRequest(imagesOnly))
                 },
-                onBulkScan = {
-                    pickImages.launch(PickVisualMediaRequest(imagesOnly))
-                },
+                onBulkScan = onOpenBulkScan,
                 onBarcodeScan = { scanBarcode.launch(Unit) },
             )
         }

@@ -513,4 +513,13 @@
     <string name="link_privacy">پرائیویسی پالیسی</string>
     <string name="link_terms">سروس کی شرائط</string>
     <string name="link_trademarks">ٹریڈ مارکس</string>
+    <string name="bulk_title">بلک اسکین</string>
+    <string name="bulk_back">واپس</string>
+    <string name="bulk_pick">رسیدیں چنیں</string>
+    <string name="bulk_progress">%1$d میں سے %2$d مکمل</string>
+    <string name="bulk_receipt_number">رسید %1$d</string>
+    <string name="bulk_waiting">انتظار</string>
+    <string name="bulk_scanning">اسکین ہو رہی ہے…</string>
+    <string name="bulk_done">اسکین ہو گئی</string>
+    <string name="bulk_failed">پڑھی نہیں جا سکی</string>
 </resources>
