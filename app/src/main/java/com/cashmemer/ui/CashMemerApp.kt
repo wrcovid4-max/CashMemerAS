@@ -1,5 +1,9 @@
 package com.cashmemer.ui
 
+import com.cashmemer.ui.ai.AskAiScreen
+import com.cashmemer.ui.ai.AskAiFab
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Alignment
 import com.cashmemer.ui.receipts.BarcodeScanBus
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
@@ -49,6 +53,7 @@ import com.cashmemer.ui.settings.SettingsScreen
 /** Sub-screen of More, so it stays off the bottom bar. */
 private const val ROUTE_DEVICES = "devices"
 private const val ROUTE_BULK = "bulk"
+private const val ROUTE_ASK_AI = "ask_ai"
 
 @Composable
 fun CashMemerApp(settings: AppSettings) {
@@ -151,6 +156,8 @@ private fun AppNavHost(
         if (barcodePending) navController.popBackStack(Destination.Receipts.route, false)
     }
 
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
     Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
         NavHost(
             navController = navController,
@@ -169,6 +176,7 @@ private fun AppNavHost(
                     onOpenBulkScan = { navController.navigate(ROUTE_BULK) },
                 )
             }
+            composable(ROUTE_ASK_AI) { AskAiScreen(onBack = { navController.popBackStack() }) }
             composable(ROUTE_BULK) {
                 BulkScanScreen(
                     onBack = { navController.popBackStack() },
@@ -188,5 +196,13 @@ private fun AppNavHost(
             }
             composable(ROUTE_DEVICES) { DevicesScreen(settings) }
         }
-    }
+            if (currentRoute != ROUTE_ASK_AI && currentRoute != ROUTE_BULK) {
+            AskAiFab(
+                onClick = { navController.navigate(ROUTE_ASK_AI) },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 16.dp, bottom = 16.dp),
+            )
+        }
+}
 }

@@ -543,4 +543,10 @@
     <string name="bulk_waiting_network">وائی فائی کا انتظار ہے، یا ترتیبات میں موبائل ڈیٹا کی اجازت کا۔۔۔</string>
     <string name="app_sounds">ایپ کی آوازیں</string>
     <string name="info_app_sounds">ڈراؤنی آوازیں: رسید محفوظ ہونے پر بھوتیہ آواز، بلک اسکین مکمل ہونے پر ڈراؤنی گونج، اور تصاویر شامل ہونے پر چمگادڑ کی گھنٹی۔ خاموشی کے لیے بند کریں۔</string>
+    <string name="ai_title">اے آئی سے پوچھیں</string>
+    <string name="ai_hint">اپنی رسیدوں یا ایکسچینج ریٹ کے بارے میں کچھ بھی پوچھیں، مثلاً: اس مہینے میں گروسری پر کتنا خرچ کیا؟ 500 USD کتنے PKR کے برابر ہیں؟</string>
+    <string name="ai_placeholder">اپنا سوال لکھیں</string>
+    <string name="ai_send">بھیجیں</string>
+    <string name="ai_thinking">سوچ رہا ہوں…</string>
+    <string name="ai_error">معذرت، ابھی جواب نہیں مل سکا۔ دوبارہ کوشش کریں۔</string>
 </resources>
