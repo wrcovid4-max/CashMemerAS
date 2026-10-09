@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
+import android.content.Intent
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
@@ -94,6 +95,26 @@ object BulkScanSession {
     private val _saveRequested = MutableStateFlow(false)
     private var doneCount = 0
     private var doneMillis = 0L
+    private val pending = ArrayDeque<Pair<Int, Uri>>()
+
+    /** Photos waiting for the background service to scan them. */
+    @Synchronized
+    fun enqueue(work: List<Pair<Int, Uri>>) {
+        pending.addAll(work)
+    }
+
+    @Synchronized
+    fun takeNext(): Pair<Int, Uri>? = if (pending.isEmpty()) null else pending.removeFirst()
+
+    @Synchronized
+    fun hasPending(): Boolean = pending.isNotEmpty()
+
+    /** Receipts finished so far, and the total in the batch. */
+    fun progressCounts(): Pair<Int, Int> {
+        val list = _items.value
+        val done = list.count { it.status == BulkStatus.Done || it.status == BulkStatus.Failed }
+        return done to list.size
+    }
 
     /** Records how long one receipt took, for the time-left estimate. */
     fun recordDuration(millis: Long) {
@@ -108,6 +129,7 @@ object BulkScanSession {
     private fun resetTiming() {
         doneCount = 0
         doneMillis = 0L
+        synchronized(this) { pending.clear() }
     }
     val saveRequested: StateFlow<Boolean> = _saveRequested.asStateFlow()
 
@@ -157,59 +179,6 @@ object BulkScanSession {
 /** The green used for the bulk scan progress bar. */
 private val ScanGreen = Color(0xFF2E7D32)
 
-/** Shows scan progress as an ongoing notification in the notification shade. */
-object BulkNotifier {
-    private const val CHANNEL = "bulk_scan"
-    private const val NOTIFICATION_ID = 4101
-
-    private fun ensureChannel(context: Context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-        val manager = context.getSystemService(NotificationManager::class.java)
-        if (manager.getNotificationChannel(CHANNEL) == null) {
-            manager.createNotificationChannel(
-                NotificationChannel(
-                    CHANNEL,
-                    context.getString(R.string.bulk_notif_channel),
-                    NotificationManager.IMPORTANCE_LOW,
-                )
-            )
-        }
-    }
-
-    private fun canPost(context: Context): Boolean =
-        Build.VERSION.SDK_INT < 33 ||
-            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
-            PackageManager.PERMISSION_GRANTED
-
-    @SuppressLint("MissingPermission")
-    fun progress(context: Context, done: Int, total: Int, etaText: String) {
-        ensureChannel(context)
-        if (!canPost(context)) return
-        val notification = NotificationCompat.Builder(context, CHANNEL)
-            .setSmallIcon(android.R.drawable.ic_popup_sync)
-            .setContentTitle(context.getString(R.string.bulk_notif_title))
-            .setContentText(context.getString(R.string.bulk_progress, done, total) + " · " + etaText)
-            .setProgress(total, done, false)
-            .setOngoing(true)
-            .setOnlyAlertOnce(true)
-            .build()
-        NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
-    }
-
-    @SuppressLint("MissingPermission")
-    fun finished(context: Context, done: Int, total: Int) {
-        ensureChannel(context)
-        if (!canPost(context)) return
-        val notification = NotificationCompat.Builder(context, CHANNEL)
-            .setSmallIcon(android.R.drawable.ic_popup_sync)
-            .setContentTitle(context.getString(R.string.bulk_notif_done))
-            .setContentText(context.getString(R.string.bulk_progress, done, total))
-            .setAutoCancel(true)
-            .build()
-        NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
-    }
-}
-
 /** Formats a time-left estimate as a short phrase. */
 @Composable
 private fun etaText(millis: Long?): String = when {
@@ -218,63 +187,15 @@ private fun etaText(millis: Long?): String = when {
     else -> stringResource(R.string.bulk_eta_seconds, maxOf(1, (millis / 1000).toInt()))
 }
 
-/** Scans the picked photos one after another, updating each item and the notification. */
+/** Queues the picked photos and starts the background service that scans them. */
 class BulkScanViewModel(application: Application) : AndroidViewModel(application) {
 
     fun scan(uris: List<Uri>) {
         if (uris.isEmpty()) return
         val start = BulkScanSession.add(uris)
-        val total = BulkScanSession.items.value.size
-        viewModelScope.launch {
-            uris.forEachIndexed { offset, uri ->
-                val id = start + offset
-                val started = System.currentTimeMillis()
-                BulkScanSession.update(id) { it.copy(status = BulkStatus.Scanning) }
-                val bitmap = decodeScaled(uri)
-                val result = bitmap?.let { GeminiOcrClient.parse(it).getOrNull() }
-                BulkScanSession.update(id) {
-                    it.copy(
-                        status = if (result != null) BulkStatus.Done else BulkStatus.Failed,
-                        parsed = result,
-                    )
-                }
-                BulkScanSession.recordDuration(System.currentTimeMillis() - started)
-                val done = BulkScanSession.items.value.count {
-                    it.status == BulkStatus.Done || it.status == BulkStatus.Failed
-                }
-                val eta = BulkScanSession.etaMillis(total - done)
-                BulkNotifier.progress(getApplication<Application>(), done, total, etaTextPlain(getApplication<Application>(), eta))
-            }
-            val done = BulkScanSession.items.value.count {
-                it.status == BulkStatus.Done || it.status == BulkStatus.Failed
-            }
-            BulkNotifier.finished(getApplication<Application>(), done, total)
-        }
-    }
-
-    private fun etaTextPlain(context: Context, millis: Long?): String = when {
-        millis == null -> context.getString(R.string.bulk_eta_calculating)
-        millis >= 60_000 -> context.getString(R.string.bulk_eta_minutes, (millis / 60_000).toInt() + 1)
-        else -> context.getString(R.string.bulk_eta_seconds, maxOf(1, (millis / 1000).toInt()))
-    }
-
-    private suspend fun decodeScaled(uri: Uri): Bitmap? = withContext(Dispatchers.IO) {
-        runCatching {
-            val resolver = getApplication<Application>().contentResolver
-            val source = ImageDecoder.createSource(resolver, uri)
-            ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
-                val longEdge = maxOf(info.size.width, info.size.height)
-                if (longEdge > BULK_MAX_EDGE) {
-                    val scale = BULK_MAX_EDGE.toFloat() / longEdge
-                    decoder.setTargetSize(
-                        (info.size.width * scale).toInt(),
-                        (info.size.height * scale).toInt(),
-                    )
-                }
-                decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
-                decoder.isMutableRequired = false
-            }
-        }.getOrNull()
+        BulkScanSession.enqueue(uris.mapIndexed { index, uri -> (start + index) to uri })
+        val app = getApplication<Application>()
+        ContextCompat.startForegroundService(app, Intent(app, BulkScanService::class.java))
     }
 }
 
