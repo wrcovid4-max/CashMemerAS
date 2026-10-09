@@ -1,5 +1,6 @@
 package com.cashmemer.ui.components
 
+import com.cashmemer.ui.effects.leafPerch
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.AlertDialog
@@ -249,7 +250,7 @@ fun SectionCard(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().leafPerch(),
         shape = Dimens.cardCorner,
         colors = CardDefaults.cardColors(
             containerColor = if (accent) MaterialTheme.colorScheme.primaryContainer
@@ -581,7 +582,7 @@ fun DetailRow(
 @Composable
 fun InfoIcon(title: String, body: String, modifier: Modifier = Modifier) {
     var open by remember { mutableStateOf(false) }
-    IconButton(onClick = { open = true }, modifier = modifier.size(32.dp)) {
+    IconButton(onClick = { open = true }, modifier = modifier.size(32.dp).leafPerch()) {
         Icon(
             painter = painterResource(R.drawable.ic_ghost),
             contentDescription = stringResource(R.string.info_about, title),

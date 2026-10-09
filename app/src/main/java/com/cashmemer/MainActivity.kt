@@ -1,5 +1,9 @@
 package com.cashmemer
 
+import com.cashmemer.ui.effects.AutumnLeaves
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import com.cashmemer.audio.AppSounds
 import com.cashmemer.ui.receipts.BarcodeScanBus
 import androidx.core.view.WindowCompat
@@ -46,12 +50,15 @@ class MainActivity : AppCompatActivity() {
                     showSplash = false
                 }
 
-                if (showSplash) {
-                    SplashScreen()
-                } else {
-                    AppLockGate(settings = settings) {
-                        CashMemerApp(settings = settings)
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (showSplash) {
+                        SplashScreen()
+                    } else {
+                        AppLockGate(settings = settings) {
+                            CashMemerApp(settings = settings)
+                        }
                     }
+                    AutumnLeaves()
                 }
             }
         }
