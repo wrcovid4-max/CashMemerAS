@@ -527,4 +527,13 @@
     <string name="bulk_clear">صاف کریں</string>
     <string name="bulk_edit">یہ رسید ترمیم کریں</string>
     <string name="bulk_saved">%1$d رسیدیں محفوظ ہو گئیں</string>
+    <string name="bulk_hint">زیادہ سے زیادہ 10 رسیدوں کی تصاویر چنیں۔ ہر ایک AI سے پڑھی جاتی ہے، پھر آپ دیکھ کر محفوظ کر سکتے ہیں۔</string>
+    <string name="bulk_section_receipts">رسیدیں</string>
+    <string name="bulk_all_done">سب مکمل</string>
+    <string name="bulk_eta_calculating">وقت کا اندازہ لگایا جا رہا ہے…</string>
+    <string name="bulk_eta_minutes">تقریباً %1$d منٹ باقی</string>
+    <string name="bulk_eta_seconds">تقریباً %1$d سیکنڈ باقی</string>
+    <string name="bulk_notif_channel">بلک اسکین کی پیش رفت</string>
+    <string name="bulk_notif_title">رسیدیں اسکین ہو رہی ہیں</string>
+    <string name="bulk_notif_done">بلک اسکین مکمل</string>
 </resources>

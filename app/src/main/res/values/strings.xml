@@ -527,4 +527,13 @@
     <string name="bulk_clear">Clear</string>
     <string name="bulk_edit">Edit this receipt</string>
     <string name="bulk_saved">Saved %1$d receipts</string>
+    <string name="bulk_hint">Choose up to 10 receipt photos. Each one is read with AI, then you can check and save them.</string>
+    <string name="bulk_section_receipts">Receipts</string>
+    <string name="bulk_all_done">All done</string>
+    <string name="bulk_eta_calculating">Estimating time…</string>
+    <string name="bulk_eta_minutes">About %1$d min left</string>
+    <string name="bulk_eta_seconds">About %1$d sec left</string>
+    <string name="bulk_notif_channel">Bulk scan progress</string>
+    <string name="bulk_notif_title">Scanning receipts</string>
+    <string name="bulk_notif_done">Bulk scan finished</string>
 </resources>
