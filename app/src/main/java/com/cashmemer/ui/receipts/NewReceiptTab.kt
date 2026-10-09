@@ -1,5 +1,6 @@
 package com.cashmemer.ui.receipts
 
+import androidx.compose.material3.Switch
 import com.cashmemer.ui.components.AppleText
 import com.cashmemer.ui.components.InfoIcon
 import android.Manifest
@@ -391,6 +392,8 @@ fun NewReceiptTab(
                 onTaxChange = viewModel::setTaxPercent,
                 onCashGivenChange = viewModel::setCashGiven,
                 onExtraFeesChange = viewModel::setExtraFees,
+                onSplitToggle = viewModel::setSplitEnabled,
+                onSplitFirstChange = viewModel::setSplitFirst,
             )
         }
 
@@ -1035,6 +1038,8 @@ private fun TotalsCard(
     onTaxChange: (Double) -> Unit,
     onCashGivenChange: (Double) -> Unit,
     onExtraFeesChange: (Double) -> Unit,
+    onSplitToggle: (Boolean) -> Unit,
+    onSplitFirstChange: (Double?) -> Unit,
 ) {
     SectionCard {
         // Full width rather than side-by-side: the Rs / % switch needs room in
@@ -1112,6 +1117,40 @@ private fun TotalsCard(
             info = stringResource(R.string.info_grand_total),
         )
 
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                stringResource(R.string.split_bill),
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.titleSmall,
+            )
+            InfoIcon(
+                title = stringResource(R.string.split_bill),
+                body = stringResource(R.string.info_split_bill),
+            )
+            Switch(checked = state.splitEnabled, onCheckedChange = onSplitToggle)
+        }
+        if (state.splitEnabled) {
+            OutlinedTextField(
+                value = state.splitFirstAmount?.toString() ?: "",
+                onValueChange = { onSplitFirstChange(it.toAmount()) },
+                label = { Text(stringResource(R.string.split_customer1)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            val first = state.splitFirstAmount ?: (state.total / 2)
+            Text(
+                stringResource(
+                    R.string.split_summary,
+                    Format.amountWithCurrency(first, state.currencyCode),
+                    Format.amountWithCurrency(state.total - first, state.currencyCode),
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
         OutlinedTextField(
             value = if (state.extraFees == 0.0) "" else state.extraFees.toString(),
             onValueChange = { onExtraFeesChange(it.toAmount() ?: 0.0) },

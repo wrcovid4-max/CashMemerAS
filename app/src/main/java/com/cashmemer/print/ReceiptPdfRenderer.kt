@@ -1,5 +1,6 @@
 package com.cashmemer.print
 
+import com.cashmemer.core.data.SplitCodec
 import com.cashmemer.core.data.TaxBreakdownCodec
 import android.content.Context
 import android.graphics.Bitmap
@@ -320,6 +321,13 @@ object ReceiptPdfRenderer {
 
         if (receipt.extraFees > 0.0) {
             sheet.money("Extra / other fees:", receipt.extraFees, symbol, y, "+ ")
+            y += ROW
+        }
+        if (SplitCodec.isSplit(receipt.splitJson)) {
+            val first = SplitCodec.firstAmount(receipt.splitJson) ?: (receipt.total / 2)
+            sheet.money("Customer 1 pays:", first, symbol, y, "")
+            y += ROW
+            sheet.money("Customer 2 pays:", receipt.total - first, symbol, y, "")
             y += ROW
         }
         sheet.write("GRAND TOTAL:", L, y, grandPaint)

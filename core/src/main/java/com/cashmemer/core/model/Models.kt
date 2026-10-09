@@ -99,6 +99,8 @@ data class Receipt(
     val taxBreakdownJson: String = "[]",
     /** Other charges that are not tax, such as delivery or packing. */
     val extraFees: Double = 0.0,
+    /** How the bill is split between two customers; "" when it is not split. */
+    val splitJson: String = "",
     /** Marks the shopkeeper drew on the memo in the viewer. See [ReceiptAnnotation]. */
     val annotationsJson: String = "[]",
     /** Local file uri of the scanned source image, when the receipt came from OCR. */

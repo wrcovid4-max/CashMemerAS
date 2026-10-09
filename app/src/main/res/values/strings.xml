@@ -550,4 +550,8 @@
     <string name="ai_send">Send</string>
     <string name="ai_thinking">Thinking…</string>
     <string name="ai_error">Sorry, I couldn't get an answer right now. Please try again.</string>
+    <string name="split_bill">Split the bill</string>
+    <string name="info_split_bill">Splits this receipt between two customers. Type what Customer 1 pays; Customer 2 pays the rest. Leave it empty for an equal split.</string>
+    <string name="split_customer1">Customer 1 pays</string>
+    <string name="split_summary">Customer 1: %1$s · Customer 2: %2$s</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.cashmemer.ui.receipts
 
+import com.cashmemer.core.data.SplitCodec
 import com.cashmemer.core.network.ParsedReceipt
 import com.cashmemer.core.data.TaxBreakdownCodec
 import com.cashmemer.core.model.TaxLine
@@ -70,6 +71,10 @@ data class ReceiptFormState(
     val taxLines: List<TaxLine> = emptyList(),
     /** Other charges (delivery, packing) read from a scan. Added to the total. */
     val extraFees: Double = 0.0,
+    /** Whether the bill is split between two customers. */
+    val splitEnabled: Boolean = false,
+    /** What Customer 1 pays; null means an equal split. */
+    val splitFirstAmount: Double? = null,
     /** Settings: list each tax on its own line instead of one combined tax. */
     val showTaxBreakdown: Boolean = false,
     val cashGiven: Double = 0.0,
@@ -269,6 +274,12 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         _state.update { it.copy(discountIsPercent = percent) }
     fun setCashGiven(value: Double) = _state.update { it.copy(cashGiven = value) }
     fun setExtraFees(value: Double) = _state.update { it.copy(extraFees = value) }
+
+    fun setSplitEnabled(on: Boolean) = _state.update {
+        it.copy(splitEnabled = on, splitFirstAmount = if (on) it.splitFirstAmount else null)
+    }
+
+    fun setSplitFirst(value: Double?) = _state.update { it.copy(splitFirstAmount = value) }
 
     /** Applies a point chosen on the map, address and coordinates together. */
     fun setPickedLocation(address: String, latitude: Double, longitude: Double) =
@@ -616,6 +627,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                     subtotal = current.subtotal,
                     discount = current.discountAmount,
                     taxPercent = current.taxPercent,
+                splitJson = SplitCodec.encode(current.splitEnabled, current.splitFirstAmount),
                     taxBreakdownJson = if (current.showTaxBreakdown) TaxBreakdownCodec.encode(current.taxLines) else "[]",
                     total = current.total,
                     extraFees = current.extraFees,
@@ -667,6 +679,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                 // the same as a fixed one and the receipt row stays simple.
                 discount = current.discountAmount,
                 taxPercent = current.taxPercent,
+                splitJson = SplitCodec.encode(current.splitEnabled, current.splitFirstAmount),
                 taxBreakdownJson = if (current.showTaxBreakdown) TaxBreakdownCodec.encode(current.taxLines) else "[]",
                 total = current.total,
                 extraFees = current.extraFees,
@@ -747,6 +760,8 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                 discount = receipt.discount,
                 taxPercent = receipt.taxPercent,
                 taxLines = TaxBreakdownCodec.decode(receipt.taxBreakdownJson),
+                splitEnabled = SplitCodec.isSplit(receipt.splitJson),
+                splitFirstAmount = SplitCodec.firstAmount(receipt.splitJson),
                 extraFees = receipt.extraFees,
                 cashGiven = receipt.cashGiven,
                 latitude = receipt.latitude,

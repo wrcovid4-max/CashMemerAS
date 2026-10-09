@@ -549,4 +549,8 @@
     <string name="ai_send">بھیجیں</string>
     <string name="ai_thinking">سوچ رہا ہوں…</string>
     <string name="ai_error">معذرت، ابھی جواب نہیں مل سکا۔ دوبارہ کوشش کریں۔</string>
+    <string name="split_bill">بل تقسیم کریں</string>
+    <string name="info_split_bill">اس رسید کو دو گاہکوں میں تقسیم کرتا ہے۔ گاہک 1 جو رقم دے وہ لکھیں، باقی گاہک 2 دیتا ہے۔ برابر تقسیم کے لیے خالی چھوڑ دیں۔</string>
+    <string name="split_customer1">گاہک 1 دیتا ہے</string>
+    <string name="split_summary">گاہک 1: %1$s · گاہک 2: %2$s</string>
 </resources>
