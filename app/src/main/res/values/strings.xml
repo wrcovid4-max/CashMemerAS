@@ -522,4 +522,9 @@
     <string name="bulk_scanning">Scanning…</string>
     <string name="bulk_done">Scanned</string>
     <string name="bulk_failed">Could not read</string>
+    <string name="bulk_back_to_bulk">Back to bulk scan</string>
+    <string name="bulk_save">Save</string>
+    <string name="bulk_clear">Clear</string>
+    <string name="bulk_edit">Edit this receipt</string>
+    <string name="bulk_saved">Saved %1$d receipts</string>
 </resources>

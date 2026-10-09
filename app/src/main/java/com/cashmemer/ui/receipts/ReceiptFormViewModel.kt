@@ -1,5 +1,6 @@
 package com.cashmemer.ui.receipts
 
+import com.cashmemer.core.network.ParsedReceipt
 import com.cashmemer.core.data.TaxBreakdownCodec
 import com.cashmemer.core.model.TaxLine
 import com.cashmemer.core.data.AppleLogo
@@ -556,6 +557,81 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                     }
                 }
         }
+
+    /** The form as it is now, handed back to the bulk screen when leaving for it. */
+    val currentState: ReceiptFormState get() = _state.value
+
+    /** Loads a bulk-scan item, or its last hand edit, into the form. */
+    fun loadBulkItem(form: ReceiptFormState) {
+        _state.value = form.copy(scanning = false, message = null)
+    }
+
+    /** A form filled in from a scan result; a blank form when there is no result. */
+    fun stateFromParsed(parsed: ParsedReceipt?): ReceiptFormState {
+        val current = _state.value
+        val base = ReceiptFormState(
+            currencyCode = current.currencyCode,
+            notesPage1 = current.notesPage1,
+            notesPage2 = current.notesPage2,
+        )
+        if (parsed == null) return base
+        return base.copy(
+            placeName = parsed.placeName,
+            locationAddress = parsed.locationAddress,
+            currencyCode = parsed.currencyCode.ifBlank { base.currencyCode },
+            category = if (parsed.category.isBlank()) base.category
+            else ReceiptCategory.from(parsed.category),
+            paymentType = PaymentType.fromScanned(parsed.paymentType) ?: base.paymentType,
+            discount = parsed.discount.takeIf { it > 0 } ?: base.discount,
+            taxLines = parsed.taxes,
+            extraFees = if (includeScanFees) parsed.extraFees else 0.0,
+            taxPercent = if (parsed.taxes.isNotEmpty()) parsed.taxes.sumOf { it.percent }
+            else parsed.taxPercent.takeIf { it > 0 } ?: base.taxPercent,
+            items = parsed.items,
+        )
+    }
+
+    /** Saves a batch of bulk-scan receipts. Any without a store name and an item are skipped. */
+    fun saveBulk(forms: List<ReceiptFormState>) {
+        viewModelScope.launch {
+            val account = settingsStore.settings.first()
+            var saved = 0
+            forms.filter { it.canGenerate }.forEach { current ->
+                val receipt = Receipt(
+                    id = 0L,
+                    issuerName = account.accountName.orEmpty(),
+                    issuerEmail = account.accountEmail.orEmpty(),
+                    placeName = current.placeName,
+                    locationAddress = current.locationAddress,
+                    memberId = current.selectedMember?.id,
+                    customerName = current.customerName,
+                    customerPhone = current.customerPhone,
+                    customerEmail = current.customerEmail,
+                    currencyCode = current.currencyCode,
+                    category = current.category.name,
+                    paymentType = current.paymentType.name,
+                    subtotal = current.subtotal,
+                    discount = current.discountAmount,
+                    taxPercent = current.taxPercent,
+                    taxBreakdownJson = if (current.showTaxBreakdown) TaxBreakdownCodec.encode(current.taxLines) else "[]",
+                    total = current.total,
+                    extraFees = current.extraFees,
+                    cashGiven = current.cashGiven,
+                    latitude = current.latitude,
+                    longitude = current.longitude,
+                    notesPage1 = current.notesPage1,
+                    notesPage2 = current.notesPage2,
+                    signatureBase64 = current.signatureBase64,
+                    sourceImageUri = current.sourceImageUri,
+                    itemsJson = ReceiptItemCodec.encode(current.items),
+                )
+                repository.saveReceipt(receipt)
+                saved++
+            }
+            PhoneWearSyncManager.push(getApplication<Application>())
+            _state.update { it.copy(message = str(R.string.bulk_saved, saved)) }
+        }
+    }
 
     /** Writes the receipt and clears the form, like the original Generate button. */
     fun generate(onGenerated: (Long) -> Unit = {}) {

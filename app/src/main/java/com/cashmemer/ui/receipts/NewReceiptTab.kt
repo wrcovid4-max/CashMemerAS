@@ -130,6 +130,20 @@ fun NewReceiptTab(
 
     val context = LocalContext.current
 
+    val editingBulk by BulkScanSession.editingId.collectAsState()
+    val saveRequested by BulkScanSession.saveRequested.collectAsState()
+    LaunchedEffect(editingBulk) {
+        val id = editingBulk ?: return@LaunchedEffect
+        val item = BulkScanSession.items.value.firstOrNull { it.id == id } ?: return@LaunchedEffect
+        viewModel.loadBulkItem(item.edited ?: viewModel.stateFromParsed(item.parsed))
+    }
+    LaunchedEffect(saveRequested) {
+        if (!saveRequested) return@LaunchedEffect
+        val forms = BulkScanSession.items.value.map { it.edited ?: viewModel.stateFromParsed(it.parsed) }
+        viewModel.saveBulk(forms)
+        BulkScanSession.finishSave()
+    }
+
     // Auto-print / auto-send need an Activity window, so they run here rather
     // than in the ViewModel.
     LaunchedEffect(Unit) {
@@ -172,6 +186,19 @@ fun NewReceiptTab(
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        item {
+            if (editingBulk != null) {
+                Button(
+                    onClick = {
+                        editingBulk?.let { BulkScanSession.stash(it, viewModel.currentState) }
+                        onOpenBulkScan()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(R.string.bulk_back_to_bulk))
+                }
+            }
+        }
         item {
             ScannerCard(
                 scanning = state.scanning,

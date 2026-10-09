@@ -522,4 +522,9 @@
     <string name="bulk_scanning">اسکین ہو رہی ہے…</string>
     <string name="bulk_done">اسکین ہو گئی</string>
     <string name="bulk_failed">پڑھی نہیں جا سکی</string>
+    <string name="bulk_back_to_bulk">بلک اسکین پر واپس</string>
+    <string name="bulk_save">محفوظ کریں</string>
+    <string name="bulk_clear">صاف کریں</string>
+    <string name="bulk_edit">یہ رسید ترمیم کریں</string>
+    <string name="bulk_saved">%1$d رسیدیں محفوظ ہو گئیں</string>
 </resources>

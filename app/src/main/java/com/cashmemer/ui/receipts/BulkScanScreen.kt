@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,11 +20,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -58,45 +61,84 @@ data class BulkItem(
     val uri: Uri,
     val status: BulkStatus = BulkStatus.Waiting,
     val parsed: ParsedReceipt? = null,
+    /** The form as last edited by hand; it takes priority over the scan result. */
+    val edited: ReceiptFormState? = null,
 )
 
-/** Holds the bulk scan results, so they survive rotation while the screen is open. */
-class BulkScanViewModel(application: Application) : AndroidViewModel(application) {
+/**
+ * Shared by the bulk screen and the receipt form, which live on different screens.
+ * Holds the batch, which receipt is open for editing, and whether a save was asked for.
+ */
+object BulkScanSession {
     private val _items = MutableStateFlow<List<BulkItem>>(emptyList())
     val items: StateFlow<List<BulkItem>> = _items.asStateFlow()
 
-    /** Adds the picked photos and scans them one after another. */
-    fun scan(uris: List<Uri>) {
-        if (uris.isEmpty()) return
+    private val _editingId = MutableStateFlow<Int?>(null)
+    val editingId: StateFlow<Int?> = _editingId.asStateFlow()
+
+    private val _saveRequested = MutableStateFlow(false)
+    val saveRequested: StateFlow<Boolean> = _saveRequested.asStateFlow()
+
+    /** Adds the photos as waiting items and returns the id of the first one. */
+    fun add(uris: List<Uri>): Int {
         val start = _items.value.size
         _items.update { current ->
             current + uris.mapIndexed { index, uri -> BulkItem(id = start + index, uri = uri) }
         }
+        return start
+    }
+
+    fun update(id: Int, transform: (BulkItem) -> BulkItem) {
+        _items.update { current -> current.map { if (it.id == id) transform(it) else it } }
+    }
+
+    fun edit(id: Int) {
+        _editingId.value = id
+    }
+
+    /** Keeps the form as it was left, and clears the editing marker. */
+    fun stash(id: Int, form: ReceiptFormState) {
+        update(id) { it.copy(edited = form) }
+        _editingId.value = null
+    }
+
+    fun requestSave() {
+        _saveRequested.value = true
+    }
+
+    /** Called once the form has saved the batch: the list is finished with. */
+    fun finishSave() {
+        _saveRequested.value = false
+        _editingId.value = null
+        _items.value = emptyList()
+    }
+
+    fun clear() {
+        _saveRequested.value = false
+        _editingId.value = null
+        _items.value = emptyList()
+    }
+}
+
+/** Scans the picked photos one after another, updating each item as it goes. */
+class BulkScanViewModel(application: Application) : AndroidViewModel(application) {
+
+    fun scan(uris: List<Uri>) {
+        if (uris.isEmpty()) return
+        val start = BulkScanSession.add(uris)
         viewModelScope.launch {
             uris.forEachIndexed { offset, uri ->
                 val id = start + offset
-                setStatus(id, BulkStatus.Scanning)
+                BulkScanSession.update(id) { it.copy(status = BulkStatus.Scanning) }
                 val bitmap = decodeScaled(uri)
                 val result = bitmap?.let { GeminiOcrClient.parse(it).getOrNull() }
-                _items.update { current ->
-                    current.map { item ->
-                        if (item.id == id) {
-                            item.copy(
-                                status = if (result != null) BulkStatus.Done else BulkStatus.Failed,
-                                parsed = result,
-                            )
-                        } else {
-                            item
-                        }
-                    }
+                BulkScanSession.update(id) {
+                    it.copy(
+                        status = if (result != null) BulkStatus.Done else BulkStatus.Failed,
+                        parsed = result,
+                    )
                 }
             }
-        }
-    }
-
-    private fun setStatus(id: Int, status: BulkStatus) {
-        _items.update { current ->
-            current.map { if (it.id == id) it.copy(status = status) else it }
         }
     }
 
@@ -120,19 +162,27 @@ class BulkScanViewModel(application: Application) : AndroidViewModel(application
     }
 }
 
-/** The bulk scan screen: one button to pick receipts, then a row per receipt with its progress. */
+/**
+ * The bulk scan screen: one button to pick receipts, a row per receipt with its progress,
+ * a pencil to open a receipt in the form, and Save / Clear once every photo is done.
+ */
 @Composable
 fun BulkScanScreen(
     onBack: () -> Unit,
+    onEdit: () -> Unit,
+    onSaveAll: () -> Unit,
     viewModel: BulkScanViewModel = viewModel(),
 ) {
-    val items by viewModel.items.collectAsState()
+    val items by BulkScanSession.items.collectAsState()
     val pick = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(BULK_LIMIT),
     ) { uris -> viewModel.scan(uris) }
     val imagesOnly = ActivityResultContracts.PickVisualMedia.ImageOnly
 
     val finished = items.count { it.status == BulkStatus.Done || it.status == BulkStatus.Failed }
+    val allDone = items.isNotEmpty() && items.none {
+        it.status == BulkStatus.Waiting || it.status == BulkStatus.Scanning
+    }
 
     Column(
         modifier = Modifier
@@ -155,7 +205,7 @@ fun BulkScanScreen(
         }
 
         Button(
-            onClick = { pick.launch(androidx.activity.result.PickVisualMediaRequest(imagesOnly)) },
+            onClick = { pick.launch(PickVisualMediaRequest(imagesOnly)) },
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(stringResource(R.string.bulk_pick))
@@ -170,14 +220,49 @@ fun BulkScanScreen(
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(items, key = { it.id }) { item ->
-                BulkRow(number = item.id + 1, status = item.status)
+                val canEdit = item.status == BulkStatus.Done || item.status == BulkStatus.Failed
+                BulkRow(
+                    number = item.id + 1,
+                    status = item.status,
+                    onEdit = if (canEdit) {
+                        {
+                            BulkScanSession.edit(item.id)
+                            onEdit()
+                        }
+                    } else {
+                        null
+                    },
+                )
+            }
+        }
+
+        if (allDone) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                OutlinedButton(
+                    onClick = { BulkScanSession.clear() },
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(stringResource(R.string.bulk_clear))
+                }
+                Button(
+                    onClick = {
+                        BulkScanSession.requestSave()
+                        onSaveAll()
+                    },
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(stringResource(R.string.bulk_save))
+                }
             }
         }
     }
 }
 
 @Composable
-private fun BulkRow(number: Int, status: BulkStatus) {
+private fun BulkRow(number: Int, status: BulkStatus, onEdit: (() -> Unit)?) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -204,5 +289,13 @@ private fun BulkRow(number: Int, status: BulkStatus) {
             ),
             style = MaterialTheme.typography.bodyMedium,
         )
+        if (onEdit != null) {
+            IconButton(onClick = onEdit) {
+                Icon(
+                    Icons.Filled.Edit,
+                    contentDescription = stringResource(R.string.bulk_edit),
+                )
+            }
+        }
     }
 }

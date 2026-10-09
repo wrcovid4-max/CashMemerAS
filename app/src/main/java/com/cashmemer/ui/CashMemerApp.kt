@@ -160,7 +160,13 @@ private fun AppNavHost(
                     onOpenBulkScan = { navController.navigate(ROUTE_BULK) },
                 )
             }
-            composable(ROUTE_BULK) { BulkScanScreen(onBack = { navController.popBackStack() }) }
+            composable(ROUTE_BULK) {
+                BulkScanScreen(
+                    onBack = { navController.popBackStack() },
+                    onEdit = { navController.popBackStack() },
+                    onSaveAll = { navController.popBackStack() },
+                )
+            }
             composable(Destination.Inventory.route) { InventoryScreen() }
             composable(Destination.PriceList.route) { PriceListScreen() }
             composable(Destination.Rates.route) { RatesScreen() }
