@@ -1,5 +1,8 @@
 package com.cashmemer.ui.receipts
 
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
 import com.cashmemer.ui.components.InfoIcon
 import android.app.Application
 import android.graphics.Bitmap
@@ -296,7 +299,26 @@ fun BulkScanScreen(
             )
         }
 
-        // Progress card: green bar, count and time left
+        if (batch.isEmpty()) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.ic_ghost),
+                    contentDescription = null,
+                    modifier = Modifier.size(96.dp),
+                )
+                Text(
+                    stringResource(R.string.bulk_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+
+        // Progress card: count, time left and bar
         if (batch.isNotEmpty()) {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(

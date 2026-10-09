@@ -513,9 +513,9 @@
     <string name="link_privacy">Privacy Policy</string>
     <string name="link_terms">Terms of Service</string>
     <string name="link_trademarks">Trademarks</string>
-    <string name="bulk_title">Bulk scan</string>
+    <string name="bulk_title">🎃 Bulk scan</string>
     <string name="bulk_back">Back</string>
-    <string name="bulk_pick">Choose receipts</string>
+    <string name="bulk_pick">🎃 Choose receipts</string>
     <string name="bulk_progress">%1$d of %2$d done</string>
     <string name="bulk_receipt_number">Receipt %1$d</string>
     <string name="bulk_waiting">Waiting</string>
@@ -523,13 +523,13 @@
     <string name="bulk_done">Scanned</string>
     <string name="bulk_failed">Could not read</string>
     <string name="bulk_back_to_bulk">Back to bulk scan</string>
-    <string name="bulk_save">Save</string>
-    <string name="bulk_clear">Clear</string>
+    <string name="bulk_save">👻 Save all</string>
+    <string name="bulk_clear">🧹 Clear</string>
     <string name="bulk_edit">Edit this receipt</string>
     <string name="bulk_saved">Saved %1$d receipts</string>
     <string name="bulk_hint">Choose up to 10 receipt photos. Each one is read with AI, then you can check and save them.</string>
     <string name="bulk_section_receipts">Receipts</string>
-    <string name="bulk_all_done">All done</string>
+    <string name="bulk_all_done">🦇 All done</string>
     <string name="bulk_eta_calculating">Estimating time…</string>
     <string name="bulk_eta_minutes">About %1$d min left</string>
     <string name="bulk_eta_seconds">About %1$d sec left</string>
@@ -541,4 +541,5 @@
     <string name="info_bulk">Scans up to 10 receipt photos with AI. It needs an internet connection: Wi-Fi works, and mobile data works unless you turn it off in Settings. Scanning carries on in the background and shows progress in the notification.</string>
     <string name="bulk_network_note">Needs Wi-Fi or mobile data. Mobile data can be turned off in Settings.</string>
     <string name="bulk_waiting_network">Waiting for Wi-Fi, or for mobile data to be allowed in Settings…</string>
+    <string name="bulk_empty">👻 Pick up to 10 receipt photos to start a spooky-fast scan!</string>
 </resources>

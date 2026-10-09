@@ -583,10 +583,10 @@ fun InfoIcon(title: String, body: String, modifier: Modifier = Modifier) {
     var open by remember { mutableStateOf(false) }
     IconButton(onClick = { open = true }, modifier = modifier.size(32.dp)) {
         Icon(
-            Icons.Filled.Info,
+            painter = painterResource(R.drawable.ic_ghost),
             contentDescription = stringResource(R.string.info_about, title),
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(20.dp),
+            tint = Color.Unspecified,
+            modifier = Modifier.size(22.dp),
         )
     }
     if (open) {
