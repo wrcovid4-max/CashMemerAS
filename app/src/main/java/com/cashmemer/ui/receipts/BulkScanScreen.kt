@@ -184,8 +184,8 @@ object BulkScanSession {
     }
 }
 
-/** The green used for the bulk scan progress bar. */
-private val ScanGreen = Color(0xFF2E7D32)
+/** The Halloween orange used for the bulk scan progress bars. */
+private val ScanGreen = Color(0xFFE8680C)
 
 /** Formats a time-left estimate as a short phrase. */
 @Composable
