@@ -207,6 +207,7 @@ class BulkScanViewModel(application: Application) : AndroidViewModel(application
         BulkScanSession.enqueue(uris.mapIndexed { index, uri -> (start + index) to uri })
         val app = getApplication<Application>()
         ContextCompat.startForegroundService(app, Intent(app, BulkScanService::class.java))
+        com.cashmemer.audio.AppSounds.play(app, com.cashmemer.audio.AppSounds.Kind.CHIME)
     }
 }
 

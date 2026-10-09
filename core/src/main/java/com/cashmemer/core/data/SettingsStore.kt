@@ -59,6 +59,8 @@ data class AppSettings(
     val includeScanFees: Boolean = true,
     /** When off, bulk scanning pauses on mobile data and continues once Wi-Fi is back. */
     val allowBulkOnCellular: Boolean = true,
+    /** Spooky sound effects on save, scan finish and photo pick. */
+    val appSounds: Boolean = true,
     /** SAF tree uri of the folder auto-backups are written into. */
     val backupFolderUri: String? = null,
     val autoBackup: Boolean = false,
@@ -106,6 +108,7 @@ class SettingsStore(private val context: Context) {
         val SHOW_TAX_BREAKDOWN = booleanPreferencesKey("show_tax_breakdown")
         val INCLUDE_SCAN_FEES = booleanPreferencesKey("include_scan_fees")
         val ALLOW_BULK_CELLULAR = booleanPreferencesKey("allow_bulk_cellular")
+        val APP_SOUNDS = booleanPreferencesKey("app_sounds")
         val BACKUP_FOLDER = stringPreferencesKey("backup_folder_uri")
         val AUTO_BACKUP = booleanPreferencesKey("auto_backup")
         val LAST_BACKUP_AT = longPreferencesKey("last_backup_at")
@@ -187,6 +190,7 @@ class SettingsStore(private val context: Context) {
         showTaxBreakdown = this[Keys.SHOW_TAX_BREAKDOWN] ?: false,
         includeScanFees = this[Keys.INCLUDE_SCAN_FEES] ?: true,
         allowBulkOnCellular = this[Keys.ALLOW_BULK_CELLULAR] ?: true,
+        appSounds = this[Keys.APP_SOUNDS] ?: true,
         backupFolderUri = this[Keys.BACKUP_FOLDER],
         autoBackup = this[Keys.AUTO_BACKUP] ?: false,
         lastBackupAt = this[Keys.LAST_BACKUP_AT] ?: 0L,
@@ -228,6 +232,7 @@ class SettingsStore(private val context: Context) {
     suspend fun setShowTaxBreakdown(value: Boolean) = put(Keys.SHOW_TAX_BREAKDOWN, value)
     suspend fun setIncludeScanFees(value: Boolean) = put(Keys.INCLUDE_SCAN_FEES, value)
     suspend fun setAllowBulkOnCellular(value: Boolean) = put(Keys.ALLOW_BULK_CELLULAR, value)
+    suspend fun setAppSounds(value: Boolean) = put(Keys.APP_SOUNDS, value)
     suspend fun setAutoBackup(value: Boolean) = put(Keys.AUTO_BACKUP, value)
 
     suspend fun setBackupFolder(uri: String?) {

@@ -1,5 +1,6 @@
 package com.cashmemer
 
+import com.cashmemer.audio.AppSounds
 import com.cashmemer.ui.receipts.BarcodeScanBus
 import androidx.core.view.WindowCompat
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +37,7 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             val settings by settingsFlow.collectAsState(initial = AppSettings())
+            LaunchedEffect(settings.appSounds) { com.cashmemer.audio.AppSounds.enabled = settings.appSounds }
             CashMemerTheme(themeMode = settings.themeMode) {
                 SystemBarIcons()
                 var showSplash by remember { mutableStateOf(true) }

@@ -681,6 +681,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
             )
 
             val id = repository.saveReceipt(receipt)
+            com.cashmemer.audio.AppSounds.play(getApplication(), com.cashmemer.audio.AppSounds.Kind.WHOOSH)
 
             if (current.saveSignatureAsDefault && current.signatureBase64 != null) {
                 settingsStore.setDefaultSignature(current.signatureBase64)

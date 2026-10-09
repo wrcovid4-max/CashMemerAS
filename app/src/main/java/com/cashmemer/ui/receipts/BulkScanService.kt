@@ -89,6 +89,7 @@ class BulkScanService : Service() {
         }
         val (done, total) = BulkScanSession.progressCounts()
         BulkNotifier.post(this, BulkNotifier.finished(this, done, total))
+        com.cashmemer.audio.AppSounds.play(this, com.cashmemer.audio.AppSounds.Kind.STING)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_DETACH)
         stopSelf()
     }

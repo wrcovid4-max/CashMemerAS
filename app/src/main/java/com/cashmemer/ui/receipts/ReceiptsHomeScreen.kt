@@ -1,5 +1,10 @@
 package com.cashmemer.ui.receipts
 
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -69,7 +74,17 @@ fun ReceiptsHomeScreen(
         }
 
         when (selectedTab) {
-            0 -> NewReceiptTab(settings, onOpenBulkScan = onOpenBulkScan)
+            0 -> Box(modifier = Modifier.fillMaxSize()) {
+                Image(
+                    painter = painterResource(R.drawable.ic_ghost),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(340.dp),
+                    alpha = 0.07f,
+                )
+                NewReceiptTab(settings, onOpenBulkScan = onOpenBulkScan)
+            }
             1 -> HistoryTab()
             else -> DashboardTab()
         }

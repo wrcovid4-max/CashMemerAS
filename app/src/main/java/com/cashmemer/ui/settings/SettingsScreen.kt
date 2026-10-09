@@ -118,6 +118,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setShowTaxBreakdown(value: Boolean) = launch { store.setShowTaxBreakdown(value) }
     fun setIncludeScanFees(value: Boolean) = launch { store.setIncludeScanFees(value) }
     fun setAllowBulkOnCellular(value: Boolean) = launch { store.setAllowBulkOnCellular(value) }
+    fun setAppSounds(value: Boolean) = launch { store.setAppSounds(value) }
     fun setAutoPrint(value: Boolean) = launch { store.setAutoPrint(value) }
     fun setShowPage1(value: Boolean) = launch { store.setShowPage1(value) }
     fun setShowPage2(value: Boolean) = launch { store.setShowPage2(value) }
@@ -354,6 +355,12 @@ fun SettingsScreen(
                     settings.allowBulkOnCellular,
                     viewModel::setAllowBulkOnCellular,
                     info = stringResource(R.string.info_allow_bulk_cellular),
+                )
+                ToggleRow(
+                    stringResource(R.string.app_sounds),
+                    settings.appSounds,
+                    viewModel::setAppSounds,
+                    info = stringResource(R.string.info_app_sounds),
                 )
             }
         }
