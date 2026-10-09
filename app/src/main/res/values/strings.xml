@@ -536,4 +536,9 @@
     <string name="bulk_notif_channel">Bulk scan progress</string>
     <string name="bulk_notif_title">Scanning receipts</string>
     <string name="bulk_notif_done">Bulk scan finished</string>
+    <string name="allow_bulk_cellular">Allow bulk scanning on mobile data</string>
+    <string name="info_allow_bulk_cellular">When off, bulk scanning pauses on mobile data and carries on once Wi-Fi is back. Turn it on to scan over mobile data too.</string>
+    <string name="info_bulk">Scans up to 10 receipt photos with AI. It needs an internet connection: Wi-Fi works, and mobile data works unless you turn it off in Settings. Scanning carries on in the background and shows progress in the notification.</string>
+    <string name="bulk_network_note">Needs Wi-Fi or mobile data. Mobile data can be turned off in Settings.</string>
+    <string name="bulk_waiting_network">Waiting for Wi-Fi, or for mobile data to be allowed in Settings…</string>
 </resources>

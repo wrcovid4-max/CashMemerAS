@@ -1,5 +1,10 @@
 package com.cashmemer.ui.receipts
 
+import com.cashmemer.core.data.SettingsStore
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.delay
+import android.net.NetworkCapabilities
+import android.net.ConnectivityManager
 import com.cashmemer.MainActivity
 import android.app.PendingIntent
 import android.Manifest
@@ -70,6 +75,7 @@ class BulkScanService : Service() {
         while (true) {
             val next = BulkScanSession.takeNext()
             if (next != null) {
+                awaitNetwork()
                 scanOne(next.first, next.second)
                 continue
             }
@@ -85,6 +91,27 @@ class BulkScanService : Service() {
         BulkNotifier.post(this, BulkNotifier.finished(this, done, total))
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_DETACH)
         stopSelf()
+    }
+
+    /** Waits until the network Settings allow is available; pauses on mobile data when turned off. */
+    private suspend fun awaitNetwork() {
+        val allowCellular = SettingsStore(applicationContext).settings.first().allowBulkOnCellular
+        while (!networkAllowed(allowCellular)) {
+            BulkScanSession.setWaitingNetwork(true)
+            delay(5_000)
+        }
+        BulkScanSession.setWaitingNetwork(false)
+    }
+
+    private fun networkAllowed(allowCellular: Boolean): Boolean {
+        val manager = getSystemService(ConnectivityManager::class.java) ?: return false
+        val caps = manager.getNetworkCapabilities(manager.activeNetwork) ?: return false
+        return when {
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> allowCellular
+            else -> true
+        }
     }
 
     private suspend fun scanOne(id: Int, uri: Uri) {

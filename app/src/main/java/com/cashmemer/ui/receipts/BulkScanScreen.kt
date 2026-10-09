@@ -1,5 +1,6 @@
 package com.cashmemer.ui.receipts
 
+import com.cashmemer.ui.components.InfoIcon
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
@@ -91,6 +92,13 @@ object BulkScanSession {
 
     private val _editingId = MutableStateFlow<Int?>(null)
     val editingId: StateFlow<Int?> = _editingId.asStateFlow()
+
+    private val _waitingNetwork = MutableStateFlow(false)
+    val waitingNetwork: StateFlow<Boolean> = _waitingNetwork.asStateFlow()
+
+    fun setWaitingNetwork(waiting: Boolean) {
+        _waitingNetwork.value = waiting
+    }
 
     private val _saveRequested = MutableStateFlow(false)
     private var doneCount = 0
@@ -211,6 +219,7 @@ fun BulkScanScreen(
     viewModel: BulkScanViewModel = viewModel(),
 ) {
     val batch by BulkScanSession.items.collectAsState()
+    val waitingNetwork by BulkScanSession.waitingNetwork.collectAsState()
     val notificationPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { }
@@ -249,6 +258,10 @@ fun BulkScanScreen(
                 stringResource(R.string.bulk_title),
                 style = MaterialTheme.typography.titleLarge,
             )
+            InfoIcon(
+                title = stringResource(R.string.bulk_title),
+                body = stringResource(R.string.info_bulk),
+            )
         }
 
         // Pick card
@@ -261,6 +274,11 @@ fun BulkScanScreen(
                     stringResource(R.string.bulk_hint),
                     style = MaterialTheme.typography.bodyMedium,
                 )
+                Text(
+                    stringResource(R.string.bulk_network_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 Button(
                     onClick = { pick.launch(PickVisualMediaRequest(imagesOnly)) },
                     modifier = Modifier.fillMaxWidth(),
@@ -268,6 +286,14 @@ fun BulkScanScreen(
                     Text(stringResource(R.string.bulk_pick))
                 }
             }
+        }
+
+        if (waitingNetwork) {
+            Text(
+                stringResource(R.string.bulk_waiting_network),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+            )
         }
 
         // Progress card: green bar, count and time left
