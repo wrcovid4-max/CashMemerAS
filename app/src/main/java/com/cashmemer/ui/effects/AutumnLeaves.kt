@@ -121,8 +121,8 @@ private class LeafSimulation {
     private var time = 0f
     private var spawnTimer = 0f
     private val random = Random(2026)
-    private val maxFalling = 20
-    private val maxPiled = 28
+    private val maxFalling = 1000
+    private val maxPiled = 200
 
     fun step(dt: Float, seconds: Float) {
         if (size == Size.Zero) return
@@ -131,7 +131,7 @@ private class LeafSimulation {
         val falling = leaves.count { it.state == LeafState.FALLING || it.state == LeafState.LEAVING }
         if (spawnTimer <= 0f && falling < maxFalling) {
             spawn()
-            spawnTimer = 0.4f + random.nextFloat() * 0.7f
+            spawnTimer = 0.04f + random.nextFloat() * 0.08f
         }
         val wind = 80f + 45f * sin(time * 0.6f) + 25f * sin(time * 1.7f)
         val perches = LeafPerches.active(seconds)
@@ -203,8 +203,8 @@ private class LeafSimulation {
                 // Anywhere across the top edge, from above the status bar.
                 x = random.nextFloat() * size.width,
                 y = -random.nextFloat() * 70f - 10f,
-                // Middle-sized leaves.
-                size = 30f + random.nextFloat() * 12f,
+                // XXL leaves.
+                size = 80f + random.nextFloat() * 30f,
                 vx = -90f,
                 vy = 70f + random.nextFloat() * 50f,
                 angle = random.nextFloat() * 360f,
