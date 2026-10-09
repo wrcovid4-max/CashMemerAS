@@ -67,6 +67,26 @@ fun AutumnLeaves() {
     }
 }
 
+/**
+ * The gaps between two surfaces stacked one above the other, where they overlap
+ * horizontally and sit a short distance apart. A leaf can stick in such a gap.
+ */
+private fun gapsBetween(rects: List<Rect>): List<Rect> {
+    val gaps = mutableListOf<Rect>()
+    for (upper in rects) {
+        for (lower in rects) {
+            if (upper === lower) continue
+            val gapHeight = lower.top - upper.bottom
+            val left = maxOf(upper.left, lower.left)
+            val right = minOf(upper.right, lower.right)
+            if (gapHeight in 4f..60f && right - left > 40f) {
+                gaps.add(Rect(left, upper.bottom, right, lower.top))
+            }
+        }
+    }
+    return gaps
+}
+
 private enum class LeafState { FALLING, RESTING, PILED, LEAVING }
 
 private class Leaf(
@@ -113,6 +133,7 @@ private class LeafSimulation {
         }
         val wind = 80f + 45f * sin(time * 0.6f) + 25f * sin(time * 1.7f)
         val perches = LeafPerches.active(seconds)
+        val gaps = gapsBetween(perches)
         val iterator = leaves.iterator()
         while (iterator.hasNext()) {
             val leaf = iterator.next()
@@ -128,7 +149,15 @@ private class LeafSimulation {
                         leaf.x in r.left..r.right &&
                             leaf.prevBottom <= r.top && bottom >= r.top
                     }
-                    if (landing != null && random.nextFloat() < 0.35f) {
+                    val gap = gaps.firstOrNull { g ->
+                        leaf.x in g.left..g.right && leaf.prevBottom <= g.top && bottom >= g.top
+                    }
+                    if (gap != null && random.nextFloat() < 0.8f) {
+                        // Stuck in the gap between two surfaces, for a while.
+                        leaf.y = gap.center.y
+                        leaf.state = LeafState.RESTING
+                        leaf.restUntil = time + 6f + random.nextFloat() * 4f
+                    } else if (landing != null && random.nextFloat() < 0.35f) {
                         leaf.y = landing.top - leaf.size * 0.6f
                         leaf.state = LeafState.RESTING
                         leaf.restUntil = time + 3f + random.nextFloat() * 3f
@@ -145,6 +174,7 @@ private class LeafSimulation {
                     leaf.prevBottom = bottom
                 }
                 LeafState.RESTING -> {
+                    leaf.x += sin(time * 3f + leaf.swayPhase) * 3f * dt
                     leaf.restUntil -= dt
                     if (leaf.restUntil <= 0f) {
                         leaf.state = LeafState.FALLING
