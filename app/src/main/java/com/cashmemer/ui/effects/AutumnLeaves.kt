@@ -200,9 +200,11 @@ private class LeafSimulation {
     private fun spawn() {
         leaves.add(
             Leaf(
-                x = size.width + random.nextFloat() * 120f,
-                y = -random.nextFloat() * 90f - 10f,
-                size = 18f + random.nextFloat() * 10f,
+                // Anywhere across the top edge, from above the status bar.
+                x = random.nextFloat() * size.width,
+                y = -random.nextFloat() * 70f - 10f,
+                // Middle-sized leaves.
+                size = 30f + random.nextFloat() * 12f,
                 vx = -90f,
                 vy = 70f + random.nextFloat() * 50f,
                 angle = random.nextFloat() * 360f,
