@@ -360,11 +360,6 @@ private fun BulkRow(number: Int, status: BulkStatus, onEdit: (() -> Unit)?) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            if (status == BulkStatus.Scanning) {
-                CircularProgressIndicator(modifier = Modifier.height(20.dp), strokeWidth = 2.dp)
-            } else {
-                Spacer(Modifier.width(20.dp))
-            }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     stringResource(R.string.bulk_receipt_number, number),
@@ -383,6 +378,22 @@ private fun BulkRow(number: Int, status: BulkStatus, onEdit: (() -> Unit)?) {
                     color = if (status == BulkStatus.Failed) MaterialTheme.colorScheme.error
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                Spacer(Modifier.height(6.dp))
+                val barColor = if (status == BulkStatus.Failed) MaterialTheme.colorScheme.error else ScanGreen
+                if (status == BulkStatus.Scanning) {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = barColor,
+                        trackColor = ScanGreen.copy(alpha = 0.2f),
+                    )
+                } else {
+                    LinearProgressIndicator(
+                        progress = { if (status == BulkStatus.Waiting) 0f else 1f },
+                        modifier = Modifier.fillMaxWidth(),
+                        color = barColor,
+                        trackColor = ScanGreen.copy(alpha = 0.2f),
+                    )
+                }
             }
             if (onEdit != null) {
                 IconButton(onClick = onEdit) {
