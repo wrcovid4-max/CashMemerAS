@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="brand_green">#2E6B1F</color>
-    <color name="paper_background">#F8F9EF</color>
-    <!-- Pre-Compose window fill. Dark variant in values-night stops the light
-         flash before the splash paints on a dark phone. -->
-    <color name="window_background">#F8F9EF</color>
-    <!-- Matches the blue field of the brand artwork. -->
-    <color name="ic_launcher_background">#1F63E0</color>
+    <color name="brand_green">#E8680C</color>
+    <color name="paper_background">#FFF8F0</color>
+    <!-- Pre-Compose window fill, so the splash never flashes a different colour. -->
+    <color name="window_background">#FFF8F0</color>
+    <!-- Midnight purple behind the pumpkin launcher icon. -->
+    <color name="ic_launcher_background">#1A0F2E</color>
 </resources>

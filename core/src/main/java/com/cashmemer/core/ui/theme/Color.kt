@@ -2,25 +2,27 @@ package com.cashmemer.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Neon green brand, per request. It is bright enough that text on top of it has
+// Halloween palette: pumpkin orange, parchment, and midnight purple.
+// Names are kept from the old green theme so nothing else has to change.
+// (Old note:) Neon green brand. It is bright enough that text on top of it has
 // to be near-black rather than white — see onPrimary in Theme.kt — otherwise
 // labels on buttons wash out. Kept a touch below pure #39FF14 so large filled
 // areas do not vibrate.
-val BrandGreen = Color(0xFF12D63B)
-val BrandGreenDark = Color(0xFF0A7D22)
-val BrandGreenLight = Color(0xFF5CF06F)
-val BrandGreenContainer = Color(0xFFC9FBC8)
-val OnBrandGreenContainer = Color(0xFF06380F)
+val BrandGreen = Color(0xFFE8680C)
+val BrandGreenDark = Color(0xFFA94A06)
+val BrandGreenLight = Color(0xFFFFA65C)
+val BrandGreenContainer = Color(0xFFFFE2C7)
+val OnBrandGreenContainer = Color(0xFF4A2300)
 
-val PaperBackground = Color(0xFFF8F9EF)
+val PaperBackground = Color(0xFFFFF8F0)
 val PaperSurface = Color(0xFFFFFFFF)
-val PaperSurfaceVariant = Color(0xFFEDF0E2)
+val PaperSurfaceVariant = Color(0xFFFBEBDA)
 
 /** Card hairline. Darkened from the old value, which was invisible on white. */
-val PaperOutline = Color(0xFFC9D0B6)
+val PaperOutline = Color(0xFFE0B98E)
 
-val InkPrimary = Color(0xFF11150C)
-val InkSecondary = Color(0xFF4A5140)
+val InkPrimary = Color(0xFF1C1410)
+val InkSecondary = Color(0xFF5A4636)
 
 // A deeper, darker red for the trash / destructive buttons, so "delete" reads
 // as a warning next to the bright green rather than a soft pink.
@@ -41,9 +43,9 @@ val DangerButton = Color(0xFF8E1710)
 val OnDangerButton = Color(0xFFFBEAE8)
 
 // Dark scheme — same hue family, lifted for legibility on black.
-val DarkBackground = Color(0xFF11150C)
-val DarkSurface = Color(0xFF1A2013)
-val DarkSurfaceVariant = Color(0xFF2A3320)
-val DarkOutline = Color(0xFF454F3B)
-val DarkGreen = Color(0xFF39FF14)
-val DarkGreenContainer = Color(0xFF10420F)
+val DarkBackground = Color(0xFF120A1A)
+val DarkSurface = Color(0xFF1E1430)
+val DarkSurfaceVariant = Color(0xFF2C1F45)
+val DarkOutline = Color(0xFF4B3A66)
+val DarkGreen = Color(0xFFFF9A3D)
+val DarkGreenContainer = Color(0xFF4A2A0A)
