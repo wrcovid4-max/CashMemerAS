@@ -7,5 +7,5 @@ package com.cashmemer.core.ui.theme
  * Change only this line, then rebuild.
  */
 object Holiday {
-    const val HALLOWEEN = false
+    const val HALLOWEEN = true
 }
