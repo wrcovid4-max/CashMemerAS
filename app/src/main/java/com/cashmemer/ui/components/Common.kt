@@ -173,8 +173,13 @@ private fun LanguageToggle(
     onLanguageChange: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val options = listOf("en" to "ENG", "ur" to "اردو", "zh" to "中文")
-    val current = options.firstOrNull { it.first == language }?.second ?: "ENG"
+    val options = listOf(
+        "en" to "English (ENG)",
+        "ur" to "Urdu (اردو)",
+        "zh" to "Chinese (中文)",
+    )
+    val shortLabels = mapOf("en" to "ENG", "ur" to "اردو", "zh" to "中文")
+    val current = shortLabels[language] ?: "ENG"
     Box {
         Surface(
             shape = Dimens.pillCorner,
