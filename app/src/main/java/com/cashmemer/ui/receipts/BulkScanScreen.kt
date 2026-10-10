@@ -1,5 +1,6 @@
 package com.cashmemer.ui.receipts
 
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.Image
@@ -180,7 +181,13 @@ object BulkScanSession {
         resetTiming()
     }
 
+    @Synchronized
+    private fun clearPending() {
+        pending.clear()
+    }
+
     fun clear() {
+        clearPending()
         _saveRequested.value = false
         _editingId.value = null
         _items.value = emptyList()
@@ -243,6 +250,8 @@ fun BulkScanScreen(
     val fraction = if (batch.isEmpty()) 0f else finished.toFloat() / batch.size
     val allDone = batch.isNotEmpty() && remaining == 0
     val eta = BulkScanSession.etaMillis(remaining)
+
+    val appContext = LocalContext.current
 
     // One scrolling list for the whole screen, so every part can be reached by scrolling.
     LazyColumn(
@@ -397,7 +406,11 @@ fun BulkScanScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     OutlinedButton(
-                        onClick = { BulkScanSession.clear() },
+                        onClick = {
+                        BulkScanSession.clear()
+                        appContext.stopService(Intent(appContext, BulkScanService::class.java))
+                        NotificationManagerCompat.from(appContext).cancel(BulkNotifier.ID)
+                    },
                         modifier = Modifier.weight(1f),
                     ) {
                         Text(stringResource(R.string.bulk_clear))
