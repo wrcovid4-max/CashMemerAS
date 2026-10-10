@@ -1,6 +1,7 @@
 package com.cashmemer
 
 import com.cashmemer.ui.effects.AutumnLeaves
+import com.cashmemer.ui.effects.BatFlyer
 import com.cashmemer.ui.effects.HalloweenDecor
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.fillMaxSize
@@ -67,6 +68,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     AutumnLeaves()
+                    BatFlyer()
                     HalloweenDecor()
                 }
             }
