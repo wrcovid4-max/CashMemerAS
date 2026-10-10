@@ -425,6 +425,8 @@ private fun EmptyState(suggestions: List<String>, onSuggestion: (String) -> Unit
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
         Spacer(Modifier.height(8.dp))
         Column(
@@ -643,7 +645,7 @@ private fun InputBar(
             }
             Text(
                 if (listening) stringResource(R.string.ai_listening)
-                else stringResource(R.string.ai_disclaimer, GeminiOcrClient.MODEL),
+                else stringResource(R.string.ai_disclaimer),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

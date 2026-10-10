@@ -545,7 +545,7 @@
     <string name="app_sounds">App sounds</string>
     <string name="info_app_sounds">Spooky sound effects: a ghostly whoosh when a receipt is saved, a scare sting when a bulk scan finishes, and a bat chime when photos are added. Turn off for silence.</string>
     <string name="ai_title">Ask AI</string>
-    <string name="ai_hint">I can look up your receipts and the latest exchange rates for you.</string>
+    <string name="ai_hint">Ask about your receipts and exchange rates</string>
     <string name="ai_placeholder">Type your question</string>
     <string name="ai_send">Send</string>
     <string name="ai_thinking">Thinking…</string>
@@ -567,5 +567,5 @@
     <string name="ai_model_info">Powered by Google Gemini (%1$s). If the model is busy, the app switches to the previous model automatically.</string>
     <string name="ai_voice">Speak your question</string>
     <string name="ai_listening">Listening… tap the mic to stop</string>
-    <string name="ai_disclaimer">Model: %1$s. AI can make mistakes. Check important amounts against your receipts.</string>
+    <string name="ai_disclaimer">This is an AI and can make mistake. The Model used in this experience is Gemini by Google Inc.</string>
 </resources>
