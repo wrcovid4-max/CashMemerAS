@@ -76,13 +76,18 @@ fun CashMemerApp(settings: AppSettings) {
     val appliedTag = AppCompatDelegate.getApplicationLocales().toLanguageTags()
     val currentLanguage = when {
         appliedTag.startsWith("ur") -> "ur"
+        appliedTag.startsWith("zh") -> "zh"
         appliedTag.startsWith("en") -> "en"
         else -> settings.language.ifBlank { "en" }
     }
 
     pendingLanguage?.let { tag ->
         val languageName = stringResource(
-            if (tag == "ur") R.string.language_name_ur else R.string.language_name_en,
+            when (tag) {
+                "ur" -> R.string.language_name_ur
+                "zh" -> R.string.language_name_zh
+                else -> R.string.language_name_en
+            },
         )
         AlertDialog(
             onDismissRequest = { pendingLanguage = null },

@@ -1,5 +1,7 @@
 package com.cashmemer.ui.components
 
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenu
 import com.cashmemer.ui.effects.leafPerch
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.IconButton
@@ -170,40 +172,49 @@ private fun LanguageToggle(
     language: String,
     onLanguageChange: (String) -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .clip(Dimens.pillCorner)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(3.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        LanguagePill("ENG", selected = language == "en") { onLanguageChange("en") }
-        LanguagePill("اردو", selected = language == "ur") { onLanguageChange("ur") }
-    }
-}
-
-@Composable
-private fun LanguagePill(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-) {
-    Surface(
-        shape = Dimens.pillCorner,
-        color = if (selected) MaterialTheme.colorScheme.primary
-        else androidx.compose.ui.graphics.Color.Transparent,
-        modifier = Modifier
-            .clip(Dimens.pillCorner)
-            .clickable(onClick = onClick),
-    ) {
-        AppleText(
-            text = label,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
-            color = if (selected) MaterialTheme.colorScheme.onPrimary
-            else MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.labelLarge,
-        )
+    var expanded by remember { mutableStateOf(false) }
+    val options = listOf("en" to "ENG", "ur" to "اردو", "zh" to "中文")
+    val current = options.firstOrNull { it.first == language }?.second ?: "ENG"
+    Box {
+        Surface(
+            shape = Dimens.pillCorner,
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier
+                .clip(Dimens.pillCorner)
+                .clickable { expanded = true },
+        ) {
+            AppleText(
+                text = "🌐 $current ▾",
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            options.forEach { (tag, label) ->
+                DropdownMenuItem(
+                    text = {
+                        AppleText(
+                            text = label,
+                            fontWeight = if (tag == language) FontWeight.Bold else FontWeight.Normal,
+                        )
+                    },
+                    trailingIcon = {
+                        if (tag == language) {
+                            AppleText(text = "✓", color = MaterialTheme.colorScheme.primary)
+                        }
+                    },
+                    onClick = {
+                        expanded = false
+                        onLanguageChange(tag)
+                    },
+                )
+            }
+        }
     }
 }
 
