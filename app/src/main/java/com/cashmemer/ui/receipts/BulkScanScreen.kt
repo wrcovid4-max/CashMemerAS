@@ -244,161 +244,174 @@ fun BulkScanScreen(
     val allDone = batch.isNotEmpty() && remaining == 0
     val eta = BulkScanSession.etaMillis(remaining)
 
-    Column(
+    // One scrolling list for the whole screen, so every part can be reached by scrolling.
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // Header
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    Icons.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.bulk_back),
+        item {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        Icons.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.bulk_back),
+                    )
+                }
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    stringResource(R.string.bulk_title),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                InfoIcon(
+                    title = stringResource(R.string.bulk_title),
+                    body = stringResource(R.string.info_bulk),
                 )
             }
-            Spacer(Modifier.width(4.dp))
-            Text(
-                stringResource(R.string.bulk_title),
-                style = MaterialTheme.typography.titleLarge,
-            )
-            InfoIcon(
-                title = stringResource(R.string.bulk_title),
-                body = stringResource(R.string.info_bulk),
-            )
         }
 
         // Pick card
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text(
-                    stringResource(R.string.bulk_hint),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Text(
-                    stringResource(R.string.bulk_network_note),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Button(
-                    onClick = { pick.launch(PickVisualMediaRequest(imagesOnly)) },
-                    modifier = Modifier.fillMaxWidth(),
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text(stringResource(R.string.bulk_pick))
+                    Text(
+                        stringResource(R.string.bulk_hint),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Text(
+                        stringResource(R.string.bulk_network_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Button(
+                        onClick = { pick.launch(PickVisualMediaRequest(imagesOnly)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.bulk_pick))
+                    }
                 }
             }
         }
 
         if (waitingNetwork) {
-            Text(
-                stringResource(R.string.bulk_waiting_network),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-            )
+            item {
+                Text(
+                    stringResource(R.string.bulk_waiting_network),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
         }
 
         if (batch.isEmpty()) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                if (Holiday.HALLOWEEN) {
-                    Image(
-                    painter = painterResource(R.drawable.ic_ghost),
-                    contentDescription = null,
-                    modifier = Modifier.size(96.dp),
-                )
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    if (Holiday.HALLOWEEN) {
+                        Image(
+                            painter = painterResource(R.drawable.ic_ghost),
+                            contentDescription = null,
+                            modifier = Modifier.size(96.dp),
+                        )
+                    }
+                    Text(
+                        stringResource(R.string.bulk_empty),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
-                Text(
-                    stringResource(R.string.bulk_empty),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
             }
         }
 
         // Progress card: count, time left and bar
         if (batch.isNotEmpty()) {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
+            item {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
-                        Text(
-                            stringResource(R.string.bulk_progress, finished, batch.size),
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        Text(
-                            if (allDone) stringResource(R.string.bulk_all_done) else etaText(eta),
-                            style = MaterialTheme.typography.bodyMedium,
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                stringResource(R.string.bulk_progress, finished, batch.size),
+                                modifier = Modifier.weight(1f),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Text(
+                                if (allDone) stringResource(R.string.bulk_all_done) else etaText(eta),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                        LinearProgressIndicator(
+                            progress = { fraction },
+                            modifier = Modifier.fillMaxWidth(),
+                            color = ScanGreen,
+                            trackColor = ScanGreen.copy(alpha = 0.2f),
                         )
                     }
-                    LinearProgressIndicator(
-                        progress = { fraction },
-                        modifier = Modifier.fillMaxWidth(),
-                        color = ScanGreen,
-                        trackColor = ScanGreen.copy(alpha = 0.2f),
-                    )
                 }
             }
         }
 
         // Receipts
         if (batch.isNotEmpty()) {
-            Text(
-                stringResource(R.string.bulk_section_receipts),
-                style = MaterialTheme.typography.titleSmall,
-            )
-            LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(batch, key = { it.id }) { item ->
-                    val canEdit = item.status == BulkStatus.Done || item.status == BulkStatus.Failed
-                    BulkRow(
-                        number = item.id + 1,
-                        status = item.status,
-                        onEdit = if (canEdit) {
-                            {
-                                BulkScanSession.edit(item.id)
-                                onEdit()
-                            }
-                        } else {
-                            null
-                        },
-                    )
-                }
+            item {
+                Text(
+                    stringResource(R.string.bulk_section_receipts),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+            }
+            items(batch, key = { it.id }) { item ->
+                val canEdit = item.status == BulkStatus.Done || item.status == BulkStatus.Failed
+                BulkRow(
+                    number = item.id + 1,
+                    status = item.status,
+                    onEdit = if (canEdit) {
+                        {
+                            BulkScanSession.edit(item.id)
+                            onEdit()
+                        }
+                    } else {
+                        null
+                    },
+                )
             }
         }
 
         // Save / Clear once everything is scanned
         if (batch.isNotEmpty()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                OutlinedButton(
-                    onClick = { BulkScanSession.clear() },
-                    modifier = Modifier.weight(1f),
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Text(stringResource(R.string.bulk_clear))
-                }
-                Button(
-                    onClick = {
-                        BulkScanSession.requestSave()
-                        onSaveAll()
-                    },
-                    enabled = allDone,
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Text(stringResource(R.string.bulk_save))
+                    OutlinedButton(
+                        onClick = { BulkScanSession.clear() },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(stringResource(R.string.bulk_clear))
+                    }
+                    Button(
+                        onClick = {
+                            BulkScanSession.requestSave()
+                            onSaveAll()
+                        },
+                        enabled = allDone,
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(stringResource(R.string.bulk_save))
+                    }
                 }
             }
         }
