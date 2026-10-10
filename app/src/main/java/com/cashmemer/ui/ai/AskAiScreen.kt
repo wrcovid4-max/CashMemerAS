@@ -1,5 +1,6 @@
 package com.cashmemer.ui.ai
 
+import androidx.compose.foundation.layout.union
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.TextFieldDefaults
