@@ -2,6 +2,24 @@ package com.cashmemer.ui.ai
 
 import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Surface
+import androidx.compose.ui.background
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -190,68 +208,131 @@ class AskAiViewModel(application: Application) : AndroidViewModel(application) {
         JSONObject().put("type", "STRING").put("description", description)
 }
 
-/** The chat screen: a list of messages and a box to type a question in. */
+/** The chat screen: a header, example questions when empty, the conversation, and an input bar. */
 @Composable
 fun AskAiScreen(onBack: () -> Unit, viewModel: AskAiViewModel = viewModel()) {
     val messages by viewModel.messages.collectAsState()
     val busy by viewModel.busy.collectAsState()
     var draft by remember { mutableStateOf("") }
+    val suggestions = listOf(
+        stringResource(R.string.ai_suggest_1),
+        stringResource(R.string.ai_suggest_2),
+        stringResource(R.string.ai_suggest_3),
+    )
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+            .imePadding(),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.bulk_back))
-            }
-            Text(stringResource(R.string.ai_title), style = MaterialTheme.typography.titleLarge)
-        }
+        ChatHeader(onBack = onBack)
 
         LazyColumn(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(vertical = 12.dp),
         ) {
             if (messages.isEmpty()) {
-                item {
-                    Text(
-                        stringResource(R.string.ai_hint),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                item { EmptyState(suggestions = suggestions, onSuggestion = { viewModel.ask(it) }) }
             }
             items(messages) { message -> ChatBubble(message) }
             if (busy) {
-                item {
-                    Text(
-                        stringResource(R.string.ai_thinking),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                item { ThinkingBubble() }
             }
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            OutlinedTextField(
-                value = draft,
-                onValueChange = { draft = it },
-                modifier = Modifier.weight(1f),
-                placeholder = { Text(stringResource(R.string.ai_placeholder)) },
+        InputBar(
+            value = draft,
+            onValueChange = { draft = it },
+            enabled = !busy,
+            onSend = {
+                viewModel.ask(draft)
+                draft = ""
+            },
+        )
+    }
+}
+
+@Composable
+private fun ChatHeader(onBack: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 4.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = onBack) {
+            Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.bulk_back))
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                stringResource(R.string.ai_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
             )
-            Button(
-                onClick = {
-                    viewModel.ask(draft)
-                    draft = ""
-                },
-                enabled = !busy && draft.isNotBlank(),
-            ) {
-                Text(stringResource(R.string.ai_send))
+            Text(
+                stringResource(R.string.ai_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Icon(
+            Icons.Filled.AutoAwesome,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+        )
+    }
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+}
+
+@Composable
+private fun EmptyState(suggestions: List<String>, onSuggestion: (String) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            modifier = Modifier.size(64.dp),
+        ) {
+            Icon(
+                Icons.Filled.AutoAwesome,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.padding(16.dp),
+            )
+        }
+        Text(
+            stringResource(R.string.ai_empty_title),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+        )
+        Text(
+            stringResource(R.string.ai_hint),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(8.dp))
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            suggestions.forEach { text ->
+                AssistChip(
+                    onClick = { onSuggestion(text) },
+                    label = { Text(text) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }
@@ -259,18 +340,81 @@ fun AskAiScreen(onBack: () -> Unit, viewModel: AskAiViewModel = viewModel()) {
 
 @Composable
 private fun ChatBubble(message: ChatMessage) {
-    Card(
+    val shape = if (message.fromUser) {
+        RoundedCornerShape(18.dp, 18.dp, 4.dp, 18.dp)
+    } else {
+        RoundedCornerShape(18.dp, 18.dp, 18.dp, 4.dp)
+    }
+    Row(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = if (message.fromUser) MaterialTheme.colorScheme.primaryContainer
+        horizontalArrangement = if (message.fromUser) Arrangement.End else Arrangement.Start,
+    ) {
+        Surface(
+            shape = shape,
+            color = if (message.fromUser) MaterialTheme.colorScheme.primary
             else MaterialTheme.colorScheme.surfaceVariant,
-        ),
+            contentColor = if (message.fromUser) MaterialTheme.colorScheme.onPrimary
+            else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.widthIn(max = 320.dp),
+        ) {
+            Text(
+                message.text,
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ThinkingBubble() {
+    Surface(
+        shape = RoundedCornerShape(18.dp, 18.dp, 18.dp, 4.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
         Text(
-            message.text,
-            modifier = Modifier.padding(12.dp),
+            stringResource(R.string.ai_thinking),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
             style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+    }
+}
+
+@Composable
+private fun InputBar(
+    value: String,
+    onValueChange: (String) -> Unit,
+    enabled: Boolean,
+    onSend: () -> Unit,
+) {
+    Surface(
+        tonalElevation = 3.dp,
+        color = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            OutlinedTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier.weight(1f),
+                placeholder = { Text(stringResource(R.string.ai_placeholder)) },
+                shape = RoundedCornerShape(24.dp),
+                maxLines = 4,
+                enabled = enabled,
+            )
+            val canSend = enabled && value.isNotBlank()
+            FilledIconButton(onClick = onSend, enabled = canSend) {
+                Icon(Icons.Filled.Send, contentDescription = stringResource(R.string.ai_send))
+            }
+        }
     }
 }
 

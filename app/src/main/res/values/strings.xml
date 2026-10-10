@@ -545,7 +545,7 @@
     <string name="app_sounds">App sounds</string>
     <string name="info_app_sounds">Spooky sound effects: a ghostly whoosh when a receipt is saved, a scare sting when a bulk scan finishes, and a bat chime when photos are added. Turn off for silence.</string>
     <string name="ai_title">Ask AI</string>
-    <string name="ai_hint">Ask anything about your receipts or exchange rates, for example: How much did I spend on groceries this month? What is 500 USD in PKR?</string>
+    <string name="ai_hint">I can look up your receipts and the latest exchange rates for you.</string>
     <string name="ai_placeholder">Type your question</string>
     <string name="ai_send">Send</string>
     <string name="ai_thinking">Thinking…</string>
@@ -554,4 +554,9 @@
     <string name="info_split_bill">Splits this receipt between two customers. Type what Customer 1 pays; Customer 2 pays the rest. Leave it empty for an equal split.</string>
     <string name="split_customer1">Customer 1 pays</string>
     <string name="split_summary">Customer 1: %1$s · Customer 2: %2$s</string>
+    <string name="ai_subtitle">Ask about receipts and exchange rates</string>
+    <string name="ai_empty_title">Ask about your money</string>
+    <string name="ai_suggest_1">How much did I spend on groceries this month?</string>
+    <string name="ai_suggest_2">What is 500 USD in PKR today?</string>
+    <string name="ai_suggest_3">Show my last 5 receipts</string>
 </resources>
