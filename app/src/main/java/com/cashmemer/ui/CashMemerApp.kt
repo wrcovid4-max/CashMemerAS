@@ -1,5 +1,6 @@
 package com.cashmemer.ui
 
+import androidx.activity.compose.BackHandler
 import com.cashmemer.ui.ai.AskAiScreen
 import com.cashmemer.ui.ai.AskAiFab
 import androidx.compose.ui.unit.dp
@@ -112,8 +113,17 @@ fun CashMemerApp(settings: AppSettings) {
         )
     }
 
+    // Back on the Ask AI screen goes to the home screen, never out of the app.
+    val goHome: () -> Unit = {
+        navController.navigate(Destination.Receipts.route) {
+            popUpTo(navController.graph.findStartDestination().id) { inclusive = false }
+            launchSingleTop = true
+        }
+    }
+    BackHandler(enabled = currentRoute == ROUTE_ASK_AI, onBack = goHome)
+
     if (currentRoute == ROUTE_ASK_AI) {
-        AskAiScreen(onBack = { navController.popBackStack() })
+        AskAiScreen(onBack = goHome)
     } else Scaffold(
         topBar = {
             BrandHeader(
