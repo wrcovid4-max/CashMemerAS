@@ -566,6 +566,6 @@
     <string name="ai_untitled">Untitled chat</string>
     <string name="ai_model_info">Powered by Google Gemini (%1$s). If the model is busy, the app switches to the previous model automatically.</string>
     <string name="ai_voice">Speak your question</string>
-    <string name="ai_listening">Speak your question</string>
-    <string name="ai_disclaimer">AI can make mistakes. Check important amounts against your receipts.</string>
+    <string name="ai_listening">Listening… tap the mic to stop</string>
+    <string name="ai_disclaimer">Model: %1$s. AI can make mistakes. Check important amounts against your receipts.</string>
 </resources>

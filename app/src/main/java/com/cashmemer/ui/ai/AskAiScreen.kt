@@ -1,5 +1,13 @@
 package com.cashmemer.ui.ai
 
+import androidx.core.content.ContextCompat
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.DisposableEffect
+import android.speech.SpeechRecognizer
+import android.speech.RecognitionListener
+import android.os.Bundle
+import android.content.pm.PackageManager
+import android.Manifest
 import androidx.compose.material.icons.filled.Mic
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -506,15 +514,60 @@ private fun InputBar(
     enabled: Boolean,
     onSend: () -> Unit,
 ) {
-    val voiceLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult(),
-    ) { result ->
-        val spoken = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
-        if (!spoken.isNullOrBlank()) {
-            onValueChange(if (value.isBlank()) spoken else "$value $spoken")
+    val context = LocalContext.current
+    var listening by remember { mutableStateOf(false) }
+    var base by remember { mutableStateOf("") }
+    val recognizer = remember {
+        if (SpeechRecognizer.isRecognitionAvailable(context)) SpeechRecognizer.createSpeechRecognizer(context) else null
+    }
+    DisposableEffect(recognizer) {
+        onDispose { recognizer?.destroy() }
+    }
+
+    fun joined(spoken: String): String = if (base.isBlank()) spoken else "$base $spoken"
+
+    val startListening: () -> Unit = {
+        recognizer?.let { r ->
+            base = value
+            r.setRecognitionListener(object : RecognitionListener {
+                override fun onReadyForSpeech(params: Bundle?) { listening = true }
+                override fun onBeginningOfSpeech() {}
+                override fun onRmsChanged(rmsdB: Float) {}
+                override fun onBufferReceived(buffer: ByteArray?) {}
+                override fun onEndOfSpeech() { listening = false }
+                override fun onError(error: Int) { listening = false }
+                override fun onResults(results: Bundle?) {
+                    listening = false
+                    results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                        ?.firstOrNull()?.let { onValueChange(joined(it)) }
+                }
+                override fun onPartialResults(partialResults: Bundle?) {
+                    partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                        ?.firstOrNull()?.let { onValueChange(joined(it)) }
+                }
+                override fun onEvent(eventType: Int, params: Bundle?) {}
+            })
+            r.startListening(Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+            })
         }
     }
-    val voicePrompt = stringResource(R.string.ai_listening)
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) startListening()
+    }
+
+    val toggleMic: () -> Unit = {
+        when {
+            listening -> recognizer?.stopListening()
+            ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
+                PackageManager.PERMISSION_GRANTED -> startListening()
+            else -> permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        }
+    }
 
     Surface(
         tonalElevation = 3.dp,
@@ -560,19 +613,13 @@ private fun InputBar(
                     ),
                 )
                 IconButton(
-                    onClick = {
-                        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                            putExtra(RecognizerIntent.EXTRA_PROMPT, voicePrompt)
-                        }
-                        runCatching { voiceLauncher.launch(intent) }
-                    },
-                    enabled = enabled,
+                    onClick = toggleMic,
+                    enabled = enabled && recognizer != null,
                 ) {
                     Icon(
                         Icons.Filled.Mic,
                         contentDescription = stringResource(R.string.ai_voice),
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = if (listening) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                     )
                 }
                 val canSend = enabled && value.isNotBlank()
@@ -591,7 +638,8 @@ private fun InputBar(
                 }
             }
             Text(
-                stringResource(R.string.ai_disclaimer),
+                if (listening) stringResource(R.string.ai_listening)
+                else stringResource(R.string.ai_disclaimer, GeminiOcrClient.MODEL),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
