@@ -1,5 +1,6 @@
 package com.cashmemer.ui.ai
 
+import androidx.activity.compose.BackHandler
 import androidx.core.content.ContextCompat
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.DisposableEffect
@@ -286,6 +287,8 @@ class AskAiViewModel(application: Application) : AndroidViewModel(application) {
 /** The chat screen: a header, example questions when empty, the conversation, and an input bar. */
 @Composable
 fun AskAiScreen(onBack: () -> Unit, viewModel: AskAiViewModel = viewModel()) {
+    // The phone's Back button on this screen goes home, not out of the app.
+    BackHandler(onBack = onBack)
     val messages by viewModel.messages.collectAsState()
     val busy by viewModel.busy.collectAsState()
     var draft by remember { mutableStateOf("") }
