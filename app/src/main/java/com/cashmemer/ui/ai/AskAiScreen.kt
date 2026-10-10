@@ -1,5 +1,6 @@
 package com.cashmemer.ui.ai
 
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.animation.core.tween
@@ -58,8 +59,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.AssistChip
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
@@ -74,23 +74,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -395,7 +390,7 @@ private fun ChatHeader(onBack: () -> Unit, onNewChat: () -> Unit, onHistory: () 
                 body = stringResource(R.string.ai_model_info, GeminiOcrClient.MODEL),
             )
             IconButton(onClick = onBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.bulk_back))
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.bulk_back))
             }
             Column(
                 modifier = Modifier.weight(1f),
@@ -676,7 +671,7 @@ private fun InputBar(
                         disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     ),
                 ) {
-                    Icon(Icons.Filled.Send, contentDescription = stringResource(R.string.ai_send))
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(R.string.ai_send))
                 }
             }
             Text(
@@ -772,7 +767,7 @@ private fun HistorySheet(
                                     IconButton(onClick = {
                                         removing = removing + chat.id
                                         scope.launch {
-                                            delay(280)
+                                            delay(280.milliseconds)
                                             onDelete(chat.id)
                                         }
                                     }) {
