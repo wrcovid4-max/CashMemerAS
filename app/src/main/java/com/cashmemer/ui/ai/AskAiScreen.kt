@@ -1,5 +1,9 @@
 package com.cashmemer.ui.ai
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TextField
 import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -404,16 +408,42 @@ private fun InputBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            OutlinedTextField(
+            TextField(
                 value = value,
                 onValueChange = onValueChange,
                 modifier = Modifier.weight(1f),
-                placeholder = { Text(stringResource(R.string.ai_placeholder)) },
+                placeholder = {
+                    Text(
+                        stringResource(R.string.ai_placeholder),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    )
+                },
+                textStyle = MaterialTheme.typography.bodyLarge,
                 shape = RoundedCornerShape(24.dp),
                 maxLines = 4,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                ),
             )
             val canSend = enabled && value.isNotBlank()
-            FilledIconButton(onClick = onSend, enabled = canSend) {
+            FilledIconButton(
+                onClick = onSend,
+                enabled = canSend,
+                modifier = Modifier.size(48.dp),
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+            ) {
                 Icon(Icons.Filled.Send, contentDescription = stringResource(R.string.ai_send))
             }
         }
