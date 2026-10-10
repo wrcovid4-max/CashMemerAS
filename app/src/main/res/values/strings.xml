@@ -559,4 +559,9 @@
     <string name="ai_suggest_1">How much did I spend on groceries this month?</string>
     <string name="ai_suggest_2">What is 500 USD in PKR today?</string>
     <string name="ai_suggest_3">Show my last 5 receipts</string>
+    <string name="ai_history">Recent chats</string>
+    <string name="ai_history_empty">No chats yet. Your conversations will appear here.</string>
+    <string name="ai_new_chat">New chat</string>
+    <string name="ai_delete">Delete chat</string>
+    <string name="ai_untitled">Untitled chat</string>
 </resources>

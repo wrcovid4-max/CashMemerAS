@@ -1,5 +1,15 @@
 package com.cashmemer.ui.ai
 
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ExperimentalMaterial3Api
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.Date
+import java.util.UUID
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.border
@@ -95,8 +105,12 @@ class AskAiViewModel(application: Application) : AndroidViewModel(application) {
     private val _busy = MutableStateFlow(false)
     val busy: StateFlow<Boolean> = _busy.asStateFlow()
 
+    private val _chats = MutableStateFlow(AiChatHistory.load(application))
+    val chats: StateFlow<List<SavedChat>> = _chats.asStateFlow()
+    private var currentId = UUID.randomUUID().toString()
+
     /** The conversation as Gemini sees it. Kept only while this screen is open. */
-    private val history = JSONArray()
+    private var history = JSONArray()
 
     fun ask(question: String) {
         val text = question.trim()
@@ -109,7 +123,42 @@ class AskAiViewModel(application: Application) : AndroidViewModel(application) {
             val reply = runConversation()
             _messages.update { it + ChatMessage(fromUser = false, text = reply) }
             _busy.value = false
+            persist()
         }
+    }
+
+    private fun persist() {
+        val messages = _messages.value
+        val firstQuestion = messages.firstOrNull { it.fromUser }?.text.orEmpty()
+        val chat = SavedChat(
+            id = currentId,
+            title = firstQuestion.take(60).ifBlank { getApplication<Application>().getString(R.string.ai_untitled) },
+            updatedAt = System.currentTimeMillis(),
+            messages = messages,
+            gemini = history.toString(),
+        )
+        _chats.value = (listOf(chat) + _chats.value.filter { it.id != currentId }).take(AiChatHistory.LIMIT)
+        AiChatHistory.save(getApplication(), _chats.value)
+    }
+
+    fun newChat() {
+        if (_busy.value) return
+        currentId = UUID.randomUUID().toString()
+        history = JSONArray()
+        _messages.value = emptyList()
+    }
+
+    fun openChat(chat: SavedChat) {
+        if (_busy.value) return
+        currentId = chat.id
+        history = runCatching { JSONArray(chat.gemini) }.getOrDefault(JSONArray())
+        _messages.value = chat.messages
+    }
+
+    fun deleteChat(id: String) {
+        _chats.value = _chats.value.filter { it.id != id }
+        AiChatHistory.save(getApplication(), _chats.value)
+        if (id == currentId) newChat()
     }
 
     private suspend fun runConversation(): String {
@@ -224,6 +273,8 @@ fun AskAiScreen(onBack: () -> Unit, viewModel: AskAiViewModel = viewModel()) {
     val messages by viewModel.messages.collectAsState()
     val busy by viewModel.busy.collectAsState()
     var draft by remember { mutableStateOf("") }
+    var showHistory by remember { mutableStateOf(false) }
+    val chats by viewModel.chats.collectAsState()
     val suggestions = listOf(
         stringResource(R.string.ai_suggest_1),
         stringResource(R.string.ai_suggest_2),
@@ -236,7 +287,11 @@ fun AskAiScreen(onBack: () -> Unit, viewModel: AskAiViewModel = viewModel()) {
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding(),
     ) {
-        ChatHeader(onBack = onBack)
+        ChatHeader(
+            onBack = onBack,
+            onNewChat = { viewModel.newChat() },
+            onHistory = { showHistory = true },
+        )
 
         LazyColumn(
             modifier = Modifier
@@ -255,6 +310,18 @@ fun AskAiScreen(onBack: () -> Unit, viewModel: AskAiViewModel = viewModel()) {
             }
         }
 
+        if (showHistory) {
+            HistorySheet(
+                chats = chats,
+                onOpen = {
+                    viewModel.openChat(it)
+                    showHistory = false
+                },
+                onDelete = { viewModel.deleteChat(it) },
+                onDismiss = { showHistory = false },
+            )
+        }
+
         InputBar(
             value = draft,
             onValueChange = { draft = it },
@@ -268,7 +335,7 @@ fun AskAiScreen(onBack: () -> Unit, viewModel: AskAiViewModel = viewModel()) {
 }
 
 @Composable
-private fun ChatHeader(onBack: () -> Unit) {
+private fun ChatHeader(onBack: () -> Unit, onNewChat: () -> Unit, onHistory: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -290,11 +357,15 @@ private fun ChatHeader(onBack: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Icon(
-            Icons.Filled.AutoAwesome,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-        )
+        IconButton(onClick = onNewChat) {
+            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.ai_new_chat))
+        }
+        IconButton(onClick = onHistory) {
+            Icon(
+                Icons.AutoMirrored.Filled.List,
+                contentDescription = stringResource(R.string.ai_history),
+            )
+        }
     }
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 }
@@ -495,3 +566,78 @@ fun AskAiFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
         Icon(Icons.Filled.AutoAwesome, contentDescription = stringResource(R.string.ai_title))
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HistorySheet(
+    chats: List<SavedChat>,
+    onOpen: (SavedChat) -> Unit,
+    onDelete: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                stringResource(R.string.ai_history),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+            )
+            if (chats.isEmpty()) {
+                Text(
+                    stringResource(R.string.ai_history_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 480.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(chats, key = { it.id }) { chat ->
+                        Surface(
+                            onClick = { onOpen(chat) },
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(start = 16.dp, end = 4.dp, top = 12.dp, bottom = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        chat.title,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Medium,
+                                    )
+                                    Text(
+                                        formatChatDate(chat.updatedAt),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                IconButton(onClick = { onDelete(chat.id) }) {
+                                    Icon(
+                                        Icons.Filled.Delete,
+                                        contentDescription = stringResource(R.string.ai_delete),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun formatChatDate(millis: Long): String =
+    SimpleDateFormat("d MMM, h:mm a", Locale.getDefault()).format(Date(millis))

@@ -558,4 +558,9 @@
     <string name="ai_suggest_1">اس مہینے گروسری پر کتنا خرچ کیا؟</string>
     <string name="ai_suggest_2">آج 500 USD کتنے PKR کے برابر ہیں؟</string>
     <string name="ai_suggest_3">میری آخری 5 رسیدیں دکھائیں</string>
+    <string name="ai_history">حالیہ چیٹس</string>
+    <string name="ai_history_empty">ابھی کوئی چیٹ نہیں۔ آپ کی بات چیت یہاں دکھائی دے گی۔</string>
+    <string name="ai_new_chat">نئی چیٹ</string>
+    <string name="ai_delete">چیٹ حذف کریں</string>
+    <string name="ai_untitled">بے عنوان چیٹ</string>
 </resources>
