@@ -408,7 +408,6 @@ private fun InputBar(
                 placeholder = { Text(stringResource(R.string.ai_placeholder)) },
                 shape = RoundedCornerShape(24.dp),
                 maxLines = 4,
-                enabled = enabled,
             )
             val canSend = enabled && value.isNotBlank()
             FilledIconButton(onClick = onSend, enabled = canSend) {
