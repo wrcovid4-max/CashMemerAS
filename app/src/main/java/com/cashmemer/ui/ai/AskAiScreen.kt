@@ -337,7 +337,8 @@ fun AskAiScreen(onBack: () -> Unit, viewModel: AskAiViewModel = viewModel()) {
                     fadeOut(animationSpec = tween(150))
             },
             label = "chat",
-        ) { _ ->
+        ) { opened ->
+        key(opened) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -352,6 +353,7 @@ fun AskAiScreen(onBack: () -> Unit, viewModel: AskAiViewModel = viewModel()) {
             if (busy) {
                 item { ThinkingBubble() }
             }
+        }
         }
         }
 
