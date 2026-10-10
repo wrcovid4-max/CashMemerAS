@@ -1,5 +1,12 @@
 package com.cashmemer.ui.ai
 
+import androidx.compose.material.icons.filled.Mic
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.rememberLauncherForActivityResult
+import android.speech.RecognizerIntent
+import android.content.Intent
+import com.cashmemer.core.network.GeminiOcrClient
+import com.cashmemer.ui.components.InfoIcon
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
@@ -169,6 +176,7 @@ class AskAiViewModel(application: Application) : AndroidViewModel(application) {
                     JSONArray().put(JSONObject().put("text", SYSTEM_PROMPT))))
                 .put("contents", history)
                 .put("tools", JSONArray().put(JSONObject().put("functionDeclarations", declarations())))
+                .put("generationConfig", JSONObject().put("temperature", 0.2).put("maxOutputTokens", 1024))
             val response = GeminiChat.generate(body).getOrNull() ?: return failed
             val parts = response.optJSONArray("candidates")?.optJSONObject(0)
                 ?.optJSONObject("content")?.optJSONArray("parts") ?: return failed
@@ -357,6 +365,10 @@ private fun ChatHeader(onBack: () -> Unit, onNewChat: () -> Unit, onHistory: () 
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        InfoIcon(
+            title = stringResource(R.string.ai_title),
+            body = stringResource(R.string.ai_model_info, GeminiOcrClient.MODEL),
+        )
         IconButton(onClick = onNewChat) {
             Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.ai_new_chat))
         }
@@ -494,6 +506,16 @@ private fun InputBar(
     enabled: Boolean,
     onSend: () -> Unit,
 ) {
+    val voiceLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        val spoken = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
+        if (!spoken.isNullOrBlank()) {
+            onValueChange(if (value.isBlank()) spoken else "$value $spoken")
+        }
+    }
+    val voicePrompt = stringResource(R.string.ai_listening)
+
     Surface(
         tonalElevation = 3.dp,
         color = MaterialTheme.colorScheme.surface,
@@ -502,54 +524,81 @@ private fun InputBar(
             // One padding for the keyboard or the navigation bar, whichever is taller.
             .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime)),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            TextField(
-                value = value,
-                onValueChange = onValueChange,
-                placeholder = {
-                    Text(
-                        stringResource(R.string.ai_placeholder),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    )
-                },
-                textStyle = MaterialTheme.typography.bodyLarge,
-                shape = RoundedCornerShape(28.dp),
-                maxLines = 4,
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .heightIn(min = 56.dp)
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), RoundedCornerShape(28.dp)),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                ),
-            )
-            val canSend = enabled && value.isNotBlank()
-            FilledIconButton(
-                onClick = onSend,
-                enabled = canSend,
-                modifier = Modifier.size(48.dp),
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                ),
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Icon(Icons.Filled.Send, contentDescription = stringResource(R.string.ai_send))
+                TextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = 56.dp)
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), RoundedCornerShape(28.dp)),
+                    placeholder = {
+                        Text(
+                            stringResource(R.string.ai_placeholder),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        )
+                    },
+                    textStyle = MaterialTheme.typography.bodyLarge,
+                    shape = RoundedCornerShape(28.dp),
+                    maxLines = 4,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                    ),
+                )
+                IconButton(
+                    onClick = {
+                        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                            putExtra(RecognizerIntent.EXTRA_PROMPT, voicePrompt)
+                        }
+                        runCatching { voiceLauncher.launch(intent) }
+                    },
+                    enabled = enabled,
+                ) {
+                    Icon(
+                        Icons.Filled.Mic,
+                        contentDescription = stringResource(R.string.ai_voice),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                val canSend = enabled && value.isNotBlank()
+                FilledIconButton(
+                    onClick = onSend,
+                    enabled = canSend,
+                    modifier = Modifier.size(48.dp),
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    ),
+                ) {
+                    Icon(Icons.Filled.Send, contentDescription = stringResource(R.string.ai_send))
+                }
             }
+            Text(
+                stringResource(R.string.ai_disclaimer),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
+            )
         }
     }
 }

@@ -563,4 +563,8 @@
     <string name="ai_new_chat">نئی چیٹ</string>
     <string name="ai_delete">چیٹ حذف کریں</string>
     <string name="ai_untitled">بے عنوان چیٹ</string>
+    <string name="ai_model_info">Google Gemini (%1$s) سے چلتا ہے۔ ماڈل مصروف ہو تو ایپ خود پچھلے ماڈل پر چلی جاتی ہے۔</string>
+    <string name="ai_voice">بول کر سوال لکھیں</string>
+    <string name="ai_listening">اپنا سوال بولیں</string>
+    <string name="ai_disclaimer">AI غلطیاں کر سکتا ہے۔ اہم رقوم اپنی رسیدوں سے ملا کر دیکھیں۔</string>
 </resources>
