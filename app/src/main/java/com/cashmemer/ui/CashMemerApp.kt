@@ -1,5 +1,7 @@
 package com.cashmemer.ui
 
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.activity.compose.BackHandler
 import com.cashmemer.ui.ai.AskAiScreen
 import com.cashmemer.ui.ai.AskAiFab
 import androidx.compose.ui.unit.dp
@@ -112,17 +114,12 @@ fun CashMemerApp(settings: AppSettings) {
         )
     }
 
-    // Back on the Ask AI screen goes to the home screen, never out of the app.
-    val goHome: () -> Unit = {
-        if (!navController.popBackStack(Destination.Receipts.route, false)) {
-            navController.navigate(Destination.Receipts.route) {
-                launchSingleTop = true
-            }
-        }
-    }
+    // Ask AI is shown on top of the app. Back on that screen returns to the app's home screen.
+    var showAskAi by rememberSaveable { mutableStateOf(false) }
+    BackHandler(enabled = showAskAi) { showAskAi = false }
 
-    if (currentRoute == ROUTE_ASK_AI) {
-        AskAiScreen(onBack = goHome)
+    if (showAskAi) {
+        AskAiScreen(onBack = { showAskAi = false })
     } else Scaffold(
         topBar = {
             BrandHeader(
@@ -152,6 +149,7 @@ fun CashMemerApp(settings: AppSettings) {
             navController = navController,
             settings = settings,
             contentPadding = innerPadding,
+            onOpenAskAi = { showAskAi = true },
         )
     }
 }
@@ -161,6 +159,7 @@ private fun AppNavHost(
     navController: androidx.navigation.NavHostController,
     settings: AppSettings,
     contentPadding: PaddingValues,
+    onOpenAskAi: () -> Unit,
 ) {
     val barcodePending by BarcodeScanBus.pending.collectAsState()
     LaunchedEffect(barcodePending) {
@@ -209,7 +208,7 @@ private fun AppNavHost(
         }
             if (currentRoute != ROUTE_ASK_AI && currentRoute != ROUTE_BULK) {
             AskAiFab(
-                onClick = { navController.navigate(ROUTE_ASK_AI) },
+                onClick = onOpenAskAi,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 16.dp, bottom = 16.dp),
