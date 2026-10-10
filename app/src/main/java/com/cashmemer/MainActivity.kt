@@ -46,8 +46,8 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val settings by settingsFlow.collectAsState(initial = AppSettings())
             LaunchedEffect(settings.appSounds) {
-                com.cashmemer.audio.AppSounds.enabled = settings.appSounds && Holiday.HALLOWEEN
-                if (settings.appSounds && Holiday.HALLOWEEN) {
+                com.cashmemer.audio.AppSounds.enabled = Holiday.HALLOWEEN
+                if (Holiday.HALLOWEEN) {
                     com.cashmemer.audio.AppSounds.startMusic(this@MainActivity)
                 } else {
                     com.cashmemer.audio.AppSounds.stopMusic()

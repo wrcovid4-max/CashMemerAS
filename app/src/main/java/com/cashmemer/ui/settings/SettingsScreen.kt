@@ -356,12 +356,6 @@ fun SettingsScreen(
                     viewModel::setAllowBulkOnCellular,
                     info = stringResource(R.string.info_allow_bulk_cellular),
                 )
-                ToggleRow(
-                    stringResource(R.string.app_sounds),
-                    settings.appSounds,
-                    viewModel::setAppSounds,
-                    info = stringResource(R.string.info_app_sounds),
-                )
             }
         }
 
