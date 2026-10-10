@@ -370,11 +370,6 @@ private fun ChatHeader(onBack: () -> Unit, onNewChat: () -> Unit, onHistory: () 
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
             )
-            Text(
-                stringResource(R.string.ai_subtitle),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
         InfoIcon(
             title = stringResource(R.string.ai_title),
@@ -391,6 +386,17 @@ private fun ChatHeader(onBack: () -> Unit, onNewChat: () -> Unit, onHistory: () 
             )
         }
     }
+    Text(
+        stringResource(R.string.ai_subtitle),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 }
 
