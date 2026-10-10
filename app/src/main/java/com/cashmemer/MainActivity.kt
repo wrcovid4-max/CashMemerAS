@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        LauncherIcon.apply(this)
         handleBarcodeIntent(intent)
 
         val settingsFlow = (application as CashMemerApplication).settingsStore.settings

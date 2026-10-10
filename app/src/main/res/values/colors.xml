@@ -7,4 +7,5 @@
     <color name="window_background">#F8F9EF</color>
     <!-- Matches the blue field of the brand artwork. -->
     <color name="ic_launcher_background">#1F63E0</color>
+    <color name="ic_launcher_background_halloween">#1A0F2E</color>
 </resources>
