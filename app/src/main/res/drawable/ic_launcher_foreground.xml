@@ -1,34 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Launcher foreground. Sized for the adaptive-icon safe zone: the mark sits
+  inside the middle 66dp of the 108dp canvas so no launcher mask clips it.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:fillColor="#FF7A18"
-        android:pathData="M54,40 C74,40 86,54 86,68 C86,86 72,96 54,96 C36,96 22,86 22,68 C22,54 34,40 54,40 Z" />
-    <path
-        android:fillColor="#00000000"
-        android:strokeColor="#C2410C"
-        android:strokeWidth="2.2"
-        android:pathData="M54,44 C47,58 47,80 54,94" />
-    <path
-        android:fillColor="#00000000"
-        android:strokeColor="#C2410C"
-        android:strokeWidth="2.2"
-        android:pathData="M54,44 C61,58 61,80 54,94" />
-    <path
-        android:fillColor="#3B6E22"
-        android:pathData="M50,36 L58,36 L57,26 Q54,22 51,26 Z" />
-    <path
-        android:fillColor="#4E8F2A"
-        android:pathData="M57,30 Q68,20 78,26 Q68,34 57,32 Z" />
-    <path
-        android:fillColor="#1A0F2E"
-        android:pathData="M36,56 L50,56 L43,68 Z" />
-    <path
-        android:fillColor="#1A0F2E"
-        android:pathData="M58,56 L72,56 L65,68 Z" />
-    <path
-        android:fillColor="#1A0F2E"
-        android:pathData="M34,76 L74,76 L68,84 L62,76 L54,85 L46,76 L40,84 Z" />
+
+    <group android:scaleX="0.62"
+        android:scaleY="0.62"
+        android:pivotX="54"
+        android:pivotY="54">
+
+        <!-- Folder back -->
+        <path
+            android:fillColor="#8FBBFF"
+            android:pathData="M22,34h30l6,8h28a4,4 0,0 1,4 4v34a4,4 0,0 1,-4 4H22a4,4 0,0 1,-4 -4V38a4,4 0,0 1,4 -4z" />
+
+        <!-- Receipt -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M33,18h42v54l-5.25,-4 -5.25,4 -5.25,-4 -5.25,4 -5.25,-4 -5.25,4 -5.25,-4 -5.25,4z" />
+
+        <path
+            android:fillColor="#3D7BE0"
+            android:pathData="M39,28h30v4h-30z" />
+        <path
+            android:fillColor="#3D7BE0"
+            android:pathData="M39,37h30v4h-30z" />
+        <path
+            android:fillColor="#3D7BE0"
+            android:pathData="M39,46h30v4h-30z" />
+        <path
+            android:fillColor="#3D7BE0"
+            android:pathData="M39,55h20v4h-20z" />
+
+        <!-- Folder front -->
+        <path
+            android:fillColor="#2F7BF6"
+            android:pathData="M18,62h72v22a4,4 0,0 1,-4 4H22a4,4 0,0 1,-4 -4z" />
+
+        <!-- Tick -->
+        <path
+            android:fillColor="#3DBB5B"
+            android:pathData="M80,80m-15,0a15,15 0,1 1,30 0a15,15 0,1 1,-30 0" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M72,80l5,5 11,-11 4,4 -15,15 -9,-9z" />
+    </group>
 </vector>

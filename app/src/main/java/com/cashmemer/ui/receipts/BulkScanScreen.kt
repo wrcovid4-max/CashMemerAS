@@ -58,6 +58,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cashmemer.R
+import com.cashmemer.core.ui.theme.Holiday
 import com.cashmemer.core.network.GeminiOcrClient
 import com.cashmemer.core.network.ParsedReceipt
 import kotlinx.coroutines.Dispatchers
@@ -306,11 +307,13 @@ fun BulkScanScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Image(
+                if (Holiday.HALLOWEEN) {
+                    Image(
                     painter = painterResource(R.drawable.ic_ghost),
                     contentDescription = null,
                     modifier = Modifier.size(96.dp),
                 )
+                }
                 Text(
                     stringResource(R.string.bulk_empty),
                     style = MaterialTheme.typography.bodyMedium,

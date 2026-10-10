@@ -1,5 +1,6 @@
 package com.cashmemer
 
+import com.cashmemer.core.ui.theme.Holiday
 import com.cashmemer.ui.effects.AutumnLeaves
 import com.cashmemer.ui.effects.BatFlyer
 import com.cashmemer.ui.effects.HalloweenDecor
@@ -44,8 +45,8 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val settings by settingsFlow.collectAsState(initial = AppSettings())
             LaunchedEffect(settings.appSounds) {
-                com.cashmemer.audio.AppSounds.enabled = settings.appSounds
-                if (settings.appSounds) {
+                com.cashmemer.audio.AppSounds.enabled = settings.appSounds && Holiday.HALLOWEEN
+                if (settings.appSounds && Holiday.HALLOWEEN) {
                     com.cashmemer.audio.AppSounds.startMusic(this@MainActivity)
                 } else {
                     com.cashmemer.audio.AppSounds.stopMusic()
@@ -67,9 +68,9 @@ class MainActivity : AppCompatActivity() {
                             CashMemerApp(settings = settings)
                         }
                     }
-                    AutumnLeaves()
-                    BatFlyer()
-                    HalloweenDecor()
+                    if (Holiday.HALLOWEEN) AutumnLeaves()
+                    if (Holiday.HALLOWEEN) BatFlyer()
+                    if (Holiday.HALLOWEEN) HalloweenDecor()
                 }
             }
         }

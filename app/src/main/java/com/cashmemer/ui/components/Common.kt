@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cashmemer.R
+import com.cashmemer.core.ui.theme.Holiday
 import com.cashmemer.core.ui.theme.DangerButton
 import com.cashmemer.core.ui.theme.Dimens
 import com.cashmemer.core.ui.theme.OnDangerButton
@@ -583,12 +584,21 @@ fun DetailRow(
 fun InfoIcon(title: String, body: String, modifier: Modifier = Modifier) {
     var open by remember { mutableStateOf(false) }
     IconButton(onClick = { open = true }, modifier = modifier.size(32.dp).leafPerch()) {
-        Icon(
-            painter = painterResource(R.drawable.ic_ghost),
-            contentDescription = stringResource(R.string.info_about, title),
-            tint = Color.Unspecified,
-            modifier = Modifier.size(22.dp),
-        )
+        if (Holiday.HALLOWEEN) {
+            Icon(
+                painter = painterResource(R.drawable.ic_ghost),
+                contentDescription = stringResource(R.string.info_about, title),
+                tint = Color.Unspecified,
+                modifier = Modifier.size(22.dp),
+            )
+        } else {
+            Icon(
+                Icons.Filled.Info,
+                contentDescription = stringResource(R.string.info_about, title),
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp),
+            )
+        }
     }
     if (open) {
         AlertDialog(

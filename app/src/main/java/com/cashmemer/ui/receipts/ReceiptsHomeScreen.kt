@@ -1,6 +1,7 @@
 package com.cashmemer.ui.receipts
 
 import androidx.compose.ui.unit.dp
+import com.cashmemer.core.ui.theme.Holiday
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.size
@@ -76,7 +77,8 @@ fun ReceiptsHomeScreen(
 
         when (selectedTab) {
             0 -> Box(modifier = Modifier.fillMaxSize()) {
-                Image(
+                if (Holiday.HALLOWEEN) {
+                    Image(
                     painter = painterResource(R.drawable.ic_ghost),
                     contentDescription = null,
                     modifier = Modifier
@@ -84,6 +86,7 @@ fun ReceiptsHomeScreen(
                         .size(340.dp),
                     alpha = 0.18f,
                 )
+                }
                 NewReceiptTab(settings, onOpenBulkScan = onOpenBulkScan)
             }
             1 -> HistoryTab()
