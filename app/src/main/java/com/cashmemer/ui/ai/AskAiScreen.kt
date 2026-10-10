@@ -1,5 +1,7 @@
 package com.cashmemer.ui.ai
 
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
@@ -311,6 +313,7 @@ fun AskAiScreen(onBack: () -> Unit, viewModel: AskAiViewModel = viewModel()) {
         stringResource(R.string.ai_suggest_3),
     )
 
+    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onBackground) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -375,6 +378,7 @@ fun AskAiScreen(onBack: () -> Unit, viewModel: AskAiViewModel = viewModel()) {
                 draft = ""
             },
         )
+    }
     }
 }
 
