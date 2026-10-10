@@ -364,6 +364,10 @@ private fun ChatHeader(onBack: () -> Unit, onNewChat: () -> Unit, onHistory: () 
         IconButton(onClick = onBack) {
             Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.bulk_back))
         }
+        InfoIcon(
+            title = stringResource(R.string.ai_title),
+            body = stringResource(R.string.ai_model_info, GeminiOcrClient.MODEL),
+        )
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 stringResource(R.string.ai_title),
@@ -371,10 +375,6 @@ private fun ChatHeader(onBack: () -> Unit, onNewChat: () -> Unit, onHistory: () 
                 fontWeight = FontWeight.SemiBold,
             )
         }
-        InfoIcon(
-            title = stringResource(R.string.ai_title),
-            body = stringResource(R.string.ai_model_info, GeminiOcrClient.MODEL),
-        )
         IconButton(onClick = onNewChat) {
             Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.ai_new_chat))
         }
