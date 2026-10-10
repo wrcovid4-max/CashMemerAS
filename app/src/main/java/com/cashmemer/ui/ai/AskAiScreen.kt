@@ -388,13 +388,13 @@ private fun ChatHeader(onBack: () -> Unit, onNewChat: () -> Unit, onHistory: () 
                 .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.bulk_back))
-            }
             InfoIcon(
                 title = stringResource(R.string.ai_title),
                 body = stringResource(R.string.ai_model_info, GeminiOcrClient.MODEL),
             )
+            IconButton(onClick = onBack) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.bulk_back))
+            }
             Column(
                 modifier = Modifier.weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -410,7 +410,7 @@ private fun ChatHeader(onBack: () -> Unit, onNewChat: () -> Unit, onHistory: () 
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                    softWrap = false,
                 )
             }
             IconButton(onClick = onNewChat) {

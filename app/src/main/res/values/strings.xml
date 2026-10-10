@@ -554,7 +554,7 @@
     <string name="info_split_bill">Splits this receipt between two customers. Type what Customer 1 pays; Customer 2 pays the rest. Leave it empty for an equal split.</string>
     <string name="split_customer1">Customer 1 pays</string>
     <string name="split_summary">Customer 1: %1$s · Customer 2: %2$s</string>
-    <string name="ai_subtitle">Ask about receipts and exchange rates</string>
+    <string name="ai_subtitle">Receipts &amp; exchange rates</string>
     <string name="ai_empty_title">Ask about your money</string>
     <string name="ai_suggest_1">How much did I spend on groceries this month?</string>
     <string name="ai_suggest_2">What is 500 USD in PKR today?</string>
