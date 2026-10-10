@@ -43,7 +43,7 @@ fun BatFlyer() {
     }
 }
 
-private const val INTERVAL_SECONDS = 120f
+private const val INTERVAL_SECONDS = 10f
 private const val FLIGHT_SECONDS = 7f
 
 private class BatFlight {
