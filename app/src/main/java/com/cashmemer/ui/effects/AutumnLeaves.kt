@@ -121,8 +121,8 @@ private class LeafSimulation {
     private var time = 0f
     private var spawnTimer = 0f
     private val random = Random(2026)
-    private val maxFalling = 160
-    private val maxPiled = 60
+    private val maxFalling = 1000
+    private val maxPiled = 200
 
     fun step(dt: Float, seconds: Float) {
         if (size == Size.Zero) return
@@ -204,7 +204,7 @@ private class LeafSimulation {
                 x = random.nextFloat() * size.width,
                 y = -random.nextFloat() * 70f - 10f,
                 // XXL leaves.
-                size = 60f + random.nextFloat() * 30f,
+                size = 80f + random.nextFloat() * 30f,
                 vx = -90f,
                 vy = 70f + random.nextFloat() * 50f,
                 angle = random.nextFloat() * 360f,
