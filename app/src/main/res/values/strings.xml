@@ -113,6 +113,7 @@
     <string name="language_restart_body">The app will restart to switch to %1$s. Your receipts, drafts and settings are kept.</string>
     <string name="language_name_en">English</string>
     <string name="language_name_ur">Urdu</string>
+    <string name="language_name_zh">Chinese</string>
     <string name="action_restart">Restart</string>
     <string name="show_tax_breakdown">Show each tax separately</string>
     <string name="info_show_tax_breakdown">When a scanned receipt has several taxes or service charges, list each one with its own percentage. Off shows one combined tax line.</string>
