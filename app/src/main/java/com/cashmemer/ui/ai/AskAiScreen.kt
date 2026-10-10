@@ -387,6 +387,7 @@ private fun ChatHeader(onBack: () -> Unit, onNewChat: () -> Unit, onHistory: () 
             Icon(
                 Icons.AutoMirrored.Filled.List,
                 contentDescription = stringResource(R.string.ai_history),
+                tint = MaterialTheme.colorScheme.primary,
             )
         }
     }
