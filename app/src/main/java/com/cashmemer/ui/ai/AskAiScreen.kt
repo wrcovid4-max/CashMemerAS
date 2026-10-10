@@ -1,5 +1,15 @@
 package com.cashmemer.ui.ai
 
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
 import androidx.activity.compose.BackHandler
 import androidx.core.content.ContextCompat
 import androidx.compose.ui.platform.LocalContext
@@ -124,6 +134,8 @@ class AskAiViewModel(application: Application) : AndroidViewModel(application) {
     private val _chats = MutableStateFlow(AiChatHistory.load(application))
     val chats: StateFlow<List<SavedChat>> = _chats.asStateFlow()
     private var currentId = UUID.randomUUID().toString()
+    private val _openedAt = MutableStateFlow(0L)
+    val openedAt: StateFlow<Long> = _openedAt.asStateFlow()
 
     /** The conversation as Gemini sees it. Kept only while this screen is open. */
     private var history = JSONArray()
@@ -166,6 +178,7 @@ class AskAiViewModel(application: Application) : AndroidViewModel(application) {
 
     fun openChat(chat: SavedChat) {
         if (_busy.value) return
+        _openedAt.value = System.currentTimeMillis()
         currentId = chat.id
         history = runCatching { JSONArray(chat.gemini) }.getOrDefault(JSONArray())
         _messages.value = chat.messages
@@ -294,6 +307,7 @@ fun AskAiScreen(onBack: () -> Unit, viewModel: AskAiViewModel = viewModel()) {
     var draft by remember { mutableStateOf("") }
     var showHistory by remember { mutableStateOf(false) }
     val chats by viewModel.chats.collectAsState()
+    val openedAt by viewModel.openedAt.collectAsState()
     val suggestions = listOf(
         stringResource(R.string.ai_suggest_1),
         stringResource(R.string.ai_suggest_2),
@@ -312,10 +326,21 @@ fun AskAiScreen(onBack: () -> Unit, viewModel: AskAiViewModel = viewModel()) {
             onHistory = { showHistory = true },
         )
 
-        LazyColumn(
+        AnimatedContent(
+            targetState = openedAt,
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            transitionSpec = {
+                fadeIn(animationSpec = tween(350)) +
+                    slideInVertically(animationSpec = tween(350), initialOffsetY = { it / 10 }) togetherWith
+                    fadeOut(animationSpec = tween(150))
+            },
+            label = "chat",
+        ) { _ ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(vertical = 12.dp),
@@ -327,6 +352,7 @@ fun AskAiScreen(onBack: () -> Unit, viewModel: AskAiViewModel = viewModel()) {
             if (busy) {
                 item { ThinkingBubble() }
             }
+        }
         }
 
         if (showHistory) {
@@ -355,49 +381,51 @@ fun AskAiScreen(onBack: () -> Unit, viewModel: AskAiViewModel = viewModel()) {
 
 @Composable
 private fun ChatHeader(onBack: () -> Unit, onNewChat: () -> Unit, onHistory: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 4.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        IconButton(onClick = onBack) {
-            Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.bulk_back))
-        }
-        InfoIcon(
-            title = stringResource(R.string.ai_title),
-            body = stringResource(R.string.ai_model_info, GeminiOcrClient.MODEL),
-        )
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                stringResource(R.string.ai_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.bulk_back))
+            }
+            InfoIcon(
+                title = stringResource(R.string.ai_title),
+                body = stringResource(R.string.ai_model_info, GeminiOcrClient.MODEL),
             )
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    stringResource(R.string.ai_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    stringResource(R.string.ai_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            IconButton(onClick = onNewChat) {
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.ai_new_chat))
+            }
+            IconButton(onClick = onHistory) {
+                Icon(
+                    Icons.AutoMirrored.Filled.List,
+                    contentDescription = stringResource(R.string.ai_history),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
         }
-        IconButton(onClick = onNewChat) {
-            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.ai_new_chat))
-        }
-        IconButton(onClick = onHistory) {
-            Icon(
-                Icons.AutoMirrored.Filled.List,
-                contentDescription = stringResource(R.string.ai_history),
-                tint = MaterialTheme.colorScheme.primary,
-            )
-        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }
-    Text(
-        stringResource(R.string.ai_subtitle),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-    )
-    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 }
 
 @Composable
@@ -684,6 +712,8 @@ private fun HistorySheet(
     onDelete: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
+    var removing by remember { mutableStateOf(setOf<String>()) }
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
@@ -708,36 +738,48 @@ private fun HistorySheet(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items(chats, key = { it.id }) { chat ->
-                        Surface(
-                            onClick = { onOpen(chat) },
-                            shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
-                            modifier = Modifier.fillMaxWidth(),
+                        AnimatedVisibility(
+                            visible = chat.id !in removing,
+                            exit = fadeOut(animationSpec = tween(200)) +
+                                shrinkVertically(animationSpec = tween(260)),
                         ) {
-                            Row(
-                                modifier = Modifier.padding(start = 16.dp, end = 4.dp, top = 12.dp, bottom = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
+                            Surface(
+                                onClick = { onOpen(chat) },
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                                modifier = Modifier.fillMaxWidth(),
                             ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        chat.title,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.Medium,
-                                    )
-                                    Text(
-                                        formatChatDate(chat.updatedAt),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                                IconButton(onClick = { onDelete(chat.id) }) {
-                                    Icon(
-                                        Icons.Filled.Delete,
-                                        contentDescription = stringResource(R.string.ai_delete),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
+                                Row(
+                                    modifier = Modifier.padding(start = 16.dp, end = 4.dp, top = 12.dp, bottom = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            chat.title,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Medium,
+                                        )
+                                        Text(
+                                            formatChatDate(chat.updatedAt),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                    IconButton(onClick = {
+                                        removing = removing + chat.id
+                                        scope.launch {
+                                            delay(280)
+                                            onDelete(chat.id)
+                                        }
+                                    }) {
+                                        Icon(
+                                            Icons.Filled.Delete,
+                                            contentDescription = stringResource(R.string.ai_delete),
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
                                 }
                             }
                         }
