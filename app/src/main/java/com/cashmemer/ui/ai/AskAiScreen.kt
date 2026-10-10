@@ -1,5 +1,8 @@
 package com.cashmemer.ui.ai
 
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.union
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.IconButtonDefaults
@@ -334,11 +337,37 @@ private fun EmptyState(suggestions: List<String>, onSuggestion: (String) -> Unit
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             suggestions.forEach { text ->
-                AssistChip(
+                Surface(
                     onClick = { onSuggestion(text) },
-                    label = { Text(text) },
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
                     modifier = Modifier.fillMaxWidth(),
-                )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Icon(
+                            Icons.Filled.AutoAwesome,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Text(
+                            text,
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
+                }
             }
         }
     }
@@ -412,7 +441,6 @@ private fun InputBar(
             TextField(
                 value = value,
                 onValueChange = onValueChange,
-                modifier = Modifier.weight(1f),
                 placeholder = {
                     Text(
                         stringResource(R.string.ai_placeholder),
@@ -421,8 +449,12 @@ private fun InputBar(
                     )
                 },
                 textStyle = MaterialTheme.typography.bodyLarge,
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(28.dp),
                 maxLines = 4,
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = 56.dp)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), RoundedCornerShape(28.dp)),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,

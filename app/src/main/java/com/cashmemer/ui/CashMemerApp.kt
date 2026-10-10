@@ -112,7 +112,9 @@ fun CashMemerApp(settings: AppSettings) {
         )
     }
 
-    Scaffold(
+    if (currentRoute == ROUTE_ASK_AI) {
+        AskAiScreen(onBack = { navController.popBackStack() })
+    } else Scaffold(
         topBar = {
             BrandHeader(
                 language = currentLanguage,
