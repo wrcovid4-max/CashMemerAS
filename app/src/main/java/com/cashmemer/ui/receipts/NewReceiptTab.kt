@@ -614,7 +614,7 @@ private fun MemberPicker(
         onExpandedChange = { expanded = it },
     ) {
         OutlinedTextField(
-            value = selectedName ?: "Select Member",
+            value = selectedName ?: stringResource(R.string.select_member),
             onValueChange = {},
             readOnly = true,
             leadingIcon = { Icon(Icons.Filled.PersonSearch, contentDescription = null) },
