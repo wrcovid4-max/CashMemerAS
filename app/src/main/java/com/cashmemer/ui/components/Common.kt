@@ -1,5 +1,6 @@
 package com.cashmemer.ui.components
 
+import com.cashmemer.ui.language.AppLanguage
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenu
 import com.cashmemer.ui.effects.leafPerch
@@ -173,14 +174,8 @@ private fun LanguageToggle(
     onLanguageChange: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val options = listOf(
-        "en" to "English (ENG)",
-        "ur" to "Urdu (اردو)",
-        "zh" to "Chinese (中文)",
-        "ar" to "Arabic (العربية)",
-    )
-    val shortLabels = mapOf("en" to "ENG", "ur" to "اردو", "zh" to "中文", "ar" to "العربية")
-    val current = shortLabels[language] ?: "ENG"
+    val options = AppLanguage.values().map { it.tag to it.menuLabel }
+    val current = AppLanguage.fromTag(language).shortLabel
     Box {
         Surface(
             shape = Dimens.pillCorner,
