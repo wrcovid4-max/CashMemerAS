@@ -567,4 +567,7 @@
     <string name="ai_voice">بول کر سوال لکھیں</string>
     <string name="ai_listening">سن رہا ہوں… بند کرنے کے لیے مائیک دبائیں</string>
     <string name="ai_disclaimer">یہ ایک AI ہے اور غلطی کر سکتا ہے۔ اس تجربے میں استعمال ہونے والا ماڈل Google Inc. کا Gemini ہے۔</string>
+    <string name="location_menu_title">موجودہ مقام بطور</string>
+    <string name="location_as_address">پتہ</string>
+    <string name="location_as_coordinates">کوآرڈینیٹس</string>
 </resources>

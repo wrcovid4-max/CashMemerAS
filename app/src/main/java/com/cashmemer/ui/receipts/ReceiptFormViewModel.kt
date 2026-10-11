@@ -308,10 +308,15 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         }
 
     /** Fills the location field from the device's current position. */
-    fun useCurrentLocation() {
+    fun useCurrentLocation(asCoordinates: Boolean = false) {
         _state.update { it.copy(locatingAddress = true) }
         viewModelScope.launch {
-            LocationResolver.currentAddress(getApplication<Application>())
+            (if (asCoordinates) {
+                LocationResolver.currentLatLng(getApplication<Application>())
+                    .map { (lat, lng) -> "%.6f, %.6f".format(lat, lng) }
+            } else {
+                LocationResolver.currentAddress(getApplication<Application>())
+            })
                 .onSuccess { address ->
                     _state.update {
                         it.copy(locationAddress = address, locatingAddress = false)

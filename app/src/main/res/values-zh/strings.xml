@@ -519,4 +519,7 @@
     <string name="ai_voice">语音提问</string>
     <string name="ai_listening">正在聆听… 点击麦克风停止</string>
     <string name="ai_disclaimer">这是一个 AI，可能会出错。本体验所使用的模型为 Google Inc. 的 Gemini。</string>
+    <string name="location_menu_title">使用当前位置为</string>
+    <string name="location_as_address">地址</string>
+    <string name="location_as_coordinates">坐标</string>
 </resources>

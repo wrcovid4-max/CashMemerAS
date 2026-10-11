@@ -569,4 +569,7 @@
     <string name="ai_voice">Speak your question</string>
     <string name="ai_listening">Listening… tap the mic to stop</string>
     <string name="ai_disclaimer">This is an AI and can make mistake. The Model used in this experience is Gemini by Google Inc.</string>
+    <string name="location_menu_title">Use current location as</string>
+    <string name="location_as_address">Address</string>
+    <string name="location_as_coordinates">Coordinates</string>
 </resources>

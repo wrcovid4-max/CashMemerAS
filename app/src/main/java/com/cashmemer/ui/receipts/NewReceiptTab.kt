@@ -175,10 +175,12 @@ fun NewReceiptTab(
             },
         )
     }
+    var showLocationMenu by remember { mutableStateOf(false) }
+
     val locationPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
     ) { granted ->
-        if (granted.values.any { it }) viewModel.useCurrentLocation()
+        if (granted.values.any { it }) showLocationMenu = true
     }
     val pickOnMap = rememberLauncherForActivityResult(PickLocationContract()) { picked ->
         picked?.let {
@@ -278,6 +280,35 @@ fun NewReceiptTab(
                     modifier = Modifier.fillMaxWidth(),
                 )
 
+                if (showLocationMenu) {
+                    AlertDialog(
+                        onDismissRequest = { showLocationMenu = false },
+                        title = { AppleText(stringResource(R.string.location_menu_title)) },
+                        text = {
+                            Column {
+                                TextButton(onClick = {
+                                    showLocationMenu = false
+                                    viewModel.useCurrentLocation(asCoordinates = false)
+                                }) {
+                                    AppleText(stringResource(R.string.location_as_address))
+                                }
+                                TextButton(onClick = {
+                                    showLocationMenu = false
+                                    viewModel.useCurrentLocation(asCoordinates = true)
+                                }) {
+                                    AppleText(stringResource(R.string.location_as_coordinates))
+                                }
+                            }
+                        },
+                        confirmButton = {},
+                        dismissButton = {
+                            TextButton(onClick = { showLocationMenu = false }) {
+                                AppleText(stringResource(R.string.action_cancel))
+                            }
+                        },
+                    )
+                }
+
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     SecondaryButton(
                         text = stringResource(R.string.use_current_location),
@@ -285,7 +316,7 @@ fun NewReceiptTab(
                         enabled = !state.locatingAddress,
                         onClick = {
                             if (LocationResolver.hasPermission(context)) {
-                                viewModel.useCurrentLocation()
+                                showLocationMenu = true
                             } else {
                                 locationPermission.launch(
                                     arrayOf(
