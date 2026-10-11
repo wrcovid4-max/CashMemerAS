@@ -8,4 +8,5 @@
     <locale android:name="en-NZ" />
     <locale android:name="es" />
     <locale android:name="zh-TW" />
+    <locale android:name="fa" />
 </locale-config>
