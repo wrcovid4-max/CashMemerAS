@@ -280,54 +280,46 @@ fun NewReceiptTab(
                     modifier = Modifier.fillMaxWidth(),
                 )
 
-                if (showLocationMenu) {
-                    AlertDialog(
-                        onDismissRequest = { showLocationMenu = false },
-                        title = { AppleText(stringResource(R.string.location_menu_title)) },
-                        text = {
-                            Column {
-                                TextButton(onClick = {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        SecondaryButton(
+                            text = stringResource(R.string.use_current_location),
+                            icon = Icons.Filled.MyLocation,
+                            enabled = !state.locatingAddress,
+                            onClick = {
+                                if (LocationResolver.hasPermission(context)) {
+                                    showLocationMenu = true
+                                } else {
+                                    locationPermission.launch(
+                                        arrayOf(
+                                            Manifest.permission.ACCESS_FINE_LOCATION,
+                                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                                        )
+                                    )
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        DropdownMenu(
+                            expanded = showLocationMenu,
+                            onDismissRequest = { showLocationMenu = false },
+                        ) {
+                            DropdownMenuItem(
+                                text = { AppleText(stringResource(R.string.location_as_address)) },
+                                onClick = {
                                     showLocationMenu = false
                                     viewModel.useCurrentLocation(asCoordinates = false)
-                                }) {
-                                    AppleText(stringResource(R.string.location_as_address))
-                                }
-                                TextButton(onClick = {
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { AppleText(stringResource(R.string.location_as_coordinates)) },
+                                onClick = {
                                     showLocationMenu = false
                                     viewModel.useCurrentLocation(asCoordinates = true)
-                                }) {
-                                    AppleText(stringResource(R.string.location_as_coordinates))
-                                }
-                            }
-                        },
-                        confirmButton = {},
-                        dismissButton = {
-                            TextButton(onClick = { showLocationMenu = false }) {
-                                AppleText(stringResource(R.string.action_cancel))
-                            }
-                        },
-                    )
-                }
-
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    SecondaryButton(
-                        text = stringResource(R.string.use_current_location),
-                        icon = Icons.Filled.MyLocation,
-                        enabled = !state.locatingAddress,
-                        onClick = {
-                            if (LocationResolver.hasPermission(context)) {
-                                showLocationMenu = true
-                            } else {
-                                locationPermission.launch(
-                                    arrayOf(
-                                        Manifest.permission.ACCESS_FINE_LOCATION,
-                                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                                    )
-                                )
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                    )
+                                },
+                            )
+                        }
+                    }
                     SecondaryButton(
                         text = stringResource(R.string.pick_on_map),
                         icon = Icons.Filled.Map,
