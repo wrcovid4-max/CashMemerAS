@@ -77,6 +77,7 @@ fun CashMemerApp(settings: AppSettings) {
     val currentLanguage = when {
         appliedTag.startsWith("ur") -> "ur"
         appliedTag.startsWith("zh") -> "zh"
+        appliedTag.startsWith("ar") -> "ar"
         appliedTag.startsWith("en") -> "en"
         else -> settings.language.ifBlank { "en" }
     }
@@ -86,6 +87,7 @@ fun CashMemerApp(settings: AppSettings) {
             when (tag) {
                 "ur" -> R.string.language_name_ur
                 "zh" -> R.string.language_name_zh
+                "ar" -> R.string.language_name_ar
                 else -> R.string.language_name_en
             },
         )

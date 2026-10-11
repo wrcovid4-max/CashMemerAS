@@ -177,8 +177,9 @@ private fun LanguageToggle(
         "en" to "English (ENG)",
         "ur" to "Urdu (اردو)",
         "zh" to "Chinese (中文)",
+        "ar" to "Arabic (العربية)",
     )
-    val shortLabels = mapOf("en" to "ENG", "ur" to "اردو", "zh" to "中文")
+    val shortLabels = mapOf("en" to "ENG", "ur" to "اردو", "zh" to "中文", "ar" to "العربية")
     val current = shortLabels[language] ?: "ENG"
     Box {
         Surface(

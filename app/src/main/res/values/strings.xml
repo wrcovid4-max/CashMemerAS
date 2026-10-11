@@ -572,4 +572,5 @@
     <string name="location_menu_title">Use current location as</string>
     <string name="location_as_address">Address</string>
     <string name="location_as_coordinates">Coordinates</string>
+    <string name="language_name_ar">Arabic</string>
 </resources>
