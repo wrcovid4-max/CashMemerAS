@@ -293,8 +293,11 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
     fun setTaxPercent(value: Double) = _state.update { it.copy(taxPercent = value, taxLines = emptyList()) }
     fun setNotesPage1(value: String) = _state.update { it.copy(notesPage1 = AppleLogo.normalize(value)) }
     fun setNotesPage2(value: String) = _state.update { it.copy(notesPage2 = AppleLogo.normalize(value)) }
-    fun setSaveSignatureAsDefault(value: Boolean) =
+    fun setSaveSignatureAsDefault(value: Boolean) {
         _state.update { it.copy(saveSignatureAsDefault = value) }
+        // Same saved value as the Settings toggle, so the two stay in sync.
+        viewModelScope.launch { settingsStore.setSaveSignature(value) }
+    }
 
     fun consumeMessage() = _state.update { it.copy(message = null) }
 
