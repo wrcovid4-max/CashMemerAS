@@ -74,13 +74,7 @@ fun CashMemerApp(settings: AppSettings) {
     // applied locale here means the highlight can never disagree with the
     // content again.
     val appliedTag = AppCompatDelegate.getApplicationLocales().toLanguageTags()
-    val currentLanguage = when {
-        appliedTag.startsWith("ur") -> "ur"
-        appliedTag.startsWith("zh") -> "zh"
-        appliedTag.startsWith("ar") -> "ar"
-        appliedTag.startsWith("en") -> "en"
-        else -> settings.language.ifBlank { "en" }
-    }
+        val currentLanguage = com.cashmemer.ui.language.AppLanguage.fromTag(appliedTag).tag
 
     pendingLanguage?.let { tag ->
         val languageName = stringResource(
@@ -88,6 +82,8 @@ fun CashMemerApp(settings: AppSettings) {
                 "ur" -> R.string.language_name_ur
                 "zh" -> R.string.language_name_zh
                 "ar" -> R.string.language_name_ar
+                "en-US" -> R.string.language_name_en_us
+                "en-NZ" -> R.string.language_name_en_nz
                 else -> R.string.language_name_en
             },
         )

@@ -573,4 +573,6 @@
     <string name="location_as_address">Address</string>
     <string name="location_as_coordinates">Coordinates</string>
     <string name="language_name_ar">Arabic</string>
+    <string name="language_name_en_us">English (US)</string>
+    <string name="language_name_en_nz">English (NZ)</string>
 </resources>
