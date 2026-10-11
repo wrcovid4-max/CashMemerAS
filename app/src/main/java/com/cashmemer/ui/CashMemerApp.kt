@@ -87,6 +87,7 @@ fun CashMemerApp(settings: AppSettings) {
                 "es" -> R.string.language_name_es
                 "zh-TW" -> R.string.language_name_zh_tw
                 "fa" -> R.string.language_name_fa
+                "pa" -> R.string.language_name_pa
                 else -> R.string.language_name_en
             },
         )

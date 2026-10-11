@@ -9,4 +9,5 @@
     <locale android:name="es" />
     <locale android:name="zh-TW" />
     <locale android:name="fa" />
+    <locale android:name="pa" />
 </locale-config>
