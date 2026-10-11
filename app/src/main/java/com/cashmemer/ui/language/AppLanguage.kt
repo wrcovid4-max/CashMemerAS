@@ -22,7 +22,8 @@ enum class AppLanguage(
     SPANISH("es", "Spanish (Español)", "ESP", R.string.language_name_es),
     CHINESE_TRADITIONAL("zh-TW", "Chinese Traditional (繁體中文)", "繁體", R.string.language_name_zh_tw),
     PERSIAN("fa", "Persian (فارسی)", "فارسی", R.string.language_name_fa),
-    PUNJABI("pa", "Punjabi (ਪੰਜਾਬੀ)", "ਪੰਜਾਬੀ", R.string.language_name_pa);
+    PUNJABI("pa", "Punjabi (ਪੰਜਾਬੀ)", "ਪੰਜਾਬੀ", R.string.language_name_pa),
+    PUNJABI_PK("pa-Arab-PK", "Punjabi Pakistan (پنجابی)", "پنجابی", R.string.language_name_pa_pk);
 
     companion object {
         /** Maps a locale tag such as "zh-CN" to its language. Unknown tags fall back to English. */
