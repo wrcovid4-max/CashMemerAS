@@ -41,7 +41,7 @@ android {
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        resourceConfigurations += listOf("en", "ur", "zh", "ar")
+        resourceConfigurations += listOf("en", "ur", "zh", "ar", "es")
 
         // Lets the app tell "Firebase not set up" apart from "sync failed".
         buildConfigField("boolean", "FIREBASE_CONFIGURED", firebaseConfig.exists().toString())
