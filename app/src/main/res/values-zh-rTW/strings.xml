@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Cash Memer</string>
+    <string name="app_name">現金記帳</string>
     <string name="app_tagline">專業收據管理工具</string>
     <string name="splash_copyright">© WR COVID YT 2026</string>
     <string name="nav_receipts">收據</string>
