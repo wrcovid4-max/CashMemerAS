@@ -216,7 +216,10 @@ private fun AppNavHost(
                 onClick = onOpenAskAi,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 16.dp, bottom = 16.dp),
+                    .padding(
+                        end = 16.dp,
+                        bottom = if (currentRoute == Destination.Members.route) 104.dp else 16.dp,
+                    ),
             )
         }
 }
