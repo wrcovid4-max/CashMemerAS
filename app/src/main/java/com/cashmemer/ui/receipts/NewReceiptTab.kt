@@ -1,5 +1,9 @@
 package com.cashmemer.ui.receipts
 
+import androidx.compose.material.icons.filled.ContentCopy
+import android.content.Context
+import android.content.ClipboardManager
+import android.content.ClipData
 import androidx.compose.material3.Switch
 import com.cashmemer.ui.components.AppleText
 import com.cashmemer.ui.components.InfoIcon
@@ -270,11 +274,24 @@ fun NewReceiptTab(
                         }
                     } else {
                         {
-                            Icon(
-                                Icons.Filled.Place,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    Icons.Filled.Place,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                                IconButton(
+                                    onClick = { copyLocation(context, state.locationAddress) },
+                                    modifier = Modifier.size(32.dp),
+                                ) {
+                                    Icon(
+                                        Icons.Filled.ContentCopy,
+                                        contentDescription = "Copy location",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(18.dp),
+                                    )
+                                }
+                            }
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -1290,4 +1307,11 @@ private fun SignatureCard(
             AppleText(stringResource(R.string.clear_and_redraw))
         }
     }
+}
+
+/** Copies the location address to the clipboard. */
+private fun copyLocation(context: Context, text: String) {
+    if (text.isBlank()) return
+    context.getSystemService(ClipboardManager::class.java)?.setPrimaryClip(ClipData.newPlainText("Location", text))
+    Toast.makeText(context, "Location copied", Toast.LENGTH_SHORT).show()
 }
