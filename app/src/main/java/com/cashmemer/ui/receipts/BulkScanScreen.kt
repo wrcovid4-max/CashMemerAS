@@ -6,21 +6,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.Image
 import com.cashmemer.ui.components.InfoIcon
 import android.app.Application
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import android.Manifest
-import android.annotation.SuppressLint
-import android.app.NotificationChannel
 import android.content.Intent
-import android.app.NotificationManager
-import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Build
-import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.Arrangement
@@ -35,13 +27,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -56,25 +46,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cashmemer.R
 import com.cashmemer.core.ui.theme.Holiday
-import com.cashmemer.core.network.GeminiOcrClient
 import com.cashmemer.core.network.ParsedReceipt
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /** Most photos one bulk scan takes. */
 private const val BULK_LIMIT = 10
 
 /** Long edge, in pixels, that photos are shrunk to before upload. */
-private const val BULK_MAX_EDGE = 1600
 
 enum class BulkStatus { Waiting, Scanning, Done, Failed }
 
@@ -265,7 +249,7 @@ fun BulkScanScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onBack) {
                     Icon(
-                        Icons.Filled.ArrowBack,
+                        Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.bulk_back),
                     )
                 }
