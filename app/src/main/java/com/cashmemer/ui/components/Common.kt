@@ -1,8 +1,5 @@
 package com.cashmemer.ui.components
 
-import com.cashmemer.ui.language.AppLanguage
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.DropdownMenu
 import com.cashmemer.ui.effects.leafPerch
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.IconButton
@@ -41,13 +38,10 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -163,58 +157,10 @@ fun BrandHeader(
                 )
             }
 
-            LanguageToggle(language = language, onLanguageChange = onLanguageChange)
-        }
-    }
-}
-
-@Composable
-private fun LanguageToggle(
-    language: String,
-    onLanguageChange: (String) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val options = AppLanguage.values().map { it.tag to it.menuLabel }
-    val current = AppLanguage.fromTag(language).shortLabel
-    Box {
-        Surface(
-            shape = Dimens.pillCorner,
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier
-                .clip(Dimens.pillCorner)
-                .clickable { expanded = true },
-        ) {
-            AppleText(
-                text = "🌐 $current ▾",
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.labelLarge,
+            com.wrcovid.kit.language.LanguageSwitcher(
+                restartBody = stringResource(R.string.language_restart_body),
+                onLanguageSaved = onLanguageChange,
             )
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            options.forEach { (tag, label) ->
-                DropdownMenuItem(
-                    text = {
-                        AppleText(
-                            text = label,
-                            fontWeight = if (tag == language) FontWeight.Bold else FontWeight.Normal,
-                        )
-                    },
-                    trailingIcon = {
-                        if (tag == language) {
-                            AppleText(text = "✓", color = MaterialTheme.colorScheme.primary)
-                        }
-                    },
-                    onClick = {
-                        expanded = false
-                        onLanguageChange(tag)
-                    },
-                )
-            }
         }
     }
 }

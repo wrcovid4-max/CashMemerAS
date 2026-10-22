@@ -83,6 +83,7 @@ dependencies {
     implementation(project(":core"))
 
     implementation(libs.androidx.appcompat)
+    implementation(project(":filewall-kit"))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.coil.compose)

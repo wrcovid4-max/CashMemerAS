@@ -10,15 +10,7 @@ import com.cashmemer.ui.receipts.BarcodeScanBus
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import com.cashmemer.ui.receipts.BulkScanScreen
-import com.cashmemer.ui.components.AppleText
-import com.cashmemer.R
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,11 +21,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.os.LocaleListCompat
 import com.cashmemer.CashMemerApplication
 import kotlinx.coroutines.launch
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -65,8 +55,6 @@ fun CashMemerApp(settings: AppSettings) {
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    // Language the user picked, waiting for confirmation before the app restarts.
-    var pendingLanguage by remember { mutableStateOf<String?>(null) }
 
     // Drive the toggle from the locale actually in effect, not from the saved
     // setting. Those two used to be read from different places and drifted
@@ -74,53 +62,7 @@ fun CashMemerApp(settings: AppSettings) {
     // applied locale here means the highlight can never disagree with the
     // content again.
     val appliedTag = AppCompatDelegate.getApplicationLocales().toLanguageTags()
-        val currentLanguage = com.cashmemer.ui.language.AppLanguage.fromTag(appliedTag).tag
-
-    pendingLanguage?.let { tag ->
-        val languageName = stringResource(
-            when (tag) {
-                "ur" -> R.string.language_name_ur
-                "zh" -> R.string.language_name_zh
-                "ar" -> R.string.language_name_ar
-                "en-US" -> R.string.language_name_en_us
-                "en-NZ" -> R.string.language_name_en_nz
-                "es" -> R.string.language_name_es
-                "zh-TW" -> R.string.language_name_zh_tw
-                "fa" -> R.string.language_name_fa
-                "pa" -> R.string.language_name_pa
-                "pa-Arab-PK" -> R.string.language_name_pa_pk
-                else -> R.string.language_name_en
-            },
-        )
-        AlertDialog(
-            onDismissRequest = { pendingLanguage = null },
-            title = {
-                AppleText(
-                    text = stringResource(R.string.language_restart_title),
-                    fontWeight = FontWeight.Bold,
-                )
-            },
-            text = {
-                AppleText(text = stringResource(R.string.language_restart_body, languageName))
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    pendingLanguage = null
-                    // Per-app language: AppCompat recreates the activity, which is the restart.
-                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag))
-                    val app = context.applicationContext as CashMemerApplication
-                    scope.launch { app.settingsStore.setLanguage(tag) }
-                }) {
-                    AppleText(stringResource(R.string.action_restart))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { pendingLanguage = null }) {
-                    AppleText(stringResource(R.string.action_cancel))
-                }
-            },
-        )
-    }
+        val currentLanguage = com.wrcovid.kit.language.AppLanguage.fromTag(appliedTag).tag
 
     // Ask AI is shown on top of the app. Back on that screen returns to the app's home screen.
     var showAskAi by rememberSaveable { mutableStateOf(false) }
@@ -133,7 +75,8 @@ fun CashMemerApp(settings: AppSettings) {
             BrandHeader(
                 language = currentLanguage,
                 onLanguageChange = { tag ->
-                    if (tag != currentLanguage) pendingLanguage = tag
+                    val app = context.applicationContext as CashMemerApplication
+                    scope.launch { app.settingsStore.setLanguage(tag) }
                 },
             )
         },

@@ -25,3 +25,6 @@ rootProject.name = "CashMemer"
 include(":core")
 include(":app")
 include(":wear")
+
+include(":filewall-kit")
+project(":filewall-kit").projectDir = file("libs/filewall-kit")
