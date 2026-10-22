@@ -54,8 +54,9 @@ object GeminiOcrClient {
 
     private val client by lazy {
         OkHttpClient.Builder()
-            .connectTimeout(20, TimeUnit.SECONDS)
-            .readTimeout(60, TimeUnit.SECONDS)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(45, TimeUnit.SECONDS)
+            .callTimeout(60, TimeUnit.SECONDS)
             .build()
     }
 
@@ -88,7 +89,7 @@ SERVICES, MEDICAL, OTHER.
                                     JSONObject().put(
                                         "inline_data", JSONObject()
                                             .put("mime_type", "image/jpeg")
-                                            .put("data", bitmap.toBase64Jpeg())
+                                            .put("data", bitmap.scaledTo(1280).toBase64Jpeg(80))
                                     )
                                 )
                         )
@@ -104,7 +105,7 @@ SERVICES, MEDICAL, OTHER.
 
             var lastError = "Gemini request failed"
             for (model in MODELS) {
-                for (attempt in 1..3) {
+                for (attempt in 1..2) {
                     val request = Request.Builder()
                         .url(ENDPOINT.format(model))
                         .header("x-goog-api-key", key)
@@ -117,7 +118,7 @@ SERVICES, MEDICAL, OTHER.
                     lastError = "Gemini request failed: HTTP $code $raw"
                     // Not a busy error (e.g. model unavailable): move on to the next model.
                     if (code !in RETRYABLE) break
-                    Thread.sleep(attempt * 2000L)
+                    Thread.sleep(1000L)
                 }
             }
             throw IllegalStateException(lastError)
@@ -205,6 +206,14 @@ SERVICES, MEDICAL, OTHER.
             total = o.optDouble("total", 0.0),
             items = items,
         )
+    }
+
+    /** Shrinks a photo so its longest side is at most [maxSide] pixels; smaller photos are unchanged. */
+    private fun Bitmap.scaledTo(maxSide: Int): Bitmap {
+        val longest = maxOf(width, height)
+        if (longest <= maxSide) return this
+        val factor = maxSide.toFloat() / longest
+        return Bitmap.createScaledBitmap(this, (width * factor).toInt(), (height * factor).toInt(), true)
     }
 
     private fun Bitmap.toBase64Jpeg(quality: Int = 85): String {
