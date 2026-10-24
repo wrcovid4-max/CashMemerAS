@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wear_today">آج</string>
+    <string name="wear_receipts">%1$d رسید</string>
+    <string name="wear_sync_status">سنک کی حالت</string>
+    <string name="wear_all_backed_up">تمام رسیدوں دا بیک اپ ہو گیا</string>
+    <string name="wear_pending">%1$d زیر التوا</string>
+    <string name="wear_live_rates">لائیو ریٹس</string>
+    <string name="wear_open_phone">سنک کرن لئی اپنے فون تے Cash Memer کھولو۔</string>
+    <string name="wear_store_weather">اسٹور دا موسم</string>
+    <string name="wear_language">زبان</string>
+    <string name="wear_language_info">صرف ایہ گھڑی بدلدی اے۔ تہاڈا فون اپنی زبان رکھدا اے۔</string>
+</resources>

@@ -1,7 +1,16 @@
 package com.cashmemer.wear
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
+import androidx.core.os.LocaleListCompat
+import com.wrcovid.kit.language.AppLanguage
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,7 +44,7 @@ import com.google.android.gms.wearable.Wearable
  * Wear OS companion. Three glanceable cards, matching the published feature set:
  * today's takings + sync status, live rates, and store weather.
  */
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,13 +89,14 @@ private fun WearApp() {
             state = listState,
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
+            item { LanguageCard() }
             item { TodayCard(summary) }
             item { SyncCard(summary) }
 
             if (summary.rates.isNotEmpty()) {
                 item {
                     Text(
-                        text = "Live rates",
+                        text = stringResource(R.string.wear_live_rates),
                         style = MaterialTheme.typography.caption1,
                         modifier = Modifier.padding(top = 8.dp),
                     )
@@ -113,7 +123,7 @@ private fun WearApp() {
             if (summary.generatedAt == 0L) {
                 item {
                     Text(
-                        text = "Open Cash Memer on your phone to sync.",
+                        text = stringResource(R.string.wear_open_phone),
                         style = MaterialTheme.typography.caption1,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(horizontal = 12.dp),
@@ -128,13 +138,13 @@ private fun WearApp() {
 private fun TodayCard(summary: WearSummary) {
     Card(onClick = {}, modifier = Modifier.fillMaxWidth()) {
         Column {
-            Text("Today", style = MaterialTheme.typography.caption1)
+            Text(stringResource(R.string.wear_today), style = MaterialTheme.typography.caption1)
             Text(
                 text = Format.amountWithCurrency(summary.todayTotal, summary.currencyCode),
                 style = MaterialTheme.typography.title2,
             )
             Text(
-                text = "${summary.todayCount} receipt(s)",
+                text = stringResource(R.string.wear_receipts, summary.todayCount),
                 style = MaterialTheme.typography.caption2,
             )
         }
@@ -145,10 +155,10 @@ private fun TodayCard(summary: WearSummary) {
 private fun SyncCard(summary: WearSummary) {
     Card(onClick = {}, modifier = Modifier.fillMaxWidth()) {
         Column {
-            Text("Sync status", style = MaterialTheme.typography.caption1)
+            Text(stringResource(R.string.wear_sync_status), style = MaterialTheme.typography.caption1)
             Text(
-                text = if (summary.synced) "All receipts backed up"
-                else "${summary.pendingCount} pending",
+                text = if (summary.synced) stringResource(R.string.wear_all_backed_up)
+                else stringResource(R.string.wear_pending, summary.pendingCount),
                 style = MaterialTheme.typography.body1,
             )
             if (summary.lastSyncedAt > 0) {
@@ -178,9 +188,58 @@ private fun RateRow(code: String, flag: String, value: String) {
 private fun WeatherCard(place: String, temperature: String, condition: String) {
     Card(onClick = {}, modifier = Modifier.fillMaxWidth()) {
         Column {
-            Text("Store weather", style = MaterialTheme.typography.caption1)
+            Text(stringResource(R.string.wear_store_weather), style = MaterialTheme.typography.caption1)
             Text(temperature, style = MaterialTheme.typography.title2)
             Text("$condition · $place", style = MaterialTheme.typography.caption2)
+        }
+    }
+}
+
+@Composable
+private fun LanguageCard() {
+    val current = AppLanguage.fromTag(AppCompatDelegate.getApplicationLocales().toLanguageTags())
+    var expanded by remember { mutableStateOf(false) }
+    var showInfo by remember { mutableStateOf(false) }
+    Card(onClick = { expanded = !expanded }, modifier = Modifier.fillMaxWidth()) {
+        Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(R.string.wear_language),
+                    style = MaterialTheme.typography.caption1,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    text = "ⓘ",
+                    style = MaterialTheme.typography.caption1,
+                    modifier = Modifier
+                        .clickable { showInfo = !showInfo }
+                        .padding(horizontal = 4.dp),
+                )
+            }
+            Text(text = current.shortLabel + " ▾", style = MaterialTheme.typography.body1)
+            if (showInfo) {
+                Text(
+                    text = stringResource(R.string.wear_language_info),
+                    style = MaterialTheme.typography.caption2,
+                )
+            }
+            if (expanded) {
+                AppLanguage.values().forEach { option ->
+                    Text(
+                        text = (if (option == current) "✓ " else "") + option.menuLabel,
+                        style = MaterialTheme.typography.body2,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                expanded = false
+                                AppCompatDelegate.setApplicationLocales(
+                                    LocaleListCompat.forLanguageTags(option.tag)
+                                )
+                            }
+                            .padding(vertical = 6.dp),
+                    )
+                }
+            }
         }
     }
 }

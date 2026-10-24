@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wear_today">اليوم</string>
+    <string name="wear_receipts">%1$d إيصال</string>
+    <string name="wear_sync_status">حالة المزامنة</string>
+    <string name="wear_all_backed_up">تم نسخ جميع الإيصالات احتياطيًا</string>
+    <string name="wear_pending">%1$d قيد الانتظار</string>
+    <string name="wear_live_rates">أسعار الصرف المباشرة</string>
+    <string name="wear_open_phone">افتح Cash Memer على هاتفك للمزامنة.</string>
+    <string name="wear_store_weather">طقس المتجر</string>
+    <string name="wear_language">اللغة</string>
+    <string name="wear_language_info">يغيّر هذه الساعة فقط. يحتفظ هاتفك بلغته الخاصة.</string>
+</resources>

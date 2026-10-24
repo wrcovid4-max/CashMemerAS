@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wear_today">ਅੱਜ</string>
+    <string name="wear_receipts">%1$d ਰਸੀਦ</string>
+    <string name="wear_sync_status">ਸਿੰਕ ਸਥਿਤੀ</string>
+    <string name="wear_all_backed_up">ਸਾਰੀਆਂ ਰਸੀਦਾਂ ਦਾ ਬੈਕਅੱਪ ਹੋ ਗਿਆ</string>
+    <string name="wear_pending">%1$d ਬਾਕੀ</string>
+    <string name="wear_live_rates">ਲਾਈਵ ਦਰਾਂ</string>
+    <string name="wear_open_phone">ਸਿੰਕ ਕਰਨ ਲਈ ਆਪਣੇ ਫ਼ੋਨ ਤੇ Cash Memer ਖੋਲ੍ਹੋ।</string>
+    <string name="wear_store_weather">ਸਟੋਰ ਦਾ ਮੌਸਮ</string>
+    <string name="wear_language">ਭਾਸ਼ਾ</string>
+    <string name="wear_language_info">ਸਿਰਫ਼ ਇਹ ਘੜੀ ਬਦਲਦੀ ਹੈ। ਤੁਹਾਡਾ ਫ਼ੋਨ ਆਪਣੀ ਭਾਸ਼ਾ ਰੱਖਦਾ ਹੈ।</string>
+</resources>

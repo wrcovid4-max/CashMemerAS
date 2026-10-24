@@ -42,6 +42,8 @@ android {
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":filewall-kit"))
+    implementation(libs.androidx.appcompat)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.wear.compose.material)

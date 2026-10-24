@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Cash Memer</string>
+    <string name="wear_today">Today</string>
+    <string name="wear_receipts">%1$d receipt(s)</string>
+    <string name="wear_sync_status">Sync status</string>
+    <string name="wear_all_backed_up">All receipts backed up</string>
+    <string name="wear_pending">%1$d pending</string>
+    <string name="wear_live_rates">Live rates</string>
+    <string name="wear_open_phone">Open Cash Memer on your phone to sync.</string>
+    <string name="wear_store_weather">Store weather</string>
+    <string name="wear_language">Language</string>
+    <string name="wear_language_info">Changes only this watch. Your phone keeps its own language.</string>
 </resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wear_today">今日</string>
+    <string name="wear_receipts">%1$d 张收据</string>
+    <string name="wear_sync_status">同步状态</string>
+    <string name="wear_all_backed_up">所有收据已备份</string>
+    <string name="wear_pending">%1$d 待处理</string>
+    <string name="wear_live_rates">实时汇率</string>
+    <string name="wear_open_phone">请在手机上打开 Cash Memer 进行同步。</string>
+    <string name="wear_store_weather">店铺天气</string>
+    <string name="wear_language">语言</string>
+    <string name="wear_language_info">仅更改此手表。手机保留自己的语言。</string>
+</resources>

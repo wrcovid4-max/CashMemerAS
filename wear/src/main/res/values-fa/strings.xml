@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wear_today">امروز</string>
+    <string name="wear_receipts">%1$d رسید</string>
+    <string name="wear_sync_status">وضعیت همگام‌سازی</string>
+    <string name="wear_all_backed_up">همه رسیدها پشتیبان‌گیری شدند</string>
+    <string name="wear_pending">%1$d در انتظار</string>
+    <string name="wear_live_rates">نرخ‌های زنده</string>
+    <string name="wear_open_phone">برای همگام‌سازی، Cash Memer را در تلفن باز کنید.</string>
+    <string name="wear_store_weather">آب‌وهوای فروشگاه</string>
+    <string name="wear_language">زبان</string>
+    <string name="wear_language_info">فقط این ساعت را تغییر می‌دهد. تلفن شما زبان خودش را نگه می‌دارد.</string>
+</resources>

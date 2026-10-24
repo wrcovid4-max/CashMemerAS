@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wear_today">Hoy</string>
+    <string name="wear_receipts">%1$d recibo(s)</string>
+    <string name="wear_sync_status">Estado de sincronización</string>
+    <string name="wear_all_backed_up">Todos los recibos respaldados</string>
+    <string name="wear_pending">%1$d pendientes</string>
+    <string name="wear_live_rates">Tasas en vivo</string>
+    <string name="wear_open_phone">Abre Cash Memer en tu teléfono para sincronizar.</string>
+    <string name="wear_store_weather">Clima de la tienda</string>
+    <string name="wear_language">Idioma</string>
+    <string name="wear_language_info">Cambia solo este reloj. Tu teléfono mantiene su propio idioma.</string>
+</resources>
