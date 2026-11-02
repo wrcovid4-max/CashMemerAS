@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
+import com.cashmemer.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -181,11 +182,11 @@ object TerminalManager {
                 IntegrationLog.add("Connected to ${device.name ?: address}")
                 refresh(context)
 
-                readLoop(newSocket)
+                readLoop(context, newSocket)
             } catch (io: IOException) {
-                fail(io.message ?: "Could not connect")
+                fail(context.getString(R.string.err_connect_failed))
             } catch (error: Exception) {
-                fail(error.message ?: "Connection error")
+                fail(context.getString(R.string.err_connect_failed))
             }
         }
     }
@@ -195,7 +196,7 @@ object TerminalManager {
      * until a terminator, then emit — splitting on every read would chop codes
      * that arrive in more than one packet.
      */
-    private suspend fun readLoop(socket: BluetoothSocket) {
+    private suspend fun readLoop(context: Context, socket: BluetoothSocket) {
         val input = socket.inputStream
         val buffer = ByteArray(1024)
         val pending = StringBuilder()
@@ -204,7 +205,7 @@ object TerminalManager {
             val read = try {
                 input.read(buffer)
             } catch (io: IOException) {
-                fail("Connection lost: ${io.message}")
+                fail(context.getString(R.string.err_connection_lost))
                 return
             }
             if (read <= 0) continue

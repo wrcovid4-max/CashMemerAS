@@ -1,6 +1,7 @@
 package com.cashmemer.ui.settings
 
 import com.cashmemer.ui.components.AppleText
+import com.cashmemer.util.FriendlyError
 import com.cashmemer.ui.components.InfoIcon
 import android.app.Application
 import android.content.Context
@@ -146,7 +147,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 ?: error(str(R.string.msg_file_write_failed))
         }
             .onSuccess { _message.value = str(R.string.msg_backup_saved) }
-            .onFailure { _message.value = it.message ?: str(R.string.msg_backup_failed) }
+            .onFailure { _message.value = FriendlyError.message(getApplication<Application>(), it, R.string.msg_backup_failed) }
     }
 
     /** Replaces everything local with a previously saved copy. */
@@ -159,7 +160,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
             .mapCatching { json -> repository.importJson(json).getOrThrow() }
             .onSuccess { _message.value = str(R.string.msg_restored_records, it) }
-            .onFailure { _message.value = it.message ?: str(R.string.msg_restore_failed) }
+            .onFailure { _message.value = FriendlyError.message(getApplication<Application>(), it, R.string.msg_restore_failed) }
     }
 
     /**
@@ -192,10 +193,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 if (FirebaseSync.isConfigured(app)) {
                     FirebaseSync.authenticate(app, account.idToken)
                         .onFailure { error ->
-                            _message.value = str(
-                                R.string.msg_sign_in_sync_failed,
-                                error.message.orEmpty(),
-                            )
+                            _message.value = str(R.string.msg_sign_in_sync_failed_plain)
                             return@onSuccess
                         }
                 }
@@ -206,7 +204,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                     is GoogleAuth.CancelledException -> null
                     is GoogleAuth.NotConfiguredException ->
                         str(R.string.msg_no_web_client_id)
-                    else -> error.message ?: str(R.string.msg_sign_in_failed)
+                    else -> FriendlyError.message(getApplication<Application>(), error, R.string.msg_sign_in_failed)
                 }
             }
     }
@@ -233,7 +231,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                     is FirebaseSync.NotConfiguredException ->
                         str(R.string.msg_no_google_services)
                     is FirebaseSync.NotSignedInException -> str(R.string.msg_sign_in_first)
-                    else -> error.message ?: str(R.string.msg_sync_failed)
+                    else -> FriendlyError.message(getApplication<Application>(), error, R.string.msg_sync_failed)
                 }
             }
         _syncing.value = false
@@ -248,7 +246,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun backupNow() = launch {
         BackupWriter.run(getApplication<Application>())
             .onSuccess { _message.value = str(R.string.msg_saved_file, it) }
-            .onFailure { _message.value = it.message ?: str(R.string.msg_backup_failed) }
+            .onFailure { _message.value = FriendlyError.message(getApplication<Application>(), it, R.string.msg_backup_failed) }
     }
 
 

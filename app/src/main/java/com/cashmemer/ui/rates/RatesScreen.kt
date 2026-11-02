@@ -1,6 +1,7 @@
 package com.cashmemer.ui.rates
 
 import com.cashmemer.ui.components.AppleText
+import com.cashmemer.util.FriendlyError
 import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -90,7 +91,7 @@ class RatesViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 .onFailure { error ->
                     _ui.update {
-                        it.copy(refreshing = false, error = error.message ?: "Refresh failed")
+                        it.copy(refreshing = false, error = FriendlyError.message(getApplication<Application>(), error, R.string.err_couldnt_load))
                     }
                 }
         }

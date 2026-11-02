@@ -527,4 +527,13 @@
     <string name="language_name_en_nz">英語（紐西蘭）</string>
     <string name="language_name_es">西班牙語</string>
     <string name="language_name_zh_tw">繁體中文</string>
+    <!-- Friendly error messages -->
+    <string name="err_no_internet">沒有網路連線。請檢查後再試一次。</string>
+    <string name="err_couldnt_load">無法載入，請再試一次。</string>
+    <string name="err_connect_failed">無法連線到裝置。</string>
+    <string name="err_connection_lost">連線已中斷。</string>
+    <string name="address_not_found">找不到此位置的地址</string>
+    <string name="msg_address_not_found">找不到該處的地址。請手動輸入，或改用座標。</string>
+    <string name="msg_auto_print_failed_plain">自動列印失敗</string>
+    <string name="msg_sign_in_sync_failed_plain">已登入，但雲端同步未成功</string>
 </resources>

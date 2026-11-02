@@ -580,4 +580,13 @@
     <string name="language_name_fa">Persian</string>
     <string name="language_name_pa">Punjabi</string>
     <string name="language_name_pa_pk">Punjabi (Pakistan)</string>
+    <!-- Friendly error messages -->
+    <string name="err_no_internet">No internet connection. Please check it and try again.</string>
+    <string name="err_couldnt_load">Couldn\'t load. Please try again.</string>
+    <string name="err_connect_failed">Couldn\'t connect to the device.</string>
+    <string name="err_connection_lost">Connection lost.</string>
+    <string name="address_not_found">No address found for this spot</string>
+    <string name="msg_address_not_found">Couldn\'t find an address there. Type it in or use coordinates instead.</string>
+    <string name="msg_auto_print_failed_plain">Auto-print failed</string>
+    <string name="msg_sign_in_sync_failed_plain">Signed in, but cloud sync didn\'t work</string>
 </resources>

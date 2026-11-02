@@ -207,7 +207,7 @@ private fun ScanScreen(
                 CameraSelector.DEFAULT_BACK_CAMERA,
                 *useCases,
             )
-        }.onFailure { error = it.message ?: context.getString(R.string.camera_failed) }
+        }.onFailure { error = context.getString(R.string.camera_failed) }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -400,7 +400,7 @@ private fun captureTo(
 
             override fun onError(exception: ImageCaptureException) {
                 ContextCompat.getMainExecutor(context).execute {
-                    onError(exception.message ?: context.getString(R.string.capture_failed))
+                    onError(context.getString(R.string.capture_failed))
                 }
             }
         },

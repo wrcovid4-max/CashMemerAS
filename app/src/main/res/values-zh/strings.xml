@@ -522,4 +522,13 @@
     <string name="location_menu_title">使用当前位置为</string>
     <string name="location_as_address">地址</string>
     <string name="location_as_coordinates">坐标</string>
+    <!-- Friendly error messages -->
+    <string name="err_no_internet">没有网络连接。请检查后重试。</string>
+    <string name="err_couldnt_load">无法加载，请重试。</string>
+    <string name="err_connect_failed">无法连接到设备。</string>
+    <string name="err_connection_lost">连接已断开。</string>
+    <string name="address_not_found">未找到此位置的地址</string>
+    <string name="msg_address_not_found">未找到该处的地址。请手动输入，或改用坐标。</string>
+    <string name="msg_auto_print_failed_plain">自动打印失败</string>
+    <string name="msg_sign_in_sync_failed_plain">已登录，但云同步未成功</string>
 </resources>

@@ -526,4 +526,13 @@
     <string name="language_name_en_us">Inglés (EE. UU.)</string>
     <string name="language_name_en_nz">Inglés (NZ)</string>
     <string name="language_name_es">Español</string>
+    <!-- Friendly error messages -->
+    <string name="err_no_internet">Sin conexión a Internet. Compruébala e inténtalo de nuevo.</string>
+    <string name="err_couldnt_load">No se pudo cargar. Inténtalo de nuevo.</string>
+    <string name="err_connect_failed">No se pudo conectar con el dispositivo.</string>
+    <string name="err_connection_lost">Conexión perdida.</string>
+    <string name="address_not_found">No se encontró una dirección para este punto</string>
+    <string name="msg_address_not_found">No se encontró una dirección allí. Escríbela o usa las coordenadas.</string>
+    <string name="msg_auto_print_failed_plain">Falló la impresión automática</string>
+    <string name="msg_sign_in_sync_failed_plain">Sesión iniciada, pero la sincronización en la nube no funcionó</string>
 </resources>

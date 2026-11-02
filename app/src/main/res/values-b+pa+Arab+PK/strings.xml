@@ -530,4 +530,13 @@
     <string name="language_name_fa">فارسی</string>
     <string name="language_name_pa">پنجابی</string>
     <string name="language_name_pa_pk">پنجابی (پاکستان)</string>
+    <!-- Friendly error messages -->
+    <string name="err_no_internet">انٹرنیٹ کنیکشن نئیں۔ مہربانی کر کے چیک کرو تے دوبارہ کوشش کرو۔</string>
+    <string name="err_couldnt_load">لوڈ نئیں ہو سکیا۔ دوبارہ کوشش کرو۔</string>
+    <string name="err_connect_failed">ڈیوائس نال رابطہ نئیں ہو سکیا۔</string>
+    <string name="err_connection_lost">رابطہ ٹُٹ گیا۔</string>
+    <string name="address_not_found">ایس تھاں دا پتہ نئیں لبھیا</string>
+    <string name="msg_address_not_found">اوتھوں دا پتہ نئیں لبھ سکیا۔ آپ لکھو یا کوآرڈینیٹس ورتو۔</string>
+    <string name="msg_auto_print_failed_plain">آٹو پرنٹ ناکام ہو گیا</string>
+    <string name="msg_sign_in_sync_failed_plain">سائن ان ہو گیا، پر کلاؤڈ سنک نئیں ہویا</string>
 </resources>

@@ -42,10 +42,7 @@ object ReceiptDelivery {
                     actions += context.getString(R.string.delivery_printing)
                 }
                 .onFailure {
-                    return context.getString(
-                        R.string.msg_auto_print_failed,
-                        it.message.orEmpty(),
-                    )
+                    return context.getString(R.string.msg_auto_print_failed_plain)
                 }
         }
 

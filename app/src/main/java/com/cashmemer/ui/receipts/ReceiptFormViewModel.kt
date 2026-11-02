@@ -1,6 +1,7 @@
 package com.cashmemer.ui.receipts
 
 import com.cashmemer.core.data.SplitCodec
+import com.cashmemer.util.FriendlyError
 import com.cashmemer.core.network.ParsedReceipt
 import com.cashmemer.core.data.TaxBreakdownCodec
 import com.cashmemer.core.model.TaxLine
@@ -288,6 +289,8 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                 locationAddress = address,
                 latitude = latitude,
                 longitude = longitude,
+                // No street address for that spot: say so instead of showing raw coordinates.
+                message = if (address.isBlank()) str(R.string.msg_address_not_found) else it.message,
             )
         }
     fun setTaxPercent(value: Double) = _state.update { it.copy(taxPercent = value, taxLines = emptyList()) }
@@ -326,7 +329,13 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                     _state.update {
                         it.copy(
                             locatingAddress = false,
-                            message = str(R.string.msg_location_failed),
+                            message = str(
+                                if (error is LocationResolver.AddressUnavailableException) {
+                                    R.string.msg_address_not_found
+                                } else {
+                                    R.string.msg_location_failed
+                                },
+                            ),
                         )
                     }
                 }
@@ -573,7 +582,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                     _state.update {
                         it.copy(
                             scanning = false,
-                            message = error.message ?: str(R.string.msg_scan_failed),
+                            message = FriendlyError.message(getApplication<Application>(), error, R.string.msg_scan_failed),
                         )
                     }
                 }

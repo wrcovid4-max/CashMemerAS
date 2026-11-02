@@ -529,4 +529,13 @@
     <string name="language_name_zh_tw">ਰਵਾਇਤੀ ਚੀਨੀ</string>
     <string name="language_name_fa">ਫ਼ਾਰਸੀ</string>
     <string name="language_name_pa">ਪੰਜਾਬੀ</string>
+    <!-- Friendly error messages -->
+    <string name="err_no_internet">ਇੰਟਰਨੈੱਟ ਕਨੈਕਸ਼ਨ ਨਹੀਂ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਚੈੱਕ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="err_couldnt_load">ਲੋਡ ਨਹੀਂ ਹੋ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="err_connect_failed">ਡਿਵਾਈਸ ਨਾਲ ਕਨੈਕਟ ਨਹੀਂ ਹੋ ਸਕਿਆ।</string>
+    <string name="err_connection_lost">ਕਨੈਕਸ਼ਨ ਟੁੱਟ ਗਿਆ।</string>
+    <string name="address_not_found">ਇਸ ਥਾਂ ਦਾ ਪਤਾ ਨਹੀਂ ਮਿਲਿਆ</string>
+    <string name="msg_address_not_found">ਉੱਥੋਂ ਦਾ ਪਤਾ ਨਹੀਂ ਮਿਲ ਸਕਿਆ। ਆਪ ਲਿਖੋ ਜਾਂ ਕੋਆਰਡੀਨੇਟ ਵਰਤੋ।</string>
+    <string name="msg_auto_print_failed_plain">ਆਟੋ-ਪ੍ਰਿੰਟ ਅਸਫਲ ਰਿਹਾ</string>
+    <string name="msg_sign_in_sync_failed_plain">ਸਾਈਨ ਇਨ ਹੋ ਗਿਆ, ਪਰ ਕਲਾਊਡ ਸਿੰਕ ਨਹੀਂ ਹੋਇਆ</string>
 </resources>

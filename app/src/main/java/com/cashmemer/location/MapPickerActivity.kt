@@ -149,7 +149,7 @@ private fun MapPickerScreen(
                 resolving = true
                 address = LocationResolver
                     .addressFor(context, target.latitude, target.longitude)
-                    .getOrElse { "${target.latitude}, ${target.longitude}" }
+                    .getOrElse { "" }
                 resolving = false
             }
     }
@@ -245,7 +245,11 @@ private fun MapPickerScreen(
                         tint = MaterialTheme.colorScheme.primary,
                     )
                     Text(
-                        text = if (resolving) stringResource(R.string.finding_address) else address,
+                        text = when {
+                            resolving -> stringResource(R.string.finding_address)
+                            address.isBlank() -> stringResource(R.string.address_not_found)
+                            else -> address
+                        },
                         modifier = Modifier.padding(start = 8.dp),
                         style = MaterialTheme.typography.bodyLarge,
                     )
@@ -257,7 +261,7 @@ private fun MapPickerScreen(
                             PickedLocation(address, target.latitude, target.longitude)
                         )
                     },
-                    enabled = !resolving && address.isNotBlank(),
+                    enabled = !resolving,
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text(stringResource(R.string.confirm_location)) }
 

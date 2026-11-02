@@ -1,6 +1,7 @@
 package com.cashmemer.backup
 
 import android.content.Context
+import com.cashmemer.util.FriendlyError
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
 import com.cashmemer.R
@@ -68,7 +69,7 @@ object BackupWriter {
 
         settingsStore.recordBackupResult(
             succeededAt = result.getOrNull()?.let { System.currentTimeMillis() },
-            error = result.exceptionOrNull()?.message,
+            error = result.exceptionOrNull()?.let { FriendlyError.message(context, it, R.string.msg_backup_failed) },
         )
         result
     }

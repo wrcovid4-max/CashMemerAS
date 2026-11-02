@@ -570,4 +570,13 @@
     <string name="location_menu_title">موجودہ مقام بطور</string>
     <string name="location_as_address">پتہ</string>
     <string name="location_as_coordinates">کوآرڈینیٹس</string>
+    <!-- Friendly error messages -->
+    <string name="err_no_internet">انٹرنیٹ کنکشن دستیاب نہیں۔ براہ کرم اسے چیک کر کے دوبارہ کوشش کریں۔</string>
+    <string name="err_couldnt_load">لوڈ نہیں ہو سکا۔ براہ کرم دوبارہ کوشش کریں۔</string>
+    <string name="err_connect_failed">آلے سے رابطہ نہیں ہو سکا۔</string>
+    <string name="err_connection_lost">رابطہ منقطع ہو گیا۔</string>
+    <string name="address_not_found">اس مقام کا پتہ نہیں ملا</string>
+    <string name="msg_address_not_found">وہاں کا پتہ نہیں مل سکا۔ اسے خود لکھیں یا اس کے بجائے نقاط استعمال کریں۔</string>
+    <string name="msg_auto_print_failed_plain">خودکار پرنٹ ناکام ہو گیا</string>
+    <string name="msg_sign_in_sync_failed_plain">سائن ان ہو گیا، لیکن کلاؤڈ ہم آہنگی نہیں ہو سکی</string>
 </resources>

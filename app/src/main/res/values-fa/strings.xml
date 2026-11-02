@@ -528,4 +528,13 @@
     <string name="language_name_es">اسپانیایی</string>
     <string name="language_name_zh_tw">چینی سنتی</string>
     <string name="language_name_fa">فارسی</string>
+    <!-- Friendly error messages -->
+    <string name="err_no_internet">اتصال اینترنت برقرار نیست. لطفاً آن را بررسی کرده و دوباره تلاش کنید.</string>
+    <string name="err_couldnt_load">بارگیری نشد. لطفاً دوباره تلاش کنید.</string>
+    <string name="err_connect_failed">اتصال به دستگاه برقرار نشد.</string>
+    <string name="err_connection_lost">اتصال قطع شد.</string>
+    <string name="address_not_found">آدرسی برای این نقطه پیدا نشد</string>
+    <string name="msg_address_not_found">آدرسی در آنجا پیدا نشد. آن را وارد کنید یا به جای آن از مختصات استفاده کنید.</string>
+    <string name="msg_auto_print_failed_plain">چاپ خودکار ناموفق بود</string>
+    <string name="msg_sign_in_sync_failed_plain">ورود انجام شد، اما همگام‌سازی ابری کار نکرد</string>
 </resources>

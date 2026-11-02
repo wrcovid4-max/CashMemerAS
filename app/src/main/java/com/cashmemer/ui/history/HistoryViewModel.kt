@@ -1,6 +1,7 @@
 package com.cashmemer.ui.history
 
 import android.app.Application
+import com.cashmemer.util.FriendlyError
 import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
@@ -236,7 +237,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
                     ?: error(str(R.string.msg_file_write_failed))
             }
                 .onSuccess { _error.value = str(R.string.msg_backup_saved) }
-                .onFailure { _error.value = it.message ?: str(R.string.msg_backup_failed) }
+                .onFailure { _error.value = FriendlyError.message(getApplication<Application>(), it, R.string.msg_backup_failed) }
         }
     }
 
@@ -250,7 +251,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
             }
                 .mapCatching { json -> repository.importJson(json).getOrThrow() }
                 .onSuccess { _error.value = str(R.string.msg_restored_records, it) }
-                .onFailure { _error.value = it.message ?: str(R.string.msg_restore_failed) }
+                .onFailure { _error.value = FriendlyError.message(getApplication<Application>(), it, R.string.msg_restore_failed) }
         }
     }
 

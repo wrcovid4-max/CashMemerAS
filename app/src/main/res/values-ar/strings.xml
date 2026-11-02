@@ -523,4 +523,13 @@
     <string name="location_as_address">العنوان</string>
     <string name="location_as_coordinates">الإحداثيات</string>
     <string name="language_name_ar">العربية</string>
+    <!-- Friendly error messages -->
+    <string name="err_no_internet">لا يوجد اتصال بالإنترنت. يرجى التحقق منه والمحاولة مرة أخرى.</string>
+    <string name="err_couldnt_load">تعذّر التحميل. يرجى المحاولة مرة أخرى.</string>
+    <string name="err_connect_failed">تعذّر الاتصال بالجهاز.</string>
+    <string name="err_connection_lost">انقطع الاتصال.</string>
+    <string name="address_not_found">لم يتم العثور على عنوان لهذا الموقع</string>
+    <string name="msg_address_not_found">تعذّر العثور على عنوان هناك. اكتبه يدويًا أو استخدم الإحداثيات بدلًا من ذلك.</string>
+    <string name="msg_auto_print_failed_plain">فشلت الطباعة التلقائية</string>
+    <string name="msg_sign_in_sync_failed_plain">تم تسجيل الدخول، لكن المزامنة السحابية لم تعمل</string>
 </resources>

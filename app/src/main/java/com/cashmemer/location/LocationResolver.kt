@@ -34,6 +34,9 @@ import kotlin.coroutines.resumeWithException
  */
 object LocationResolver {
 
+    /** The point is fine but no street address could be found for it. */
+    class AddressUnavailableException : Exception()
+
     private val client by lazy {
         OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
@@ -57,7 +60,7 @@ object LocationResolver {
 
         deviceGeocode(context, location)
             ?: remoteGeocode(location.latitude, location.longitude)
-            ?: "${location.latitude}, ${location.longitude}"
+            ?: throw AddressUnavailableException()
     }
 
     /** Just the coordinates, for centring the map picker. */
@@ -79,7 +82,7 @@ object LocationResolver {
         }
         deviceGeocode(context, point)
             ?: remoteGeocode(latitude, longitude)
-            ?: "$latitude, $longitude"
+            ?: throw AddressUnavailableException()
     }
 
     /** Forward geocode for the picker's search box. */

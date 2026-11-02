@@ -125,7 +125,7 @@ object ReceiptOutput {
             }.onSuccess {
                 callback.onWriteFinished(arrayOf(PageRange.ALL_PAGES))
             }.onFailure { error ->
-                callback.onWriteFailed(error.message)
+                callback.onWriteFailed(null)
             }
         }
     }
