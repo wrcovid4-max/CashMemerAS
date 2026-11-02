@@ -303,17 +303,13 @@ fun NewReceiptTab(
                             text = stringResource(R.string.use_current_location),
                             icon = Icons.Filled.MyLocation,
                             enabled = !state.locatingAddress,
+                            // Same as "Pick on Map": the green location button opens the map picker.
                             onClick = {
-                                if (LocationResolver.hasPermission(context)) {
-                                    showLocationMenu = true
-                                } else {
-                                    locationPermission.launch(
-                                        arrayOf(
-                                            Manifest.permission.ACCESS_FINE_LOCATION,
-                                            Manifest.permission.ACCESS_COARSE_LOCATION,
-                                        )
-                                    )
-                                }
+                                pickOnMap.launch(
+                                    state.latitude?.let { lat ->
+                                        state.longitude?.let { lng -> lat to lng }
+                                    }
+                                )
                             },
                             modifier = Modifier.fillMaxWidth(),
                         )
