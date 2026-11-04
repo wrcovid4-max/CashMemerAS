@@ -63,6 +63,8 @@ import com.cashmemer.core.ui.theme.DangerButton
 import com.cashmemer.core.ui.theme.Dimens
 import com.cashmemer.core.ui.theme.OnDangerButton
 import com.cashmemer.ui.Destination
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 /**
  * One line of text that gets smaller until it fits, instead of being cut off

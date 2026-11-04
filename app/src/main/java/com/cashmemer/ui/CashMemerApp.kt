@@ -41,6 +41,8 @@ import com.cashmemer.ui.pricelist.PriceListScreen
 import com.cashmemer.ui.rates.RatesScreen
 import com.cashmemer.ui.receipts.ReceiptsHomeScreen
 import com.cashmemer.ui.settings.SettingsScreen
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 /** Sub-screen of More, so it stays off the bottom bar. */
 private const val ROUTE_DEVICES = "devices"
