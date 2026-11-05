@@ -275,11 +275,22 @@ fun NewReceiptTab(
                     } else {
                         {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    Icons.Filled.Place,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                )
+                                IconButton(
+                                    onClick = {
+                                        pickOnMap.launch(
+                                            state.latitude?.let { lat ->
+                                                state.longitude?.let { lng -> lat to lng }
+                                            }
+                                        )
+                                    },
+                                    modifier = Modifier.size(40.dp),
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Place,
+                                        contentDescription = stringResource(R.string.pick_on_map),
+                                        tint = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
                                 IconButton(
                                     onClick = { copyLocation(context, state.locationAddress) },
                                     modifier = Modifier.size(32.dp),
@@ -303,13 +314,17 @@ fun NewReceiptTab(
                             text = stringResource(R.string.use_current_location),
                             icon = Icons.Filled.MyLocation,
                             enabled = !state.locatingAddress,
-                            // Same as "Pick on Map": the green location button opens the map picker.
                             onClick = {
-                                pickOnMap.launch(
-                                    state.latitude?.let { lat ->
-                                        state.longitude?.let { lng -> lat to lng }
-                                    }
-                                )
+                                if (LocationResolver.hasPermission(context)) {
+                                    showLocationMenu = true
+                                } else {
+                                    locationPermission.launch(
+                                        arrayOf(
+                                            Manifest.permission.ACCESS_FINE_LOCATION,
+                                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                                        )
+                                    )
+                                }
                             },
                             modifier = Modifier.fillMaxWidth(),
                         )
