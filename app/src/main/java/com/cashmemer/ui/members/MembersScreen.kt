@@ -3,6 +3,7 @@ package com.cashmemer.ui.members
 import com.cashmemer.ui.components.AppleText
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -25,6 +26,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -49,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
@@ -107,6 +110,28 @@ private fun MemberAvatar(photoUri: String?, size: Dp) {
  * the read permission is granted to this process only, so after a reboot every
  * member photo would vanish.
  */
+/**
+ * Writes the directory as CSV (Name, Phone, Email, Address) and offers it to the share sheet — the
+ * counterpart of the iOS "Export Members" action. Every cell is quoted, with embedded quotes doubled.
+ */
+private fun exportMembersCsv(context: Context, members: List<Member>) {
+    fun cell(value: String) = "\"" + value.replace("\"", "\"\"") + "\""
+    val csv = (listOf("Name,Phone,Email,Address") +
+        members.map { listOf(it.name, it.phone, it.email, it.address).joinToString(",") { c -> cell(c) } })
+        .joinToString("\n")
+    runCatching {
+        val dir = File(context.cacheDir, "receipts").apply { mkdirs() }
+        val file = File(dir, "CashMemer-Members.csv").apply { writeText(csv) }
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "text/csv"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        context.startActivity(Intent.createChooser(send, context.getString(R.string.export_members)))
+    }
+}
+
 private fun copyMemberPhoto(context: Context, source: Uri): String? = runCatching {
     val dir = File(context.filesDir, "members").apply { mkdirs() }
     val target = File(dir, "member-${System.currentTimeMillis()}.jpg")
@@ -138,6 +163,7 @@ class MembersViewModel(application: Application) : AndroidViewModel(application)
 fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
     val members by viewModel.members.collectAsState()
     var editing by remember { mutableStateOf<Member?>(null) }
+    val context = LocalContext.current
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -145,7 +171,23 @@ fun MembersScreen(viewModel: MembersViewModel = viewModel()) {
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item { SectionTitle(stringResource(R.string.members_directory)) }
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    SectionTitle(stringResource(R.string.members_directory), modifier = Modifier.weight(1f))
+                    IconButton(
+                        onClick = { exportMembersCsv(context, members) },
+                        enabled = members.isNotEmpty(),
+                    ) {
+                        Icon(
+                            Icons.Filled.FileDownload,
+                            contentDescription = stringResource(R.string.export_members),
+                        )
+                    }
+                }
+            }
 
             items(members, key = { it.id }) { member ->
                 SectionCard {

@@ -531,4 +531,5 @@
     <string name="msg_address_not_found">未找到该处的地址。请手动输入，或改用坐标。</string>
     <string name="msg_auto_print_failed_plain">自动打印失败</string>
     <string name="msg_sign_in_sync_failed_plain">已登录，但云同步未成功</string>
+    <string name="export_members">导出会员</string>
 </resources>

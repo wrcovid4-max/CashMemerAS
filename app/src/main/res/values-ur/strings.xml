@@ -579,4 +579,5 @@
     <string name="msg_address_not_found">وہاں کا پتہ نہیں مل سکا۔ اسے خود لکھیں یا اس کے بجائے نقاط استعمال کریں۔</string>
     <string name="msg_auto_print_failed_plain">خودکار پرنٹ ناکام ہو گیا</string>
     <string name="msg_sign_in_sync_failed_plain">سائن ان ہو گیا، لیکن کلاؤڈ ہم آہنگی نہیں ہو سکی</string>
+    <string name="export_members">ممبران برآمد کریں</string>
 </resources>

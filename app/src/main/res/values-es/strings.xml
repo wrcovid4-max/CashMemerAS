@@ -535,4 +535,5 @@
     <string name="msg_address_not_found">No se encontró una dirección allí. Escríbela o usa las coordenadas.</string>
     <string name="msg_auto_print_failed_plain">Falló la impresión automática</string>
     <string name="msg_sign_in_sync_failed_plain">Sesión iniciada, pero la sincronización en la nube no funcionó</string>
+    <string name="export_members">Exportar miembros</string>
 </resources>

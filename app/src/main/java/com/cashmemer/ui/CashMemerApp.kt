@@ -118,6 +118,10 @@ private fun AppNavHost(
     LaunchedEffect(barcodePending) {
         if (barcodePending) navController.popBackStack(Destination.Receipts.route, false)
     }
+    val shortcutTab by com.cashmemer.ui.receipts.ShortcutBus.tab.collectAsState()
+    LaunchedEffect(shortcutTab) {
+        if (shortcutTab != null) navController.popBackStack(Destination.Receipts.route, false)
+    }
 
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 

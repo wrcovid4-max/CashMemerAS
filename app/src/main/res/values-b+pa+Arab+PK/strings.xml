@@ -539,4 +539,5 @@
     <string name="msg_address_not_found">اوتھوں دا پتہ نئیں لبھ سکیا۔ آپ لکھو یا کوآرڈینیٹس ورتو۔</string>
     <string name="msg_auto_print_failed_plain">آٹو پرنٹ ناکام ہو گیا</string>
     <string name="msg_sign_in_sync_failed_plain">سائن ان ہو گیا، پر کلاؤڈ سنک نئیں ہویا</string>
+    <string name="export_members">ممبران دا ڈیٹا کڈھو</string>
 </resources>

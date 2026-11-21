@@ -1,9 +1,16 @@
 package com.cashmemer
 
 import com.cashmemer.core.ui.theme.Holiday
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.dp
 import com.cashmemer.ui.effects.AutumnLeaves
 import com.cashmemer.ui.effects.BatFlyer
 import com.cashmemer.ui.effects.HalloweenDecor
+import com.cashmemer.ui.effects.LaughingGhost
+import com.cashmemer.ui.effects.SpiderDrop
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Box
@@ -72,6 +79,16 @@ class MainActivity : AppCompatActivity() {
                     if (Holiday.HALLOWEEN) AutumnLeaves()
                     if (Holiday.HALLOWEEN) BatFlyer()
                     if (Holiday.HALLOWEEN) HalloweenDecor()
+                    if (Holiday.HALLOWEEN) SpiderDrop()
+                    // The laughing ghost is a tablet easter egg, as on iPad.
+                    if (Holiday.HALLOWEEN && LocalConfiguration.current.screenWidthDp >= 600) {
+                        LaughingGhost(
+                            Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(16.dp)
+                                .size(200.dp),
+                        )
+                    }
                 }
             }
         }
@@ -93,6 +110,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleBarcodeIntent(intent: android.content.Intent?) {
+        if (com.cashmemer.ui.receipts.ShortcutBus.handle(intent?.action)) {
+            intent?.action = null   // don't replay on a configuration change
+            return
+        }
         if (intent?.getBooleanExtra(BarcodeScanBus.EXTRA_OPEN_BARCODE, false) == true) {
             BarcodeScanBus.request()
         }

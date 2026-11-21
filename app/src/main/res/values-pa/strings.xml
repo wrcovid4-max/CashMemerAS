@@ -538,4 +538,5 @@
     <string name="msg_address_not_found">ਉੱਥੋਂ ਦਾ ਪਤਾ ਨਹੀਂ ਮਿਲ ਸਕਿਆ। ਆਪ ਲਿਖੋ ਜਾਂ ਕੋਆਰਡੀਨੇਟ ਵਰਤੋ।</string>
     <string name="msg_auto_print_failed_plain">ਆਟੋ-ਪ੍ਰਿੰਟ ਅਸਫਲ ਰਿਹਾ</string>
     <string name="msg_sign_in_sync_failed_plain">ਸਾਈਨ ਇਨ ਹੋ ਗਿਆ, ਪਰ ਕਲਾਊਡ ਸਿੰਕ ਨਹੀਂ ਹੋਇਆ</string>
+    <string name="export_members">ਮੈਂਬਰ ਐਕਸਪੋਰਟ ਕਰੋ</string>
 </resources>

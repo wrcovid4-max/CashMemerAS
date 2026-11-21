@@ -47,6 +47,15 @@ fun ReceiptsHomeScreen(
         if (barcodePending) selectedTab = 0
     }
 
+    // A launcher shortcut asked for History or the Dashboard.
+    val shortcutTab by ShortcutBus.tab.collectAsState()
+    LaunchedEffect(shortcutTab) {
+        shortcutTab?.let {
+            selectedTab = it
+            ShortcutBus.consume()
+        }
+    }
+
     // Tapping Edit in History jumps back to the form with that receipt loaded.
     val editRequest by ReceiptEditBus.requestedId.collectAsState()
     LaunchedEffect(editRequest) {

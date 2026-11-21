@@ -589,4 +589,5 @@
     <string name="msg_address_not_found">Couldn\'t find an address there. Type it in or use coordinates instead.</string>
     <string name="msg_auto_print_failed_plain">Auto-print failed</string>
     <string name="msg_sign_in_sync_failed_plain">Signed in, but cloud sync didn\'t work</string>
+    <string name="export_members">Export members</string>
 </resources>

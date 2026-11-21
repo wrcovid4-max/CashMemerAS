@@ -532,4 +532,5 @@
     <string name="msg_address_not_found">تعذّر العثور على عنوان هناك. اكتبه يدويًا أو استخدم الإحداثيات بدلًا من ذلك.</string>
     <string name="msg_auto_print_failed_plain">فشلت الطباعة التلقائية</string>
     <string name="msg_sign_in_sync_failed_plain">تم تسجيل الدخول، لكن المزامنة السحابية لم تعمل</string>
+    <string name="export_members">تصدير الأعضاء</string>
 </resources>

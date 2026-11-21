@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="barcode"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_barcode"
+        android:shortcutShortLabel="@string/barcode_scan"
+        android:shortcutLongLabel="@string/barcode_scan">
+        <intent
+            android:action="com.cashmemer.action.SHORTCUT_BARCODE"
+            android:targetPackage="com.cashmemer"
+            android:targetClass="com.cashmemer.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="history"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_history"
+        android:shortcutShortLabel="@string/tab_history"
+        android:shortcutLongLabel="@string/tab_history">
+        <intent
+            android:action="com.cashmemer.action.SHORTCUT_HISTORY"
+            android:targetPackage="com.cashmemer"
+            android:targetClass="com.cashmemer.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="dashboard"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_dashboard"
+        android:shortcutShortLabel="@string/tab_dashboard"
+        android:shortcutLongLabel="@string/tab_dashboard">
+        <intent
+            android:action="com.cashmemer.action.SHORTCUT_DASHBOARD"
+            android:targetPackage="com.cashmemer"
+            android:targetClass="com.cashmemer.MainActivity" />
+    </shortcut>
+</shortcuts>
