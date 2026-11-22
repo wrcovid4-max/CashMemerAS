@@ -536,4 +536,7 @@
     <string name="msg_auto_print_failed_plain">Falló la impresión automática</string>
     <string name="msg_sign_in_sync_failed_plain">Sesión iniciada, pero la sincronización en la nube no funcionó</string>
     <string name="export_members">Exportar miembros</string>
+    <string name="period_week">Semana</string>
+    <string name="period_year">Año</string>
+    <string name="period_custom">Personalizado</string>
 </resources>

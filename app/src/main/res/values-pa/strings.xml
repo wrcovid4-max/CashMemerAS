@@ -539,4 +539,7 @@
     <string name="msg_auto_print_failed_plain">ਆਟੋ-ਪ੍ਰਿੰਟ ਅਸਫਲ ਰਿਹਾ</string>
     <string name="msg_sign_in_sync_failed_plain">ਸਾਈਨ ਇਨ ਹੋ ਗਿਆ, ਪਰ ਕਲਾਊਡ ਸਿੰਕ ਨਹੀਂ ਹੋਇਆ</string>
     <string name="export_members">ਮੈਂਬਰ ਐਕਸਪੋਰਟ ਕਰੋ</string>
+    <string name="period_week">ਹਫ਼ਤਾ</string>
+    <string name="period_year">ਸਾਲ</string>
+    <string name="period_custom">ਕਸਟਮ</string>
 </resources>

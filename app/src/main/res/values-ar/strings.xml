@@ -533,4 +533,7 @@
     <string name="msg_auto_print_failed_plain">فشلت الطباعة التلقائية</string>
     <string name="msg_sign_in_sync_failed_plain">تم تسجيل الدخول، لكن المزامنة السحابية لم تعمل</string>
     <string name="export_members">تصدير الأعضاء</string>
+    <string name="period_week">هذا الأسبوع</string>
+    <string name="period_year">هذه السنة</string>
+    <string name="period_custom">مخصص</string>
 </resources>

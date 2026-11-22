@@ -540,4 +540,7 @@
     <string name="msg_auto_print_failed_plain">آٹو پرنٹ ناکام ہو گیا</string>
     <string name="msg_sign_in_sync_failed_plain">سائن ان ہو گیا، پر کلاؤڈ سنک نئیں ہویا</string>
     <string name="export_members">ممبران دا ڈیٹا کڈھو</string>
+    <string name="period_week">اس ہفتے</string>
+    <string name="period_year">اس سال</string>
+    <string name="period_custom">اپنی مرضی دا ویلا</string>
 </resources>

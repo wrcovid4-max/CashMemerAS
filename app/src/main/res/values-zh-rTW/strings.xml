@@ -537,4 +537,7 @@
     <string name="msg_auto_print_failed_plain">自動列印失敗</string>
     <string name="msg_sign_in_sync_failed_plain">已登入，但雲端同步未成功</string>
     <string name="export_members">匯出會員</string>
+    <string name="period_week">本週</string>
+    <string name="period_year">本年</string>
+    <string name="period_custom">自定義</string>
 </resources>

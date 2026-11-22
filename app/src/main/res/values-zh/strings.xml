@@ -532,4 +532,7 @@
     <string name="msg_auto_print_failed_plain">自动打印失败</string>
     <string name="msg_sign_in_sync_failed_plain">已登录，但云同步未成功</string>
     <string name="export_members">导出会员</string>
+    <string name="period_week">本周</string>
+    <string name="period_year">本年</string>
+    <string name="period_custom">自定义</string>
 </resources>

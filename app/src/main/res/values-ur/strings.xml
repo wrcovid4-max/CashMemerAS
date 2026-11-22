@@ -580,4 +580,7 @@
     <string name="msg_auto_print_failed_plain">خودکار پرنٹ ناکام ہو گیا</string>
     <string name="msg_sign_in_sync_failed_plain">سائن ان ہو گیا، لیکن کلاؤڈ ہم آہنگی نہیں ہو سکی</string>
     <string name="export_members">ممبران برآمد کریں</string>
+    <string name="period_week">ہفتہ</string>
+    <string name="period_year">سال</string>
+    <string name="period_custom">حسبِ ضرورت</string>
 </resources>

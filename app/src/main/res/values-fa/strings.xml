@@ -538,4 +538,7 @@
     <string name="msg_auto_print_failed_plain">چاپ خودکار ناموفق بود</string>
     <string name="msg_sign_in_sync_failed_plain">ورود انجام شد، اما همگام‌سازی ابری کار نکرد</string>
     <string name="export_members">خروجی اعضا</string>
+    <string name="period_week">هفته</string>
+    <string name="period_year">سال</string>
+    <string name="period_custom">سفارشی</string>
 </resources>

@@ -10,7 +10,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DateRangePicker
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDateRangePickerState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.time.temporal.WeekFields
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -88,6 +102,9 @@ data class DashboardStats(
     val byCategory: List<Pair<String, Double>> = emptyList(),
 )
 
+/** The window the dashboard's figures cover. Today / this month tiles always show those windows. */
+enum class DashboardPeriod { TODAY, WEEK, MONTH, YEAR, ALL, CUSTOM }
+
 class DashboardViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = CashMemerRepository.get(application)
@@ -99,14 +116,33 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
      */
     private val storage = MutableStateFlow(0L)
 
-    val stats: StateFlow<DashboardStats> = combine(
+    private val _period = MutableStateFlow(DashboardPeriod.ALL)
+    private val _customRange = MutableStateFlow<Pair<LocalDate, LocalDate>?>(null)
+
+    val period: StateFlow<DashboardPeriod> = _period
+    val customRange: StateFlow<Pair<LocalDate, LocalDate>?> = _customRange
+
+    fun selectPeriod(period: DashboardPeriod) { _period.value = period }
+
+    fun setCustomRange(from: LocalDate, to: LocalDate) {
+        _customRange.value = if (from <= to) from to to else to to from
+        _period.value = DashboardPeriod.CUSTOM
+    }
+
+    private val data = combine(
         repository.observeReceipts(),
         repository.observeProducts(),
         repository.observeMembers(),
+    ) { receipts, products, members -> Triple(receipts, products, members) }
+
+    val stats: StateFlow<DashboardStats> = combine(
+        data,
         settingsStore.settings,
         storage,
-    ) { receipts, products, members, settings, storageBytes ->
-        buildStats(receipts, products, members, settings, storageBytes)
+        _period,
+        _customRange,
+    ) { (receipts, products, members), settings, storageBytes, period, range ->
+        buildStats(receipts, products, members, settings, storageBytes, period, range)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardStats())
 
     init {
@@ -119,6 +155,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         members: List<Member>,
         settings: AppSettings,
         storageBytes: Long,
+        period: DashboardPeriod,
+        customRange: Pair<LocalDate, LocalDate>?,
     ): DashboardStats {
         val live = products.filterNot { it.archived }
 
@@ -152,30 +190,52 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             date.month == today.month && date.year == today.year
         }
 
-        val byStore = receipts.groupBy { it.placeName.ifBlank { UNTITLED } }
+        // Today / this month always mean those windows; every other receipt figure follows the picked period.
+        val startOfWeek = today.with(WeekFields.of(Locale.getDefault()).dayOfWeek(), 1)
+        val (from, to) = when (period) {
+            DashboardPeriod.TODAY -> today to today
+            DashboardPeriod.WEEK -> startOfWeek to null
+            DashboardPeriod.MONTH -> today.withDayOfMonth(1) to null
+            DashboardPeriod.YEAR -> today.withDayOfYear(1) to null
+            DashboardPeriod.ALL -> null to null
+            DashboardPeriod.CUSTOM -> (customRange?.first) to (customRange?.second)
+        }
+        val inPeriod = receipts.filter {
+            val date = Instant.ofEpochMilli(it.createdAt).atZone(zone).toLocalDate()
+            (from == null || !date.isBefore(from)) && (to == null || !date.isAfter(to))
+        }
+        if (inPeriod.isEmpty()) {
+            return base.copy(
+                todayTotal = todays.sumOf { it.total },
+                todayCount = todays.size,
+                monthTotal = thisMonth.sumOf { it.total },
+            )
+        }
+
+        val byStore = inPeriod.groupBy { it.placeName.ifBlank { UNTITLED } }
         val mostVisited = byStore.maxByOrNull { (_, list) -> list.size }
 
         // Quantities across every line on every receipt — this is "what do I
         // actually sell", which is a different question from "what earns most".
-        val soldQuantities = receipts
+        val soldQuantities = inPeriod
             .flatMap { ReceiptItemCodec.decode(it.itemsJson) }
             .groupBy { it.productName.trim() }
             .filterKeys { it.isNotBlank() }
             .mapValues { (_, lines) -> lines.sumOf { it.qty } }
         val topProduct = soldQuantities.maxByOrNull { it.value }
 
-        val total = receipts.sumOf { it.total }
+        val total = inPeriod.sumOf { it.total }
 
         return base.copy(
             todayTotal = todays.sumOf { it.total },
             todayCount = todays.size,
             monthTotal = thisMonth.sumOf { it.total },
             allTimeTotal = total,
-            receiptCount = receipts.size,
-            averageReceipt = total / receipts.size,
-            highestReceipt = receipts.maxOf { it.total },
-            lowestReceipt = receipts.minOf { it.total },
-            scannedCount = receipts.count { !it.sourceImageUri.isNullOrBlank() },
+            receiptCount = inPeriod.size,
+            averageReceipt = total / inPeriod.size,
+            highestReceipt = inPeriod.maxOf { it.total },
+            lowestReceipt = inPeriod.minOf { it.total },
+            scannedCount = inPeriod.count { !it.sourceImageUri.isNullOrBlank() },
             uniqueStores = byStore.size,
             mostVisitedStore = mostVisited?.key,
             mostVisitedCount = mostVisited?.value?.size ?: 0,
@@ -185,7 +245,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 .map { (name, list) -> name to list.sumOf { it.total } }
                 .sortedByDescending { it.second }
                 .take(5),
-            byCategory = receipts.groupBy { it.category }
+            byCategory = inPeriod.groupBy { it.category }
                 .map { (category, list) -> category to list.sumOf { it.total } }
                 .sortedByDescending { it.second },
         )
@@ -213,16 +273,98 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 }
 
 @Composable
+private fun periodName(period: DashboardPeriod): String = stringResource(
+    when (period) {
+        DashboardPeriod.TODAY -> R.string.today
+        DashboardPeriod.WEEK -> R.string.period_week
+        DashboardPeriod.MONTH -> R.string.this_month
+        DashboardPeriod.YEAR -> R.string.period_year
+        DashboardPeriod.ALL -> R.string.all_time
+        DashboardPeriod.CUSTOM -> R.string.period_custom
+    },
+)
+
+/** Period chips (Today, Week, Month, Year, All, Custom) with a date-range dialog for Custom. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PeriodPicker(
+    selected: DashboardPeriod,
+    range: Pair<LocalDate, LocalDate>?,
+    onSelect: (DashboardPeriod) -> Unit,
+    onRange: (LocalDate, LocalDate) -> Unit,
+) {
+    var picking by remember { mutableStateOf(false) }
+    val rangeFormat = remember { DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault()) }
+
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        items(DashboardPeriod.entries.toList()) { period ->
+            FilterChip(
+                selected = period == selected,
+                onClick = { if (period == DashboardPeriod.CUSTOM) picking = true else onSelect(period) },
+                label = {
+                    val custom = period == DashboardPeriod.CUSTOM && selected == period && range != null
+                    Text(
+                        if (custom) "${range!!.first.format(rangeFormat)} – ${range.second.format(rangeFormat)}"
+                        else periodName(period),
+                    )
+                },
+            )
+        }
+    }
+
+    if (picking) {
+        val state = rememberDateRangePickerState()
+        DatePickerDialog(
+            onDismissRequest = { picking = false },
+            confirmButton = {
+                TextButton(
+                    enabled = state.selectedStartDateMillis != null,
+                    onClick = {
+                        val start = state.selectedStartDateMillis
+                        if (start != null) {
+                            // The picker reports UTC midnights; read them as calendar dates, not instants.
+                            val from = Instant.ofEpochMilli(start).atZone(ZoneOffset.UTC).toLocalDate()
+                            val to = state.selectedEndDateMillis
+                                ?.let { Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate() } ?: from
+                            onRange(from, to)
+                        }
+                        picking = false
+                    },
+                ) { Text(stringResource(android.R.string.ok)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { picking = false }) { Text(stringResource(android.R.string.cancel)) }
+            },
+        ) {
+            DateRangePicker(state = state, modifier = Modifier.weight(1f, fill = false))
+        }
+    }
+}
+
+@Composable
 fun DashboardTab(viewModel: DashboardViewModel = viewModel()) {
     val stats by viewModel.stats.collectAsState()
+    val period by viewModel.period.collectAsState()
+    val customRange by viewModel.customRange.collectAsState()
     val currency = stats.currencyCode
     val noValue = stringResource(R.string.no_value)
+    // Captions on the receipt figures name the window they cover instead of always saying "All time".
+    val periodCaption = periodName(period)
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        item {
+            PeriodPicker(
+                selected = period,
+                range = customRange,
+                onSelect = viewModel::selectPeriod,
+                onRange = viewModel::setCustomRange,
+            )
+        }
+
         item {
             TilePair(
                 left = {
@@ -246,7 +388,7 @@ fun DashboardTab(viewModel: DashboardViewModel = viewModel()) {
 
         item {
             SectionCard {
-                SectionTitle(stringResource(R.string.all_time_sales))
+                SectionTitle(if (period == DashboardPeriod.ALL) stringResource(R.string.all_time_sales) else periodCaption)
                 AppleText(
                     text = Format.amountWithCurrency(stats.allTimeTotal, currency),
                     style = MaterialTheme.typography.headlineLarge,
@@ -284,7 +426,7 @@ fun DashboardTab(viewModel: DashboardViewModel = viewModel()) {
                     StatTile(
                         label = stringResource(R.string.highest_receipt),
                         value = Format.amountWithCurrency(stats.highestReceipt, currency),
-                        caption = stringResource(R.string.all_time),
+                        caption = periodCaption,
                         modifier = it,
                     )
                 },
@@ -292,7 +434,7 @@ fun DashboardTab(viewModel: DashboardViewModel = viewModel()) {
                     StatTile(
                         label = stringResource(R.string.lowest_receipt),
                         value = Format.amountWithCurrency(stats.lowestReceipt, currency),
-                        caption = stringResource(R.string.all_time),
+                        caption = periodCaption,
                         modifier = it,
                     )
                 },
