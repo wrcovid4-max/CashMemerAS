@@ -11,6 +11,7 @@ import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
+import com.cashmemer.print.ReceiptDownloader
 import androidx.lifecycle.viewModelScope
 import androidx.annotation.StringRes
 import com.cashmemer.R
@@ -627,6 +628,7 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
         viewModelScope.launch {
             val account = settingsStore.settings.first()
             var saved = 0
+            var downloaded = 0
             forms.filter { it.canGenerate }.forEach { current ->
                 val receipt = Receipt(
                     id = 0L,
@@ -657,12 +659,40 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
                     sourceImageUri = current.sourceImageUri,
                     itemsJson = ReceiptItemCodec.encode(current.items),
                 )
-                repository.saveReceipt(receipt)
+                val id = repository.saveReceipt(receipt)
                 saved++
+                if (account.autoDownloadPdf) {
+                    repository.receipt(id)?.let { if (downloadPdf(it, account, announce = false)) downloaded++ }
+                }
             }
             PhoneWearSyncManager.push(getApplication<Application>())
             _state.update { it.copy(message = str(R.string.bulk_saved, saved)) }
+            if (downloaded > 0) {
+                _toasts.emit(
+                    str(
+                        R.string.msg_pdfs_saved,
+                        downloaded,
+                        ReceiptDownloader.locationLabel(getApplication<Application>(), account),
+                    ),
+                )
+            }
         }
+    }
+
+    /**
+     * Saves [receipt]'s PDF to the download location. A failure is reported but never blocks the sale,
+     * which is already committed. [announce] is false for bulk saves, which report once at the end.
+     */
+    private suspend fun downloadPdf(
+        receipt: Receipt,
+        settings: com.cashmemer.core.data.AppSettings,
+        announce: Boolean = true,
+    ): Boolean {
+        val app = getApplication<Application>()
+        val result = ReceiptDownloader.save(app, receipt, settings)
+        result.onSuccess { where -> if (announce) _toasts.emit(str(R.string.msg_pdf_saved, where)) }
+        result.onFailure { _toasts.emit(str(R.string.msg_pdf_save_failed)) }
+        return result.isSuccess
     }
 
     /** Writes the receipt and clears the form, like the original Generate button. */
@@ -728,6 +758,9 @@ class ReceiptFormViewModel(application: Application) : AndroidViewModel(applicat
             // phone costs at most the receipt currently being typed.
             val saved = repository.receipt(id)
             saved?.let { FirebaseSync.pushReceipt(getApplication<Application>(), it) }
+
+            // Auto-download PDF (Settings): the receipt's PDF goes straight to the chosen folder.
+            if (account.autoDownloadPdf) saved?.let { downloadPdf(it, account) }
 
             // The sale is committed — the draft has served its purpose.
             DraftStore.clear(getApplication<Application>())

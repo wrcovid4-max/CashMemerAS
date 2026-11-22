@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CloudDownload
@@ -177,6 +178,22 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
         store.setBackupFolder(uri.toString())
         _message.value = str(R.string.msg_backup_folder_set)
+    }
+
+    fun setAutoDownloadPdf(value: Boolean) = launch { store.setAutoDownloadPdf(value) }
+
+    /** Stores the folder receipt PDFs are downloaded into; null goes back to Downloads/CashMemer. */
+    fun setDownloadFolder(uri: Uri?) = launch {
+        val app = getApplication<Application>()
+        if (uri != null) {
+            runCatching {
+                app.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                )
+            }
+        }
+        store.setDownloadFolder(uri?.toString())
     }
 
     private val _syncing = MutableStateFlow(false)
@@ -474,6 +491,7 @@ fun SettingsScreen(
 
         item { PasscodeCard(onUpdate = viewModel::setPasscode) }
 
+        item { AutoDownloadCard(settings = settings, viewModel = viewModel) }
         item { AutoBackupCard(settings = settings, viewModel = viewModel) }
 
         item { BackupCard(viewModel = viewModel) }
@@ -757,6 +775,51 @@ private fun AccountCard(
  * Scheduled backups. Point this at a Drive/Dropbox-synced folder and the
  * snapshots leave the phone on their own.
  */
+/** Auto-download PDF: on/off, and where the PDFs go. */
+@Composable
+private fun AutoDownloadCard(
+    settings: AppSettings,
+    viewModel: SettingsViewModel,
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val folderPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocumentTree(),
+    ) { uri -> uri?.let(viewModel::setDownloadFolder) }
+
+    SectionCard {
+        RowTitle(Icons.Filled.FileDownload, stringResource(R.string.auto_download_pdf))
+        ToggleRow(
+            stringResource(R.string.auto_download_pdf),
+            settings.autoDownloadPdf,
+            viewModel::setAutoDownloadPdf,
+            info = stringResource(R.string.info_auto_download_pdf),
+        )
+
+        AppleText(stringResource(R.string.download_location), style = MaterialTheme.typography.titleMedium)
+        AppleText(
+            text = com.cashmemer.print.ReceiptDownloader.locationLabel(context, settings),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        OutlinedButton(
+            onClick = { folderPicker.launch(null) },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Icon(Icons.Filled.FolderOpen, contentDescription = null)
+            Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+            AppleText(
+                if (settings.downloadFolderUri == null) stringResource(R.string.choose_download_folder)
+                else stringResource(R.string.change_download_folder),
+            )
+        }
+        if (settings.downloadFolderUri != null) {
+            androidx.compose.material3.TextButton(onClick = { viewModel.setDownloadFolder(null) }) {
+                AppleText(stringResource(R.string.use_default_download_folder))
+            }
+        }
+    }
+}
+
 @Composable
 private fun AutoBackupCard(
     settings: AppSettings,

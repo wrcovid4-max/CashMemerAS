@@ -536,4 +536,13 @@
     <string name="period_week">هذا الأسبوع</string>
     <string name="period_year">هذه السنة</string>
     <string name="period_custom">مخصص</string>
+    <string name="auto_download_pdf">تنزيل PDF تلقائيًا</string>
+    <string name="info_auto_download_pdf">يحفظ ملف PDF لكل إيصال بمجرد الضغط على إنشاء، ولكل إيصال يُحفظ من المسح الجماعي.</string>
+    <string name="download_location">موقع التنزيل</string>
+    <string name="choose_download_folder">اختيار مجلد التنزيل</string>
+    <string name="change_download_folder">تغيير مجلد التنزيل</string>
+    <string name="use_default_download_folder">استخدام Downloads/CashMemer</string>
+    <string name="msg_pdf_saved">تم حفظ ملف PDF في %1$s</string>
+    <string name="msg_pdfs_saved">تم حفظ %1$d ملفات PDF في %2$s</string>
+    <string name="msg_pdf_save_failed">تعذّر حفظ ملف PDF للإيصال</string>
 </resources>

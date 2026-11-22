@@ -593,4 +593,13 @@
     <string name="period_week">Week</string>
     <string name="period_year">Year</string>
     <string name="period_custom">Custom</string>
+    <string name="auto_download_pdf">Auto-download PDF</string>
+    <string name="info_auto_download_pdf">Saves a PDF of each receipt as soon as you press Generate, and for every receipt saved from a bulk scan.</string>
+    <string name="download_location">Download location</string>
+    <string name="choose_download_folder">Choose download folder</string>
+    <string name="change_download_folder">Change download folder</string>
+    <string name="use_default_download_folder">Use Downloads/CashMemer</string>
+    <string name="msg_pdf_saved">PDF saved to %1$s</string>
+    <string name="msg_pdfs_saved">%1$d PDFs saved to %2$s</string>
+    <string name="msg_pdf_save_failed">Couldn't save the receipt PDF</string>
 </resources>

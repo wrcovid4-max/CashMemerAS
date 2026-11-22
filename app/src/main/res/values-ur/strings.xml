@@ -583,4 +583,13 @@
     <string name="period_week">ہفتہ</string>
     <string name="period_year">سال</string>
     <string name="period_custom">حسبِ ضرورت</string>
+    <string name="auto_download_pdf">پی ڈی ایف خودکار ڈاؤن لوڈ</string>
+    <string name="info_auto_download_pdf">جنریٹ دبانے پر ہر رسید کا پی ڈی ایف فوراً محفوظ کرتا ہے، اور بلک اسکین سے محفوظ ہونے والی ہر رسید کا بھی۔</string>
+    <string name="download_location">ڈاؤن لوڈ کا مقام</string>
+    <string name="choose_download_folder">ڈاؤن لوڈ فولڈر منتخب کریں</string>
+    <string name="change_download_folder">ڈاؤن لوڈ فولڈر تبدیل کریں</string>
+    <string name="use_default_download_folder">Downloads/CashMemer استعمال کریں</string>
+    <string name="msg_pdf_saved">پی ڈی ایف %1$s میں محفوظ ہو گیا</string>
+    <string name="msg_pdfs_saved">%1$d پی ڈی ایف %2$s میں محفوظ ہو گئے</string>
+    <string name="msg_pdf_save_failed">رسید کا پی ڈی ایف محفوظ نہیں ہو سکا</string>
 </resources>

@@ -543,4 +543,13 @@
     <string name="period_week">اس ہفتے</string>
     <string name="period_year">اس سال</string>
     <string name="period_custom">اپنی مرضی دا ویلا</string>
+    <string name="auto_download_pdf">PDF آپ ای ڈاؤنلوڈ کرو</string>
+    <string name="info_auto_download_pdf">جنریٹ دباندیاں ای ہر رسید دی PDF سانبھ لیندا اے، تے بلک سکین توں سانبھی ہر رسید دی وی۔</string>
+    <string name="download_location">ڈاؤنلوڈ دی تھاں</string>
+    <string name="choose_download_folder">ڈاؤنلوڈ فولڈر چنو</string>
+    <string name="change_download_folder">ڈاؤنلوڈ فولڈر بدلو</string>
+    <string name="use_default_download_folder">Downloads/CashMemer ورتو</string>
+    <string name="msg_pdf_saved">PDF %1$s وچ سانبھی گئی</string>
+    <string name="msg_pdfs_saved">%1$d PDF %2$s وچ سانبھیاں گئیاں</string>
+    <string name="msg_pdf_save_failed">رسید دی PDF سانبھی نہیں جا سکی</string>
 </resources>

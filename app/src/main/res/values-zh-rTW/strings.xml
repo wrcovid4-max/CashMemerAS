@@ -540,4 +540,13 @@
     <string name="period_week">本週</string>
     <string name="period_year">本年</string>
     <string name="period_custom">自定義</string>
+    <string name="auto_download_pdf">自動下載 PDF</string>
+    <string name="info_auto_download_pdf">按下「產生」後立即儲存每張收據的 PDF，批次掃描儲存的每張收據也一樣。</string>
+    <string name="download_location">下載位置</string>
+    <string name="choose_download_folder">選擇下載資料夾</string>
+    <string name="change_download_folder">變更下載資料夾</string>
+    <string name="use_default_download_folder">使用 Downloads/CashMemer</string>
+    <string name="msg_pdf_saved">PDF 已儲存至 %1$s</string>
+    <string name="msg_pdfs_saved">已將 %1$d 個 PDF 儲存至 %2$s</string>
+    <string name="msg_pdf_save_failed">無法儲存收據 PDF</string>
 </resources>

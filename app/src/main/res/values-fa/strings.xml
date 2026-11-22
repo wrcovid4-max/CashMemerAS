@@ -541,4 +541,13 @@
     <string name="period_week">هفته</string>
     <string name="period_year">سال</string>
     <string name="period_custom">سفارشی</string>
+    <string name="auto_download_pdf">دانلود خودکار PDF</string>
+    <string name="info_auto_download_pdf">به‌محض فشردن «ایجاد»، و برای هر رسیدی که از اسکن دسته‌ای ذخیره می‌شود، یک PDF از رسید ذخیره می‌کند.</string>
+    <string name="download_location">محل دانلود</string>
+    <string name="choose_download_folder">انتخاب پوشه دانلود</string>
+    <string name="change_download_folder">تغییر پوشه دانلود</string>
+    <string name="use_default_download_folder">استفاده از Downloads/CashMemer</string>
+    <string name="msg_pdf_saved">PDF در %1$s ذخیره شد</string>
+    <string name="msg_pdfs_saved">%1$d فایل PDF در %2$s ذخیره شد</string>
+    <string name="msg_pdf_save_failed">ذخیره PDF رسید ممکن نشد</string>
 </resources>

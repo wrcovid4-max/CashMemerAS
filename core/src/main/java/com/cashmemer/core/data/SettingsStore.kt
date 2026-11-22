@@ -64,6 +64,10 @@ data class AppSettings(
     /** SAF tree uri of the folder auto-backups are written into. */
     val backupFolderUri: String? = null,
     val autoBackup: Boolean = false,
+    /** Save a PDF of each receipt as soon as it is generated, including receipts saved from a bulk scan. */
+    val autoDownloadPdf: Boolean = true,
+    /** SAF tree uri of the folder those PDFs go into; null means Downloads/CashMemer. */
+    val downloadFolderUri: String? = null,
     val lastBackupAt: Long = 0L,
     val lastBackupError: String? = null,
     val accountName: String? = null,
@@ -111,6 +115,8 @@ class SettingsStore(private val context: Context) {
         val APP_SOUNDS = booleanPreferencesKey("app_sounds")
         val BACKUP_FOLDER = stringPreferencesKey("backup_folder_uri")
         val AUTO_BACKUP = booleanPreferencesKey("auto_backup")
+        val AUTO_DOWNLOAD_PDF = booleanPreferencesKey("auto_download_pdf")
+        val DOWNLOAD_FOLDER = stringPreferencesKey("download_folder_uri")
         val LAST_BACKUP_AT = longPreferencesKey("last_backup_at")
         val LAST_BACKUP_ERROR = stringPreferencesKey("last_backup_error")
         val ACCOUNT_NAME = stringPreferencesKey("account_name")
@@ -193,6 +199,8 @@ class SettingsStore(private val context: Context) {
         appSounds = this[Keys.APP_SOUNDS] ?: true,
         backupFolderUri = this[Keys.BACKUP_FOLDER],
         autoBackup = this[Keys.AUTO_BACKUP] ?: false,
+        autoDownloadPdf = this[Keys.AUTO_DOWNLOAD_PDF] ?: true,
+        downloadFolderUri = this[Keys.DOWNLOAD_FOLDER],
         lastBackupAt = this[Keys.LAST_BACKUP_AT] ?: 0L,
         lastBackupError = this[Keys.LAST_BACKUP_ERROR],
         accountName = this[Keys.ACCOUNT_NAME],
@@ -234,6 +242,14 @@ class SettingsStore(private val context: Context) {
     suspend fun setAllowBulkOnCellular(value: Boolean) = put(Keys.ALLOW_BULK_CELLULAR, value)
     suspend fun setAppSounds(value: Boolean) = put(Keys.APP_SOUNDS, value)
     suspend fun setAutoBackup(value: Boolean) = put(Keys.AUTO_BACKUP, value)
+    suspend fun setAutoDownloadPdf(value: Boolean) = put(Keys.AUTO_DOWNLOAD_PDF, value)
+
+    suspend fun setDownloadFolder(uri: String?) {
+        context.dataStore.edit { prefs ->
+            if (uri == null) prefs.remove(Keys.DOWNLOAD_FOLDER)
+            else prefs[Keys.DOWNLOAD_FOLDER] = uri
+        }
+    }
 
     suspend fun setBackupFolder(uri: String?) {
         context.dataStore.edit { prefs ->

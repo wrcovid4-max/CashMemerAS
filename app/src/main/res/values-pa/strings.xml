@@ -542,4 +542,13 @@
     <string name="period_week">ਹਫ਼ਤਾ</string>
     <string name="period_year">ਸਾਲ</string>
     <string name="period_custom">ਕਸਟਮ</string>
+    <string name="auto_download_pdf">PDF ਆਪਣੇ ਆਪ ਡਾਊਨਲੋਡ ਕਰੋ</string>
+    <string name="info_auto_download_pdf">ਜਨਰੇਟ ਦਬਾਉਂਦੇ ਹੀ ਹਰ ਰਸੀਦ ਦੀ PDF ਸੰਭਾਲਦਾ ਹੈ, ਅਤੇ ਬਲਕ ਸਕੈਨ ਤੋਂ ਸੰਭਾਲੀ ਹਰ ਰਸੀਦ ਦੀ ਵੀ।</string>
+    <string name="download_location">ਡਾਊਨਲੋਡ ਦੀ ਥਾਂ</string>
+    <string name="choose_download_folder">ਡਾਊਨਲੋਡ ਫੋਲਡਰ ਚੁਣੋ</string>
+    <string name="change_download_folder">ਡਾਊਨਲੋਡ ਫੋਲਡਰ ਬਦਲੋ</string>
+    <string name="use_default_download_folder">Downloads/CashMemer ਵਰਤੋ</string>
+    <string name="msg_pdf_saved">PDF %1$s ਵਿੱਚ ਸੰਭਾਲੀ ਗਈ</string>
+    <string name="msg_pdfs_saved">%1$d PDF %2$s ਵਿੱਚ ਸੰਭਾਲੀਆਂ ਗਈਆਂ</string>
+    <string name="msg_pdf_save_failed">ਰਸੀਦ ਦੀ PDF ਸੰਭਾਲੀ ਨਹੀਂ ਜਾ ਸਕੀ</string>
 </resources>

@@ -539,4 +539,13 @@
     <string name="period_week">Semana</string>
     <string name="period_year">Año</string>
     <string name="period_custom">Personalizado</string>
+    <string name="auto_download_pdf">Descargar PDF automáticamente</string>
+    <string name="info_auto_download_pdf">Guarda un PDF de cada recibo en cuanto pulsas Generar, y de cada recibo guardado desde un escaneo masivo.</string>
+    <string name="download_location">Ubicación de descarga</string>
+    <string name="choose_download_folder">Elegir carpeta de descarga</string>
+    <string name="change_download_folder">Cambiar carpeta de descarga</string>
+    <string name="use_default_download_folder">Usar Downloads/CashMemer</string>
+    <string name="msg_pdf_saved">PDF guardado en %1$s</string>
+    <string name="msg_pdfs_saved">%1$d PDF guardados en %2$s</string>
+    <string name="msg_pdf_save_failed">No se pudo guardar el PDF del recibo</string>
 </resources>
