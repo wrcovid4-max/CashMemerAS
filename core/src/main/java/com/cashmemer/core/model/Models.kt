@@ -107,6 +107,11 @@ data class Receipt(
     val sourceImageUri: String? = null,
     val pinned: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
+    /**
+     * When this receipt last changed on any device. Stamped by the repository on every save, pin and
+     * mark, and used by cloud sync to decide which copy of a receipt is newer (last write wins).
+     */
+    val updatedAt: Long = 0L,
 ) {
     /** Never negative — an underpayment is not change owed. */
     val changeAmount: Double get() = (cashGiven - total).coerceAtLeast(0.0)

@@ -57,17 +57,32 @@ class CashMemerRepository private constructor(context: Context) {
 
     suspend fun receipt(id: Long): Receipt? = receipts.byId(id)
 
-    suspend fun saveReceipt(receipt: Receipt): Long =
-        if (receipt.id == 0L) receipts.insert(receipt)
-        else receipt.id.also { receipts.update(receipt) }
+    suspend fun saveReceipt(receipt: Receipt): Long {
+        // Every save stamps the receipt, so sync can tell which device's copy is the newer one.
+        val stamped = receipt.copy(updatedAt = System.currentTimeMillis())
+        return if (stamped.id == 0L) receipts.insert(stamped)
+        else stamped.id.also { receipts.update(stamped) }
+    }
+
+    /**
+     * Applies receipts from the cloud without deleting anything: a receipt is taken only if this device
+     * has no copy or the cloud copy is newer. Returns how many were applied.
+     */
+    suspend fun mergeReceipts(remote: List<Receipt>): Int = remote.count { incoming ->
+        val local = receipts.byId(incoming.id)
+        val take = local == null || incoming.updatedAt > local.updatedAt
+        if (take) receipts.insert(incoming)
+        take
+    }
 
     suspend fun deleteReceipts(ids: List<Long>) = receipts.deleteByIds(ids)
 
-    suspend fun setPinned(id: Long, pinned: Boolean) = receipts.setPinned(id, pinned)
+    suspend fun setPinned(id: Long, pinned: Boolean) =
+        receipts.setPinned(id, pinned, System.currentTimeMillis())
 
     /** Persists the marks made on a memo in the viewer. */
     suspend fun setAnnotations(id: Long, annotations: List<ReceiptAnnotation>) =
-        receipts.setAnnotations(id, ReceiptAnnotationCodec.encode(annotations))
+        receipts.setAnnotations(id, ReceiptAnnotationCodec.encode(annotations), System.currentTimeMillis())
 
     // ---- Products -----------------------------------------------------------
 

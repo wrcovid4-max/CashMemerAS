@@ -232,8 +232,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _message.value = str(R.string.msg_signed_out)
     }
 
-    /** Uploads everything local to Firestore. */
-    fun syncUp() = runSync { FirebaseSync.push(getApplication<Application>()) }
+    /** Two-way sync: takes newer receipts from the cloud, uploads newer ones from this device. */
+    fun syncUp() = runSync { FirebaseSync.sync(getApplication<Application>()) }
 
     /** Pulls the cloud copy down, replacing what is on this device. */
     fun syncDown() = runSync { FirebaseSync.pull(getApplication<Application>()) }

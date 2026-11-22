@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -89,6 +90,38 @@ object FirebaseSync {
     }
 
     /**
+     * Two-way sync: takes receipts that are new or newer in the cloud (for example ones made or edited in
+     * the iOS app), then uploads the receipts that are new or newer here, plus products and members.
+     * Nothing is deleted on either side. Returns how many records moved in either direction.
+     */
+    suspend fun sync(context: Context): Result<Int> = withContext(Dispatchers.IO) {
+        runCatching {
+            val uid = requireUid(context)
+            val repository = CashMemerRepository.get(context)
+            val db = FirebaseFirestore.getInstance()
+            val root = db.collection("users").document(uid)
+
+            val remote = root.collection("receipts").get().await().toReceipts()
+            val applied = repository.mergeReceipts(remote)
+
+            val remoteStamp = remote.associate { it.id to it.updatedAt }
+            val receipts = repository.allReceiptsOnce().filter { local ->
+                remoteStamp[local.id]?.let { local.updatedAt > it } ?: true
+            }
+            val products = repository.allProductsOnce()
+            val members = repository.allMembersOnce()
+
+            writeAll(db, root.collection("receipts"), receipts) { it.id to it.toMap() }
+            writeAll(db, root.collection("products"), products) { it.id to it.toMap() }
+            writeAll(db, root.collection("members"), members) { it.id to it.toMap() }
+
+            root.set(mapOf("lastSyncAt" to System.currentTimeMillis())).await()
+
+            applied + receipts.size + products.size + members.size
+        }
+    }
+
+    /**
      * Replaces local data with what is in the cloud. Destructive by design —
      * this is the "new phone, get my shop back" path.
      */
@@ -119,7 +152,8 @@ object FirebaseSync {
                 FirebaseFirestore.getInstance()
                     .collection("users").document(uid)
                     .collection("receipts").document(receipt.id.toString())
-                    .set(receipt.toMap())
+                    // Merge, so fields another app added to this document (the iOS app's) survive.
+                    .set(receipt.toMap(), SetOptions.merge())
                     .await()
                 Unit
             }
@@ -140,7 +174,7 @@ object FirebaseSync {
             val batch = db.batch()
             chunk.forEach { item ->
                 val (id, data) = entry(item)
-                batch.set(collection.document(id.toString()), data)
+                batch.set(collection.document(id.toString()), data, SetOptions.merge())
             }
             batch.commit().await()
         }
@@ -180,6 +214,8 @@ object FirebaseSync {
         "sourceImageUri" to sourceImageUri,
         "pinned" to pinned,
         "createdAt" to createdAt,
+        "updatedAt" to updatedAt,
+        "splitJson" to splitJson,
     )
 
     private fun Product.toMap(): Map<String, Any?> = mapOf(
@@ -239,6 +275,9 @@ object FirebaseSync {
             sourceImageUri = doc.getString("sourceImageUri"),
             pinned = doc.getBoolean("pinned") ?: false,
             createdAt = doc.long("createdAt"),
+            // Documents written before updatedAt existed count as last changed when they were created.
+            updatedAt = doc.long("updatedAt").takeIf { it > 0L } ?: doc.long("createdAt"),
+            splitJson = doc.str("splitJson"),
         )
     }
 

@@ -13,7 +13,7 @@ import com.cashmemer.core.model.Receipt
 
 @Database(
     entities = [Receipt::class, Product::class, Member::class, CurrencyRate::class],
-    version = 8,
+    version = 9,
     exportSchema = true,
 )
 abstract class CashMemerDatabase : RoomDatabase() {
@@ -83,6 +83,17 @@ abstract class CashMemerDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v8 -> v9: when each receipt last changed, so cloud sync can merge two devices' edits instead of
+         * one overwriting the other. Existing receipts start out stamped with their creation time.
+         */
+        private val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE receipts ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("UPDATE receipts SET updatedAt = createdAt")
+            }
+        }
+
         @Volatile
         private var instance: CashMemerDatabase? = null
 
@@ -95,7 +106,7 @@ abstract class CashMemerDatabase : RoomDatabase() {
                 )
                     // Real migrations, not destructive fallback — a shop's
                     // history must survive an app update.
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
                     .fallbackToDestructiveMigrationOnDowngrade()
                     .build()
                     .also { instance = it }

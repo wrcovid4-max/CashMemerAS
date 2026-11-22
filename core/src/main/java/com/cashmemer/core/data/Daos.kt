@@ -53,11 +53,11 @@ interface ReceiptDao {
     @Query("DELETE FROM receipts WHERE id IN (:ids)")
     suspend fun deleteByIds(ids: List<Long>)
 
-    @Query("UPDATE receipts SET pinned = :pinned WHERE id = :id")
-    suspend fun setPinned(id: Long, pinned: Boolean)
+    @Query("UPDATE receipts SET pinned = :pinned, updatedAt = :now WHERE id = :id")
+    suspend fun setPinned(id: Long, pinned: Boolean, now: Long)
 
-    @Query("UPDATE receipts SET annotationsJson = :json WHERE id = :id")
-    suspend fun setAnnotations(id: Long, json: String)
+    @Query("UPDATE receipts SET annotationsJson = :json, updatedAt = :now WHERE id = :id")
+    suspend fun setAnnotations(id: Long, json: String, now: Long)
 
     @Query("DELETE FROM receipts")
     suspend fun clear()
