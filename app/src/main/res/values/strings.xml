@@ -601,5 +601,5 @@
     <string name="use_default_download_folder">Use Downloads/CashMemer</string>
     <string name="msg_pdf_saved">PDF saved to %1$s</string>
     <string name="msg_pdfs_saved">%1$d PDFs saved to %2$s</string>
-    <string name="msg_pdf_save_failed">Couldn't save the receipt PDF</string>
+    <string name="msg_pdf_save_failed">Couldn\'t save the receipt PDF</string>
 </resources>
