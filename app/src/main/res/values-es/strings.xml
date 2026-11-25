@@ -548,4 +548,7 @@
     <string name="msg_pdf_saved">PDF guardado en %1$s</string>
     <string name="msg_pdfs_saved">%1$d PDF guardados en %2$s</string>
     <string name="msg_pdf_save_failed">No se pudo guardar el PDF del recibo</string>
+    <string name="scan_missing_key">El escaneo con IA aún no está configurado. Añade GEMINI_API_KEY a local.properties y vuelve a compilar la app.</string>
+    <string name="scan_bad_key">Google rechazó la clave de la API de Gemini. Revisa GEMINI_API_KEY en local.properties.</string>
+    <string name="scan_quota">Se agotó el límite gratuito de Gemini por ahora. Espera un minuto e inténtalo de nuevo.</string>
 </resources>

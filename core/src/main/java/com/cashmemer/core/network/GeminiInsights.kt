@@ -75,25 +75,33 @@ object GeminiInsights {
                     )
                     .toString()
 
-                val request = Request.Builder()
-                    .url(ENDPOINT.format(GeminiOcrClient.MODEL))
-                    .header("x-goog-api-key", key)
-                    .post(body.toRequestBody(json))
-                    .build()
+                // Try each free-tier model in turn, so a retired or busy one doesn't lose the insight.
+                var lastCode = 0
+                for (model in GeminiOcrClient.MODELS) {
+                    val request = Request.Builder()
+                        .url(ENDPOINT.format(model))
+                        .header("x-goog-api-key", key)
+                        .post(body.toRequestBody(json))
+                        .build()
 
-                client.newCall(request).execute().use { response ->
-                    val raw = response.body?.string().orEmpty()
-                    check(response.isSuccessful) { "HTTP ${response.code}" }
-
-                    JSONObject(raw)
-                        .getJSONArray("candidates")
-                        .getJSONObject(0)
-                        .getJSONObject("content")
-                        .getJSONArray("parts")
-                        .getJSONObject(0)
-                        .getString("text")
-                        .trim()
+                    val text = client.newCall(request).execute().use { response ->
+                        val raw = response.body?.string().orEmpty()
+                        lastCode = response.code
+                        if (!response.isSuccessful) return@use null
+                        JSONObject(raw)
+                            .getJSONArray("candidates")
+                            .getJSONObject(0)
+                            .getJSONObject("content")
+                            .getJSONArray("parts")
+                            .getJSONObject(0)
+                            .getString("text")
+                            .trim()
+                    }
+                    if (text != null) return@runCatching text
+                    // A refused key fails on every model; don't try the rest.
+                    if (lastCode == 401 || lastCode == 403) break
                 }
+                error("HTTP $lastCode")
             }
         }
 }

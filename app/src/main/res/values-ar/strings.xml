@@ -545,4 +545,7 @@
     <string name="msg_pdf_saved">تم حفظ ملف PDF في %1$s</string>
     <string name="msg_pdfs_saved">تم حفظ %1$d ملفات PDF في %2$s</string>
     <string name="msg_pdf_save_failed">تعذّر حفظ ملف PDF للإيصال</string>
+    <string name="scan_missing_key">مسح الذكاء الاصطناعي غير مُعدّ بعد. أضف GEMINI_API_KEY إلى local.properties ثم أعد بناء التطبيق.</string>
+    <string name="scan_bad_key">رفضت Google مفتاح Gemini API. تحقّق من GEMINI_API_KEY في local.properties.</string>
+    <string name="scan_quota">استُنفد الحد المجاني لـ Gemini حاليًا. انتظر دقيقة ثم حاول مرة أخرى.</string>
 </resources>

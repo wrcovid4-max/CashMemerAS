@@ -602,4 +602,7 @@
     <string name="msg_pdf_saved">PDF saved to %1$s</string>
     <string name="msg_pdfs_saved">%1$d PDFs saved to %2$s</string>
     <string name="msg_pdf_save_failed">Couldn\'t save the receipt PDF</string>
+    <string name="scan_missing_key">AI scanning isn\'t set up yet. Add GEMINI_API_KEY to local.properties and rebuild the app.</string>
+    <string name="scan_bad_key">Google rejected the Gemini API key. Check GEMINI_API_KEY in local.properties.</string>
+    <string name="scan_quota">The free Gemini limit is used up for the moment. Wait a minute and try again.</string>
 </resources>

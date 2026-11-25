@@ -550,4 +550,7 @@
     <string name="msg_pdf_saved">PDF در %1$s ذخیره شد</string>
     <string name="msg_pdfs_saved">%1$d فایل PDF در %2$s ذخیره شد</string>
     <string name="msg_pdf_save_failed">ذخیره PDF رسید ممکن نشد</string>
+    <string name="scan_missing_key">اسکن هوش مصنوعی هنوز راه‌اندازی نشده است. GEMINI_API_KEY را به local.properties اضافه کنید و برنامه را دوباره بسازید.</string>
+    <string name="scan_bad_key">گوگل کلید API جمینای را رد کرد. GEMINI_API_KEY را در local.properties بررسی کنید.</string>
+    <string name="scan_quota">سهمیه رایگان جمینای فعلاً تمام شده است. یک دقیقه صبر کنید و دوباره تلاش کنید.</string>
 </resources>

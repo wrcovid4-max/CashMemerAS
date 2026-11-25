@@ -13,7 +13,8 @@ import kotlinx.coroutines.withContext
 /** Chat-style calls to Gemini, with the same model fallback and retries as the scanner. */
 object GeminiChat {
     private const val ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent"
-    private val MODELS = listOf("gemini-3.8-flash", "gemini-3.6-flash")
+    /** The same free-tier chain as the receipt scanner, so one retired model never takes Ask AI down. */
+    private val MODELS get() = GeminiOcrClient.MODELS
     private val RETRYABLE = setOf(429, 500, 503)
     private val json = "application/json".toMediaType()
     private val client by lazy {

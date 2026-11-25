@@ -36,13 +36,21 @@ data class ParsedReceipt(
  * Sends a receipt photo to Gemini and asks for structured JSON back.
  * Response schema is pinned so the model cannot wander into prose.
  */
+/** Why a scan could not even be attempted or was refused, so the screen can say what to do about it. */
+class ScanException(val kind: Kind, message: String) : Exception(message) {
+    enum class Kind { MISSING_KEY, BAD_KEY, QUOTA }
+}
+
 object GeminiOcrClient {
 
     /** Swap this for a newer model id as they ship. */
     const val MODEL = "gemini-3.8-flash"
 
-    /** Newest model first; the scanner falls back to the next one if the newest stays busy. */
-    private val MODELS = listOf(MODEL, "gemini-3.6-flash")
+    /**
+     * Newest model first; the scanner falls on to the next one when a model is busy, over quota or no
+     * longer exists. These are the Gemini models with a free tier (Nov 2026), so a free key works.
+     */
+    val MODELS = listOf(MODEL, "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-2.5-flash-lite")
 
     /** Busy or overloaded responses worth retrying. */
     private val RETRYABLE = setOf(429, 500, 503)
@@ -75,8 +83,8 @@ SERVICES, MEDICAL, OTHER.
     suspend fun parse(bitmap: Bitmap): Result<ParsedReceipt> = withContext(Dispatchers.IO) {
         runCatching {
             val key = BuildConfig.GEMINI_API_KEY
-            require(key.isNotBlank()) {
-                "GEMINI_API_KEY is missing from local.properties"
+            if (key.isBlank()) {
+                throw ScanException(ScanException.Kind.MISSING_KEY, "GEMINI_API_KEY is missing from local.properties")
             }
 
             val body = JSONObject()
@@ -104,6 +112,7 @@ SERVICES, MEDICAL, OTHER.
                 .toString()
 
             var lastError = "Gemini request failed"
+            var sawQuota = false
             for (model in MODELS) {
                 for (attempt in 1..2) {
                     val request = Request.Builder()
@@ -116,11 +125,17 @@ SERVICES, MEDICAL, OTHER.
                     }
                     if (code in 200..299) return@runCatching parseResponse(raw)
                     lastError = "Gemini request failed: HTTP $code $raw"
+                    // A key Google refuses fails the same way on every model, so stop here.
+                    if (code == 401 || code == 403 || (code == 400 && raw.contains("API key", ignoreCase = true))) {
+                        throw ScanException(ScanException.Kind.BAD_KEY, lastError)
+                    }
+                    if (code == 429) sawQuota = true
                     // Not a busy error (e.g. model unavailable): move on to the next model.
                     if (code !in RETRYABLE) break
                     Thread.sleep(1000L)
                 }
             }
+            if (sawQuota) throw ScanException(ScanException.Kind.QUOTA, lastError)
             throw IllegalStateException(lastError)
         }
     }

@@ -552,4 +552,7 @@
     <string name="msg_pdf_saved">PDF %1$s وچ سانبھی گئی</string>
     <string name="msg_pdfs_saved">%1$d PDF %2$s وچ سانبھیاں گئیاں</string>
     <string name="msg_pdf_save_failed">رسید دی PDF سانبھی نہیں جا سکی</string>
+    <string name="scan_missing_key">AI سکین ہالے سیٹ نہیں ہویا۔ local.properties وچ GEMINI_API_KEY پاؤ تے ایپ دوبارہ بناؤ۔</string>
+    <string name="scan_bad_key">گوگل نے Gemini API کنجی رد کر دتی۔ local.properties وچ GEMINI_API_KEY ویکھو۔</string>
+    <string name="scan_quota">Gemini دی مفت حد ہن لئی مک گئی اے۔ اک منٹ ٹھہرو تے دوبارہ کوشش کرو۔</string>
 </resources>

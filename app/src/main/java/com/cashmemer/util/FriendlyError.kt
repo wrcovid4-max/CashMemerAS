@@ -3,6 +3,7 @@ package com.cashmemer.util
 import android.content.Context
 import androidx.annotation.StringRes
 import com.cashmemer.R
+import com.cashmemer.core.network.ScanException
 import java.net.ConnectException
 import java.net.NoRouteToHostException
 import java.net.SocketTimeoutException
@@ -31,5 +32,16 @@ object FriendlyError {
     }
 
     fun message(context: Context, error: Throwable?, @StringRes fallback: Int = R.string.err_couldnt_load): String =
-        context.getString(if (isNetwork(error)) R.string.err_no_internet else fallback)
+        context.getString(
+            when {
+                isNetwork(error) -> R.string.err_no_internet
+                // The AI scanner says what to fix: a missing or refused key, or the free limit being used up.
+                error is ScanException -> when (error.kind) {
+                    ScanException.Kind.MISSING_KEY -> R.string.scan_missing_key
+                    ScanException.Kind.BAD_KEY -> R.string.scan_bad_key
+                    ScanException.Kind.QUOTA -> R.string.scan_quota
+                }
+                else -> fallback
+            },
+        )
 }
