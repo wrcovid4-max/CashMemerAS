@@ -555,4 +555,9 @@
     <string name="scan_missing_key">AI سکین ہالے سیٹ نہیں ہویا۔ local.properties وچ GEMINI_API_KEY پاؤ تے ایپ دوبارہ بناؤ۔</string>
     <string name="scan_bad_key">گوگل نے Gemini API کنجی رد کر دتی۔ local.properties وچ GEMINI_API_KEY ویکھو۔</string>
     <string name="scan_quota">Gemini دی مفت حد ہن لئی مک گئی اے۔ اک منٹ ٹھہرو تے دوبارہ کوشش کرو۔</string>
+    <string name="accent_color">تھیم دا رنگ</string>
+    <string name="accent_green">ہرا</string>
+    <string name="accent_blue">نیلا</string>
+    <string name="accent_red">لال</string>
+    <string name="accent_yellow">پیلا</string>
 </resources>

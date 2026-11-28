@@ -1,5 +1,13 @@
 package com.cashmemer.ui.settings
 
+import com.cashmemer.core.ui.theme.onSwatch
+import com.cashmemer.core.ui.theme.swatch
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import com.cashmemer.ui.components.AppleText
 import com.cashmemer.util.FriendlyError
 import com.cashmemer.ui.components.InfoIcon
@@ -110,6 +118,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val message: StateFlow<String?> = _message.asStateFlow()
 
     fun setThemeMode(mode: ThemeMode) = launch { store.setThemeMode(mode) }
+    fun setAccent(accent: com.cashmemer.core.data.AccentTheme) = launch { store.setAccent(accent) }
     fun setAutoSend(value: Boolean) = launch { store.setAutoSend(value) }
     fun setSaveSignature(value: Boolean) = launch { store.setSaveSignature(value) }
     fun setSignatureLocked(value: Boolean) = launch { store.setSignatureLocked(value) }
@@ -345,6 +354,7 @@ fun SettingsScreen(
                         )
                     }
                 }
+                AccentPicker(selected = settings.accent, onSelect = viewModel::setAccent)
             }
         }
 
@@ -964,5 +974,41 @@ private fun BackupCard(viewModel: SettingsViewModel) {
                 }
             },
         )
+    }
+}
+
+
+/** Theme colour choice: green (default), blue, red or yellow. Applies instantly everywhere. */
+@androidx.compose.runtime.Composable
+private fun AccentPicker(selected: com.cashmemer.core.data.AccentTheme, onSelect: (com.cashmemer.core.data.AccentTheme) -> Unit) {
+    AppleText(stringResource(R.string.accent_color), style = MaterialTheme.typography.titleSmall)
+    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        com.cashmemer.core.data.AccentTheme.entries.forEach { a ->
+            val isSelected = a == selected
+            val name = stringResource(
+                when (a) {
+                    com.cashmemer.core.data.AccentTheme.GREEN -> R.string.accent_green
+                    com.cashmemer.core.data.AccentTheme.BLUE -> R.string.accent_blue
+                    com.cashmemer.core.data.AccentTheme.RED -> R.string.accent_red
+                    com.cashmemer.core.data.AccentTheme.YELLOW -> R.string.accent_yellow
+                }
+            )
+            androidx.compose.foundation.layout.Box(
+                Modifier
+                    .size(48.dp)
+                    .clip(androidx.compose.foundation.shape.CircleShape)
+                    .background(a.swatch())
+                    .border(
+                        if (isSelected) 3.dp else 1.dp,
+                        if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline,
+                        androidx.compose.foundation.shape.CircleShape,
+                    )
+                    .selectable(selected = isSelected, role = androidx.compose.ui.semantics.Role.RadioButton, onClick = { onSelect(a) })
+                    .semantics { contentDescription = name },
+                contentAlignment = Alignment.Center,
+            ) {
+                if (isSelected) Icon(Icons.Filled.Check, contentDescription = null, tint = a.onSwatch())
+            }
+        }
     }
 }

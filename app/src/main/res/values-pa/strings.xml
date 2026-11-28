@@ -554,4 +554,9 @@
     <string name="scan_missing_key">AI ਸਕੈਨ ਅਜੇ ਸੈੱਟ ਨਹੀਂ। local.properties ਵਿੱਚ GEMINI_API_KEY ਜੋੜੋ ਅਤੇ ਐਪ ਦੁਬਾਰਾ ਬਣਾਓ।</string>
     <string name="scan_bad_key">Google ਨੇ Gemini API ਕੁੰਜੀ ਰੱਦ ਕਰ ਦਿੱਤੀ। local.properties ਵਿੱਚ GEMINI_API_KEY ਜਾਂਚੋ।</string>
     <string name="scan_quota">Gemini ਦੀ ਮੁਫ਼ਤ ਹੱਦ ਹੁਣ ਲਈ ਖ਼ਤਮ ਹੈ। ਇੱਕ ਮਿੰਟ ਉਡੀਕੋ ਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="accent_color">ਥੀਮ ਦਾ ਰੰਗ</string>
+    <string name="accent_green">ਹਰਾ</string>
+    <string name="accent_blue">ਨੀਲਾ</string>
+    <string name="accent_red">ਲਾਲ</string>
+    <string name="accent_yellow">ਪੀਲਾ</string>
 </resources>

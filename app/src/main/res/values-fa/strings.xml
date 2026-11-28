@@ -553,4 +553,9 @@
     <string name="scan_missing_key">اسکن هوش مصنوعی هنوز راه‌اندازی نشده است. GEMINI_API_KEY را به local.properties اضافه کنید و برنامه را دوباره بسازید.</string>
     <string name="scan_bad_key">گوگل کلید API جمینای را رد کرد. GEMINI_API_KEY را در local.properties بررسی کنید.</string>
     <string name="scan_quota">سهمیه رایگان جمینای فعلاً تمام شده است. یک دقیقه صبر کنید و دوباره تلاش کنید.</string>
+    <string name="accent_color">رنگ پوسته</string>
+    <string name="accent_green">سبز</string>
+    <string name="accent_blue">آبی</string>
+    <string name="accent_red">قرمز</string>
+    <string name="accent_yellow">زرد</string>
 </resources>

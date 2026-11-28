@@ -14,6 +14,9 @@ private val Context.dataStore by preferencesDataStore(name = "cashmemer_settings
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
+/** App colour. Green is the default and the original look. */
+enum class AccentTheme { GREEN, BLUE, RED, YELLOW }
+
 enum class MassPrintOption { PAGE_1, PAGE_2, BOTH }
 
 /** How a single unit is labelled when showing the per-unit price on a memo. */
@@ -31,6 +34,7 @@ enum class PriceUnit(val unitLabel: String) {
 /** Mirrors the Settings screen: appearance, general, print, and lock. */
 data class AppSettings(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val accent: AccentTheme = AccentTheme.GREEN,
     val language: String = "en",
     val autoSend: Boolean = false,
     val saveSignature: Boolean = true,
@@ -92,6 +96,7 @@ class SettingsStore(private val context: Context) {
 
     private object Keys {
         val THEME = stringPreferencesKey("theme_mode")
+        val ACCENT = stringPreferencesKey("accent_theme")
         val LANGUAGE = stringPreferencesKey("language")
         val AUTO_SEND = booleanPreferencesKey("auto_send")
         val SAVE_SIGNATURE = booleanPreferencesKey("save_signature")
@@ -173,6 +178,7 @@ class SettingsStore(private val context: Context) {
 
     private fun Preferences.toSettings() = AppSettings(
         themeMode = enumValueOrDefault(this[Keys.THEME], ThemeMode.SYSTEM),
+        accent = enumValueOrDefault(this[Keys.ACCENT], AccentTheme.GREEN),
         language = this[Keys.LANGUAGE] ?: "en",
         autoSend = this[Keys.AUTO_SEND] ?: false,
         saveSignature = this[Keys.SAVE_SIGNATURE] ?: true,
@@ -219,6 +225,12 @@ class SettingsStore(private val context: Context) {
     )
 
     suspend fun setThemeMode(mode: ThemeMode) = put(Keys.THEME, mode.name)
+
+    /** Saves the colour and applies it straight away in every screen of the app (also remembered for the next launch). */
+    suspend fun setAccent(accent: AccentTheme) {
+        put(Keys.ACCENT, accent.name)
+        com.cashmemer.core.ui.theme.AccentPreference.set(context, accent)
+    }
     suspend fun setLanguage(tag: String) = put(Keys.LANGUAGE, tag)
     suspend fun setAutoSend(value: Boolean) = put(Keys.AUTO_SEND, value)
 

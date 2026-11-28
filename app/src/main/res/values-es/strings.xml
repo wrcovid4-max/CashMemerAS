@@ -551,4 +551,9 @@
     <string name="scan_missing_key">El escaneo con IA aún no está configurado. Añade GEMINI_API_KEY a local.properties y vuelve a compilar la app.</string>
     <string name="scan_bad_key">Google rechazó la clave de la API de Gemini. Revisa GEMINI_API_KEY en local.properties.</string>
     <string name="scan_quota">Se agotó el límite gratuito de Gemini por ahora. Espera un minuto e inténtalo de nuevo.</string>
+    <string name="accent_color">Color del tema</string>
+    <string name="accent_green">Verde</string>
+    <string name="accent_blue">Azul</string>
+    <string name="accent_red">Rojo</string>
+    <string name="accent_yellow">Amarillo</string>
 </resources>

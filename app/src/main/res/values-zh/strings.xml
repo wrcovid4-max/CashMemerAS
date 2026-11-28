@@ -547,4 +547,9 @@
     <string name="scan_missing_key">AI 扫描尚未设置。请在 local.properties 中添加 GEMINI_API_KEY，然后重新构建应用。</string>
     <string name="scan_bad_key">Google 拒绝了 Gemini API 密钥。请检查 local.properties 中的 GEMINI_API_KEY。</string>
     <string name="scan_quota">Gemini 免费额度暂时用完，请等一分钟后重试。</string>
+    <string name="accent_color">主题颜色</string>
+    <string name="accent_green">绿色</string>
+    <string name="accent_blue">蓝色</string>
+    <string name="accent_red">红色</string>
+    <string name="accent_yellow">黄色</string>
 </resources>

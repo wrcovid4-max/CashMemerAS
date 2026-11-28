@@ -595,4 +595,9 @@
     <string name="scan_missing_key">اے آئی اسکین ابھی سیٹ اپ نہیں۔ local.properties میں GEMINI_API_KEY شامل کریں اور ایپ دوبارہ بنائیں۔</string>
     <string name="scan_bad_key">گوگل نے جیمنی API کلید مسترد کر دی۔ local.properties میں GEMINI_API_KEY جانچیں۔</string>
     <string name="scan_quota">جیمنی کی مفت حد فی الحال ختم ہو گئی ہے۔ ایک منٹ رک کر دوبارہ کوشش کریں۔</string>
+    <string name="accent_color">تھیم کا رنگ</string>
+    <string name="accent_green">سبز</string>
+    <string name="accent_blue">نیلا</string>
+    <string name="accent_red">سرخ</string>
+    <string name="accent_yellow">پیلا</string>
 </resources>

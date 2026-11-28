@@ -263,3 +263,5 @@ Read-only and driving-safe — no text entry, short lists.
 | Sync conflicts | Push overwrites cloud, pull overwrites phone — no merge |
 | Tests | No unit or instrumentation tests yet |
 | **Never compiled** | **No Android SDK in the environment it was written in. Expect errors on first Gradle sync.** |
+
+- **Theme colour:** Settings → Appearance → Theme colour. Green (default), blue, red or yellow, in light and dark mode. Applies at once to every screen and is remembered.
